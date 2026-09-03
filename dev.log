@@ -1,0 +1,157 @@
+
+> corsair-x-guma-event@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.25
+   - Local:        http://localhost:3000
+   - Network:      http://26.217.146.196:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.4s
+ ○ Compiling / ...
+ ✓ Compiled / in 3.7s (697 modules)
+ GET / 200 in 4655ms
+ ✓ Compiled in 240ms (285 modules)
+ ✓ Compiled / in 154ms (412 modules)
+ GET / 200 in 397ms
+ GET / 200 in 98ms
+ GET / 200 in 230ms
+ ○ Compiling /api/track ...
+ ✓ Compiled /api/track in 1307ms (922 modules)
+[track] Error: Appwrite is not configured. Set APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID and APPWRITE_API_KEY in .env.local
+    at getAppwrite (src\lib\appwrite.ts:10:11)
+    at POST (src\app\api\track\route.ts:34:38)
+   8 | export function getAppwrite() {
+   9 |   if (!APPWRITE.endpoint || !APPWRITE.projectId || !APPWRITE.apiKey) {
+> 10 |     throw new Error(
+     |           ^
+  11 |       "Appwrite is not configured. Set APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID and APPWRITE_API_KEY in .env.local"
+  12 |     );
+  13 |   }
+ POST /api/track 202 in 2090ms
+ ⨯ ./src/components/EventArena.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from F:\Corsair\CorsairxGuma\EventLandingPage\src\components\EventArena.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./src/components/EventArena.tsx
+ ⨯ ./src/components/EventArena.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from F:\Corsair\CorsairxGuma\EventLandingPage\src\components\EventArena.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./src/components/EventArena.tsx
+./src/app/page.tsx
+ ⨯ ./src/components/EventArena.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from F:\Corsair\CorsairxGuma\EventLandingPage\src\components\EventArena.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./src/components/EventArena.tsx
+./src/app/page.tsx
+ ○ Compiling /_error ...
+ GET / 500 in 1278ms
+ GET / 500 in 24ms
+ GET / 500 in 30ms
+ GET / 500 in 19ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 500 in 101ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled /_error in 543ms (1043 modules)
+ GET / 200 in 466ms
+ GET / 200 in 64ms
+ ⨯ ./src/components/MakeMoment.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from F:\Corsair\CorsairxGuma\EventLandingPage\src\components\MakeMoment.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./src/components/MakeMoment.tsx
+./src/app/page.tsx
+ ⨯ ./src/components/MakeMoment.tsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from F:\Corsair\CorsairxGuma\EventLandingPage\src\components\MakeMoment.tsx
+    1: The system cannot find the file specified. (os error 2)
+
+Import trace for requested module:
+./src/components/MakeMoment.tsx
+./src/app/page.tsx
+ GET / 500 in 287ms
+ GET / 500 in 22ms
+ GET / 500 in 19ms
+ ○ Compiling /_error ...
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 500 in 349ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ ./src/components/MakeMoment.tsx
+Error:   [31mx[0m Unexpected eof
+     ,-[[36;1;4mF:\Corsair\CorsairxGuma\EventLandingPage\src\components\MakeMoment.tsx[0m:113:1]
+ [2m110[0m |             >
+ [2m111[0m |               {/* 3 copies of the set — teleports between copies stay invisible */}
+ [2m112[0m |               {Array.from({ length: COPIES }).flatMap((_, copy) =>
+ [2m113[0m |                 SLIDES.map((src, i) => (
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/MakeMoment.tsx
+./src/app/page.tsx
+ GET / 200 in 488ms
+ GET / 500 in 59ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 500 in 373ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/components/MakeMoment.tsx
+Error:   [31mx[0m Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ,-[[36;1;4mF:\Corsair\CorsairxGuma\EventLandingPage\src\components\MakeMoment.tsx[0m:115:1]
+ [2m112[0m |                     </div>
+ [2m113[0m |                   </div>
+ [2m114[0m |                 ))
+ [2m115[0m |               )}
+     : [35;1m               ^[0m
+ [2m116[0m |             </div>
+ [2m117[0m | 
+ [2m117[0m |             {/* Left arrow */}
+     `----
+  [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m
+  [31m|[0m             )'
+     ,-[[36;1;4mF:\Corsair\CorsairxGuma\EventLandingPage\src\components\MakeMoment.tsx[0m:116:1]
+ [2m113[0m |                       </div>
+ [2m114[0m |                     ))
+ [2m115[0m |                   )}
+ [2m116[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m             </div>
+ [2m117[0m | [35;1m|[0m   
+ [2m118[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m             {/* Left arrow */}
+ [2m119[0m |                 <button
+ [2m120[0m |                   type="button"
+ [2m120[0m |                   onClick={() => scrollCards(-1)}
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/MakeMoment.tsx
+./src/app/page.tsx
+ GET / 200 in 327ms
+ GET / 500 in 55ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
