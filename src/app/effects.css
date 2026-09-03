@@ -19,7 +19,7 @@
   content: "";
   position: absolute;
   border-radius: 9999px;
-  filter: blur(90px);
+  /* Perf: no blur filter — the radial gradient falloff already reads as a glow */
   opacity: 0.55;
   will-change: transform;
 }
@@ -46,6 +46,11 @@
 @keyframes aura-drift-b {
   0% { transform: translate(0, 0) scale(1); }
   100% { transform: translate(-50px, -30px) scale(1.08); }
+}
+/* Pause the drifting aura while the hero is off-screen (toggled by Hero) */
+.hero[data-idle] .hero-aura::before,
+.hero[data-idle] .hero-aura::after {
+  animation-play-state: paused;
 }
 .scanline {
   position: absolute;
@@ -311,8 +316,8 @@
 .nav-blur {
   position: relative;
   background: rgba(5, 5, 5, 0.72);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-          backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+          backdrop-filter: blur(8px) saturate(140%);
   border-bottom: 1px solid var(--color-line);
 }
 .nav-blur::after {

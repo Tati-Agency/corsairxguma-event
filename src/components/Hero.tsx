@@ -1,9 +1,26 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { EVENT } from "@/lib/config";
 import Reveal from "./Reveal";
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Pause the drifting aura while the hero is off-screen (scroll perf)
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => section.toggleAttribute("data-idle", !entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="top" className="hero">
+    <section ref={sectionRef} id="top" className="hero">
       {/* Preload the hero image for the current breakpoint (LCP) */}
       <link
         rel="preload"

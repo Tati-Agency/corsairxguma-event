@@ -155,3 +155,17 @@ Import trace for requested module:
  GET / 200 in 327ms
  GET / 500 in 55ms
  ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 500 in 167ms
+ ✓ Compiled /_error in 648ms (1029 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 200 in 788ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 200 in 120ms
+ GET / 200 in 96ms
+ GET / 200 in 83ms
+ GET / 200 in 223ms
+ ✓ Compiled in 1573ms (1045 modules)
+ GET / 200 in 364ms
+ GET / 200 in 479ms
+ GET / 200 in 189ms
