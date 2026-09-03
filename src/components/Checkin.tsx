@@ -21,7 +21,8 @@ export default function Checkin() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [consent, setConsent] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // VERIFY: check existing pass on mount
@@ -37,23 +38,60 @@ export default function Checkin() {
 
   const onPickPhoto = (file: File | undefined) => {
     if (!file) return;
+    if (!PHOTO_TYPES.includes(file.type)) {
+      setFieldErrors((fe) => ({ ...fe, photo: "photo_invalid_type" }));
+      return;
+    }
+    setFieldErrors((fe) => ({ ...fe, photo: "" }));
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
   };
 
+  /** Live validation: cập nhật giá trị + đánh giá lỗi ngay khi gõ. */
+  const updateField = (
+    field: "fullName" | "phone" | "email",
+    value: string
+  ) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    setFieldErrors((fe) => ({
+      ...fe,
+      [field]: value.trim() ? validateField(field, value) : "",
+    }));
+  };
+
+  const markTouched = (field: string) =>
+    setTouched((t) => ({ ...t, [field]: true }));
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!photo || !consent) {
-        setFieldErrors({ photo: !photo, consent: !consent });
+
+      // Validate toàn bộ form trước khi gọi API — không bắn request nếu sai
+      const nextErrors: Record<string, string> = {
+        fullName: validateField("fullName", form.fullName),
+        phone: validateField("phone", form.phone),
+        email: validateField("email", form.email),
+        photo: photo ? "" : "photo_required",
+        consent: consent ? "" : "consent_required",
+      };
+      setTouched({ fullName: true, phone: true, email: true });
+      setFieldErrors(nextErrors);
+
+      const firstBad = ["fullName", "phone", "email", "photo", "consent"].find(
+        (k) => nextErrors[k]
+      );
+      if (firstBad) {
+        if (["fullName", "phone", "email"].includes(firstBad)) {
+          document.getElementById(firstBad)?.focus();
+        }
         return;
       }
-      setFieldErrors({});
+
       setRetryInfo(null);
       setState("checking-in");
 
       const result = await submitCheckin(
-        { ...form, consent, photo },
+        { ...form, consent, photo: photo! },
         (msg) => setRetryInfo(msg)
       );
 
@@ -65,7 +103,7 @@ export default function Checkin() {
           ?.scrollIntoView({ behavior: "smooth" });
       } else {
         setRetryInfo(null);
-        setFieldErrors(result.field ? { [result.field]: true } : {});
+        setFieldErrors(result.field ? { [result.field]: result.error } : {});
         setState("error");
       }
     },
@@ -107,15 +145,16 @@ export default function Checkin() {
                     <label className="label" htmlFor="fullName">Họ và tên *</label>
                     <input
                       id="fullName"
-                      className="field"
+                      className={"field" + (fieldErrors.fullName ? " !border-red-400/70" : "")}
                       placeholder="Nguyễn Văn A"
                       value={form.fullName}
                       maxLength={80}
                       required
-                      onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                      onChange={(e) => updateField("fullName", e.target.value)}
+                      onBlur={() => markTouched("fullName")}
                     />
                     {fieldErrors.fullName && (
-                      <FieldError msg={errorMessage("invalid_name")} />
+                      <FieldError msg={errorMessage(fieldErrors.fullName)} />
                     )}
                   </div>
 
@@ -123,17 +162,18 @@ export default function Checkin() {
                     <label className="label" htmlFor="phone">Số điện thoại *</label>
                     <input
                       id="phone"
-                      className="field"
+                      className={"field" + (fieldErrors.phone ? " !border-red-400/70" : "")}
                       type="tel"
                       inputMode="numeric"
                       placeholder="09xx xxx xxx"
                       value={form.phone}
                       maxLength={15}
                       required
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      onChange={(e) => updateField("phone", e.target.value)}
+                      onBlur={() => markTouched("phone")}
                     />
                     {fieldErrors.phone && (
-                      <FieldError msg={errorMessage("invalid_phone")} />
+                      <FieldError msg={errorMessage(fieldErrors.phone)} />
                     )}
                   </div>
 
@@ -141,16 +181,17 @@ export default function Checkin() {
                     <label className="label" htmlFor="email">Email *</label>
                     <input
                       id="email"
-                      className="field"
+                      className={"field" + (fieldErrors.email ? " !border-red-400/70" : "")}
                       type="email"
                       placeholder="ban@email.com"
                       value={form.email}
                       maxLength={120}
                       required
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      onChange={(e) => updateField("email", e.target.value)}
+                      onBlur={() => markTouched("email")}
                     />
                     {fieldErrors.email && (
-                      <FieldError msg={errorMessage("invalid_email")} />
+                      <FieldError msg={errorMessage(fieldErrors.email)} />
                     )}
                   </div>
 
@@ -190,7 +231,7 @@ export default function Checkin() {
                       </button>
                     )}
                     {fieldErrors.photo && (
-                      <FieldError msg={errorMessage("photo_required")} />
+                      <FieldError msg={errorMessage(fieldErrors.photo)} />
                     )}
                     <p className="mt-2 text-xs text-muted">
                       Ảnh được nén ngay trên máy bạn trước khi gửi — chỉ dùng
@@ -302,4 +343,25 @@ export default function Checkin() {
 
 function FieldError({ msg }: { msg: string }) {
   return <p className="mt-1.5 text-xs text-red-400">{msg}</p>;
+}
+
+/* ---------- Client-side validation (mirror rules của /api/checkin) ---------- */
+
+const NAME_RE = /^[\p{L}\p{M}'.\- ]{2,80}$/u;
+const PHONE_RE = /^0\d{8,10}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function validateField(field: string, value: string): string {
+  switch (field) {
+    case "fullName":
+      return NAME_RE.test(value.trim()) ? "" : "invalid_name";
+    case "phone":
+      // Cho phép nhập kèm khoảng trắng / dấu chấm / gạch ngang / ngoặc
+      return PHONE_RE.test(value.replace(/[\s.\-()]/g, "")) ? "" : "invalid_phone";
+    case "email":
+      return EMAIL_RE.test(value.trim()) ? "" : "invalid_email";
+    default:
+      return "";
+  }
 }

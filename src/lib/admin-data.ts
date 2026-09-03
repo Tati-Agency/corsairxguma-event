@@ -7,16 +7,16 @@ export async function listAllDocs(
   collectionId: string,
   queries: string[] = []
 ): Promise<Record<string, unknown>[]> {
-  const { databases } = getAppwrite();
+  const { tablesDB } = getAppwrite();
   const out: Record<string, unknown>[] = [];
   let offset = 0;
   for (;;) {
-    const res = await databases.listDocuments(APPWRITE.databaseId, collectionId, [
+    const res = await tablesDB.listRows(APPWRITE.databaseId, collectionId, [
       ...queries,
       Query.limit(1000),
       Query.offset(offset),
     ]);
-    out.push(...(res.documents as unknown as Record<string, unknown>[]));
+    out.push(...(res.rows as unknown as Record<string, unknown>[]));
     if (out.length >= res.total) break;
     offset += 1000;
   }

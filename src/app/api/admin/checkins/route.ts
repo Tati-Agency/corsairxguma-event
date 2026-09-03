@@ -24,8 +24,8 @@ export async function GET(req: NextRequest) {
       queries.push(Query.search("full_name", q));
     }
 
-    const { databases } = getAppwrite();
-    const res = await databases.listDocuments(
+    const { tablesDB } = getAppwrite();
+    const res = await tablesDB.listRows(
       APPWRITE.databaseId,
       APPWRITE.colCheckins,
       [...queries, Query.orderDesc("$createdAt"), Query.limit(limit), Query.offset(offset)]
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       total: res.total,
-      documents: res.documents,
+      documents: res.rows,
     });
   } catch (err) {
     console.error("[admin/checkins]", err);

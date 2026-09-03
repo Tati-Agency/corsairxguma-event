@@ -54,10 +54,10 @@ export async function POST(req: NextRequest) {
     if (!ALLOWED_PHOTO_TYPES.includes(photo.type))
       return errorJson("photo_invalid_type", 400, "photo");
 
-    const { databases, storage } = getAppwrite();
+    const { tablesDB, storage } = getAppwrite();
 
     // ---- Dedupe: one check-in per phone per event ----
-    const dup = await databases.listDocuments(
+    const dup = await tablesDB.listRows(
       APPWRITE.databaseId,
       APPWRITE.colCheckins,
       [
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       let candidate = "";
       for (let i = 0; i < 4; i++)
         candidate += CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length];
-      const taken = await databases.listDocuments(
+      const taken = await tablesDB.listRows(
         APPWRITE.databaseId,
         APPWRITE.colCheckins,
         [
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     if (!playerCode) return errorJson("server_busy", 500);
 
     // ---- Persist ----
-    const doc = await databases.createDocument(
+    const doc = await tablesDB.createRow(
       APPWRITE.databaseId,
       APPWRITE.colCheckins,
       "unique()",

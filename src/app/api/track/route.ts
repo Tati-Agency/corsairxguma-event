@@ -31,10 +31,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "missing_session" }, { status: 400 });
     }
 
-    const { databases } = getAppwrite();
+    const { tablesDB } = getAppwrite();
 
     // Dedupe: one page-view log per session per event
-    const existing = await databases.listDocuments(
+    const existing = await tablesDB.listRows(
       APPWRITE.databaseId,
       APPWRITE.colVisits,
       [
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const info = parseUa(ua);
-    await databases.createDocument(
+    await tablesDB.createRow(
       APPWRITE.databaseId,
       APPWRITE.colVisits,
       "unique()",

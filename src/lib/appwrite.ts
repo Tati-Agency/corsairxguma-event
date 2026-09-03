@@ -1,8 +1,8 @@
 import "server-only";
-import { Client, Databases, Storage } from "node-appwrite";
+import { Client, TablesDB, Storage } from "node-appwrite";
 import { APPWRITE } from "./config";
 
-let cached: { databases: Databases; storage: Storage } | null = null;
+let cached: { tablesDB: TablesDB; storage: Storage } | null = null;
 
 /** Server-side Appwrite client — NEVER import this from client components. */
 export function getAppwrite() {
@@ -19,7 +19,7 @@ export function getAppwrite() {
     .setKey(APPWRITE.apiKey);
 
   cached = {
-    databases: new Databases(client),
+    tablesDB: new TablesDB(client),
     storage: new Storage(client),
   };
   return cached;
