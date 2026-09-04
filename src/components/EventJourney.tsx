@@ -64,14 +64,14 @@ export default function EventJourney() {
         <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {PRODUCTS.map((product, i) => (
             <Reveal key={product.name} delay={i * 90} variant="zoom">
-              <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-[#1a1a1a] md:flex-row">
+              <div className="relative flex h-full flex-col items-center overflow-hidden rounded-xl bg-[#1a1a1a] text-center md:flex-row md:items-stretch md:text-left">
                 {product.bestseller && (
                   <span className="absolute left-0 top-7 z-10 bg-[#ece81a] py-1.5 pl-4 pr-6 text-[11px] font-bold uppercase tracking-wider text-black [clip-path:polygon(0_0,100%_0,calc(100%-14px)_100%,0_100%)]">
                     Bestseller
                   </span>
                 )}
 
-                <div className="flex shrink-0 items-center justify-center px-6 py-8 md:w-[42%] md:px-4 md:py-10 [background:radial-gradient(circle_at_center,#2f2f2f_0%,#1a1a1a_72%)]">
+                <div className="flex w-full shrink-0 items-center justify-center px-6 py-8 md:w-[42%] md:px-4 md:py-10 [background:radial-gradient(circle_at_center,#2f2f2f_0%,#1a1a1a_72%)]">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -81,7 +81,7 @@ export default function EventJourney() {
                   />
                 </div>
 
-                <div className="flex flex-1 flex-col pb-9 pr-6 md:py-11 md:pl-0 md:pr-10">
+                <div className="flex w-full flex-1 flex-col items-center px-6 pb-9 md:items-start md:py-11 md:pl-0 md:pr-10 md:text-left">
                   <h3 className="display text-2xl font-bold tracking-wide text-white">
                     {product.name}
                   </h3>
@@ -89,7 +89,7 @@ export default function EventJourney() {
                     {product.desc}
                   </p>
 
-                  <dl className="mt-6">
+                  <dl className="mt-6 w-full">
                     {product.specs.map((spec) => (
                       <div
                         key={spec.label}
@@ -103,7 +103,7 @@ export default function EventJourney() {
                     ))}
                   </dl>
 
-                  <div className="mt-auto flex items-center pt-8">
+                  <div className="mt-auto flex items-center justify-center pt-8 md:justify-start">
                     <a
                       href={product.url}
                       target="_blank"

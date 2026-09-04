@@ -47,8 +47,8 @@ export default function Hero() {
             decoding="async"
           />
         </picture>
-        {/* Overlay: mobile đậm hơn (text đè lên ảnh full-bleed), desktop giữ nguyên */}
-        <div className="absolute inset-0 bg-gradient-to-r from-bg/95 via-bg/80 to-bg/25 md:from-bg/90 md:via-bg/60 md:to-transparent" />
+        {/* Overlay: mobile dốc dưới-lên (đậm đáy, nhạt đỉnh — đúng ảnh tham chiếu), desktop gradient ngang như cũ */}
+        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-transparent md:bg-gradient-to-r md:from-bg/90 md:via-bg/60 md:to-transparent" />
       </div>
 
       <div className="hero-aura">
@@ -60,7 +60,7 @@ export default function Hero() {
       <span className="corner-bracket bl" />
       <span className="corner-bracket br" />
 
-      <div className="container-c relative z-10 flex min-h-[92svh] flex-col justify-center py-28">
+      <div className="container-c relative z-10 flex min-h-[92svh] flex-col justify-end pb-16 py-28 md:justify-center md:pb-0">
         {/* Title reveals line-by-line on load (pure CSS, runs pre-hydration) */}
         <h1 className="hero-title">
           <span
@@ -83,27 +83,35 @@ export default function Hero() {
           </span>
         </h1>
 
-        <Reveal delay={120}>
+        <Reveal delay={120} className="hidden md:block">
           <p className="mt-5 max-w-xl text-base text-muted leading-relaxed md:mt-7 md:text-lg">
             Sự kiện gặp gỡ {EVENT.title} — một ngày chỉ dành cho fan.
             Check-in, trải nghiệm gear đỉnh cao và giữ lại khoảnh khắc của riêng bạn.
           </p>
         </Reveal>
 
-        <Reveal delay={240}>
-          {/* Mobile: nút stack dọc full-width — touch target to, dễ bấm; desktop: ngang */}
-          <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-4">
-            <a href="#checkin" className="btn-accent w-full sm:w-auto">
+        {/* Mobile: CTA rectangular giống WATCH VIDEO trên LP gốc */}
+        <Reveal delay={240} className="mt-8 md:hidden">
+          <a href="#checkin" className="btn-watch-video">
+            [ Watch Video ]
+          </a>
+        </Reveal>
+
+        {/* Desktop: giữ nguyên 2 nút cũ */}
+        <Reveal delay={240} className="hidden md:block">
+          <div className="mt-8 flex flex-row flex-wrap gap-4">
+            <a href="#checkin" className="btn-accent">
               [ Enter Event ]
               <span className="arrow">→</span>
             </a>
-            <a href="#arena" className="btn-ghost w-full sm:w-auto">
+            <a href="#arena" className="btn-ghost">
               Khám phá khu vực
             </a>
           </div>
         </Reveal>
 
-        <Reveal delay={360}>
+        {/* Meta line — chỉ desktop (mobile giữ ảnh sạch + đậm ở đáy) */}
+        <Reveal delay={360} className="hidden md:block">
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted md:mt-14">
             <span className="flex items-center gap-2">
               <span className="text-accent">▸</span> {EVENT.date}
