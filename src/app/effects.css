@@ -221,6 +221,22 @@ html:not(.js) .reveal[data-variant="zoom"] {
 }
 html:not(.js) .section-title::after { transform: scaleX(1); }
 
+/* Mobile (< md): variant left/right chỉ dành cho desktop. Bỏ trượt ngang ±36px
+   (gây cắt chữ mép trái / lệch khối nội dung sang phải), mobile chuyển sang
+   reveal "up" mượt như default. is-visible phải thắng variant — đặt sau + độ ưu
+   tiên cao hơn (0,3,0>0,2,0): .reveal.is-visible (0,2,0) bị variant (0,2,0,
+   xuất hiện SAU trong file) ghi đè nên transform:none không bao giờ chạy. */
+@media (max-width: 767px) {
+  .reveal[data-variant="left"],
+  .reveal[data-variant="right"] {
+    transform: translateY(26px);
+  }
+  .reveal[data-variant="left"].is-visible,
+  .reveal[data-variant="right"].is-visible {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; filter: none; transition: none; }
