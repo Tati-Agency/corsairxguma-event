@@ -209,8 +209,13 @@
 
 /* No-JS fallback: chỉ ẩn .reveal khi JS chắc chắn đang chạy (html.js).
    Nếu JS bị chặn/lỗi chunk (vd: dev qua LAN IP), nội dung vẫn hiện đầy đủ
-   thay vì đứng đen ở opacity:0. */
-html:not(.js) .reveal {
+   thay vì đứng đen ở opacity:0. Liệt kê cả các variant để thắng specificity
+   (0,2,0) của .reveal[data-variant=...] — nếu không, khối nội dung vẫn bị
+   lệch ±36px kể cả khi đã hiện. */
+html:not(.js) .reveal,
+html:not(.js) .reveal[data-variant="left"],
+html:not(.js) .reveal[data-variant="right"],
+html:not(.js) .reveal[data-variant="zoom"] {
   opacity: 1;
   transform: none;
 }

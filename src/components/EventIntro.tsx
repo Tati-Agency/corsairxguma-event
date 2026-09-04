@@ -6,7 +6,7 @@ export default function EventIntro() {
     <section className="section-divider py-16 md:py-32">
       <div className="container-c grid gap-12 md:grid-cols-2 md:items-center">
         <Reveal variant="left" className="w-full">
-          <h2 className="section-title text-center leading-[1.05] md:text-left md:leading-none">
+          <h2 className="section-title leading-[1.05] md:leading-none">
             ONE DAY.
             <br />
             ONE PLAYER.
@@ -17,15 +17,19 @@ export default function EventIntro() {
 
         <Reveal delay={150} variant="right" className="w-full">
           <div className="space-y-5 text-center leading-[1.7] text-muted md:text-left md:leading-relaxed">
-            <p>
-              Chào mừng đến với {EVENT.title} — sự kiện dành riêng cho cộng đồng
-              fan. Đây là dịp để bạn tận mắt trải nghiệm những bộ gear đỉnh cao,
-              gặp gỡ những người cùng đam mê và ghi dấu khoảnh khắc riêng của mình.
-            </p>
-            <p>
-              Quét QR, điền thông tin và nhận <strong className="text-text">Event Pass</strong>{" "}
-              cá nhân — tấm vé thông minh theo bạn suốt sự kiện.
-            </p>
+            {/* Mobile: nudge trái nhẹ để khối chữ cân quang học giữa màn hình */}
+            <div className="space-y-5 -translate-x-2 md:translate-x-0">
+              <p>
+                Chào mừng đến với {EVENT.title} — sự kiện dành riêng cho cộng đồng
+                fan. Đây là dịp để bạn tận mắt trải nghiệm những bộ gear đỉnh cao,
+                gặp gỡ những người cùng đam mê và ghi dấu khoảnh khắc riêng của mình.
+              </p>
+              <p>
+                Quét QR, điền thông tin và nhận{" "}
+                <strong className="text-text">Event Pass</strong> cá nhân — tấm vé
+                thông minh theo bạn suốt sự kiện.
+              </p>
+            </div>
             <div className="card text-center md:text-left">
               <div className="card-core !p-6">
                 <p className="font-semibold text-text">{EVENT.date}</p>
