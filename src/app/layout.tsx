@@ -25,8 +25,24 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={saira.variable}>
-      <body>{children}</body>
+    <html
+      lang="vi"
+      className={saira.variable}
+      // Inline script trong body thêm class "js" trước hydration — suppress
+      // để React không cảnh báo/gỡ class này khi đối chiếu server/client.
+      suppressHydrationWarning
+    >
+      <body>
+        {/* Đánh dấu "js" trước khi render bất kỳ nội dung nào — CSS dựa vào flag
+            này để ẩn .reveal. Nếu JS không chạy (bị chặn/lỗi chunk), flag không
+            bao giờ xuất hiện -> .reveal vẫn hiện bình thường (fallback no-JS). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

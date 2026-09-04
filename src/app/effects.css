@@ -207,6 +207,15 @@
 .reveal[data-variant="right"] { transform: translateX(36px); }
 .reveal[data-variant="zoom"] { transform: scale(0.955) translateY(10px); }
 
+/* No-JS fallback: chỉ ẩn .reveal khi JS chắc chắn đang chạy (html.js).
+   Nếu JS bị chặn/lỗi chunk (vd: dev qua LAN IP), nội dung vẫn hiện đầy đủ
+   thay vì đứng đen ở opacity:0. */
+html:not(.js) .reveal {
+  opacity: 1;
+  transform: none;
+}
+html:not(.js) .section-title::after { transform: scaleX(1); }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; filter: none; transition: none; }
