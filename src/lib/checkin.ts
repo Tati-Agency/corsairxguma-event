@@ -30,18 +30,18 @@ export type CheckinResult = CheckinSuccess | CheckinFailure;
 
 // ---- Masking (cho QR & Event Pass — staff xem đầy đủ trong /admin) ----
 
-/** SĐT: chỉ hiện 4 số cuối — VD: ••••1234 */
+/** SĐT: chỉ hiện 4 số cuối — VD: ****1234 */
 export function maskPhone(phone?: string): string {
   if (!phone) return "";
   const digits = phone.replace(/\D/g, "");
-  return `••••${digits.slice(-4)}`;
+  return `****${digits.slice(-4)}`;
 }
 
-/** Email: 3 ký tự đầu + 6 ký tự cuối — VD: ngu••••il.com */
+/** Email: 3 ký tự đầu + ****** + 6 ký tự cuối — VD: adm******il.com */
 export function maskEmail(email?: string): string {
   if (!email) return "";
-  if (email.length <= 9) return `${email.slice(0, 3)}•••`;
-  return `${email.slice(0, 3)}••••${email.slice(-6)}`;
+  if (email.length <= 9) return `${email.slice(0, 3)}******`;
+  return `${email.slice(0, 3)}******${email.slice(-6)}`;
 }
 
 /** Thời gian: chỉ ngày, không giờ — VD: 09/03/2026 */
@@ -56,23 +56,23 @@ export function formatDateOnly(iso?: string): string {
 }
 
 /**
- * Nội dung mã QR: mã vé + thông tin đã điền (SĐT/email đã mask, ngày không giờ).
- * Định dạng text để staff quét bằng camera là đọc được ngay.
- * Các pass cũ (lưu localStorage trước khi có phone/email) sẽ tự bỏ dòng thiếu.
+ * Nội dung mã QR: JSON chứa mã pass + thông tin đã điền
+ * (SĐT/email đã mask để bảo mật, ngày tạo pass chỉ có ngày không có giờ).
+ * Máy quét đọc ra chuỗi JSON chuẩn, dễ parse trên máy quét/app staff.
+ * Các pass cũ (lưu localStorage trước khi có phone/email) sẽ tự bỏ field thiếu.
  */
 export function buildQrPayload(pass: CheckinSuccess): string {
-  const lines = [
-    "CORSAIR x GUMAYUSI - EVENT TICKET",
-    `CODE: ${pass.playerCode}`,
-    `NAME: ${pass.fullName}`,
-  ];
   const maskedPhone = maskPhone(pass.phone);
   const maskedEmail = maskEmail(pass.email);
   const date = formatDateOnly(pass.createdAt);
-  if (maskedPhone) lines.push(`PHONE: ${maskedPhone}`);
-  if (maskedEmail) lines.push(`EMAIL: ${maskedEmail}`);
-  if (date) lines.push(`DATE: ${date}`);
-  return lines.join("\n");
+  return JSON.stringify({
+    event: "CORSAIR x GUMAYUSI",
+    code: pass.playerCode,
+    fullName: pass.fullName,
+    ...(maskedPhone ? { phone: maskedPhone } : {}),
+    ...(maskedEmail ? { email: maskedEmail } : {}),
+    ...(date ? { createdAt: date } : {}),
+  });
 }
 
 export const PASS_STORAGE_KEY = "cxg_event_pass";
