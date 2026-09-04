@@ -58,7 +58,7 @@ export default function EventJourney() {
     <section className="section-divider cv-auto py-20 md:py-32">
       <div className="container-c">
         <Reveal>
-          <h2 className="section-title text-center">TRUSTED BY THE LEGEND</h2>
+          <h2 className="section-title section-title-light">TRUSTED BY THE LEGEND</h2>
         </Reveal>
 
         <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">

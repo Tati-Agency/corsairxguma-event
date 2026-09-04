@@ -388,6 +388,12 @@
   font-size: clamp(2.25rem, 6vw, 4.5rem);
   letter-spacing: -0.005em;
 }
+/* Biến thể tiêu đề dạng hero: Saira Expanded Light, không bold (như hero-main) */
+.section-title-light {
+  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
+  font-weight: 300;
+  font-variation-settings: normal;
+}
 /* Accent underline sweeps in when the title is revealed */
 .section-title::after {
   content: "";
