@@ -10,7 +10,13 @@ import {
   type CheckinSuccess,
 } from "@/lib/checkin";
 
-type CheckInState = "idle" | "verifying" | "checking-in" | "success" | "error";
+type CheckInState =
+  | "idle"
+  | "verifying"
+  | "checking-in"
+  | "success"
+  | "error"
+  | "duplicate";
 
 export default function Checkin() {
   const [state, setState] = useState<CheckInState>("verifying");
@@ -103,8 +109,12 @@ export default function Checkin() {
           ?.scrollIntoView({ behavior: "smooth" });
       } else {
         setRetryInfo(null);
-        setFieldErrors(result.field ? { [result.field]: result.error } : {});
-        setState("error");
+        if (result.error === "already_checked_in") {
+          setState("duplicate");
+        } else {
+          setFieldErrors(result.field ? { [result.field]: result.error } : {});
+          setState("error");
+        }
       }
     },
     [form, photo, consent]
@@ -244,7 +254,7 @@ export default function Checkin() {
                       type="checkbox"
                       checked={consent}
                       onChange={(e) => setConsent(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#ffd400]"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#ece81a]"
                     />
                     <span>
                       Tôi đồng ý cho ban tổ chức lưu hình ảnh này phục vụ sự
@@ -272,6 +282,32 @@ export default function Checkin() {
                   <p className="mt-2 text-sm text-muted">
                     {retryInfo ?? "Vui lòng giữ mở màn hình này."}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {state === "duplicate" && (
+              <div className="card border-accent/40">
+                <div className="card-core !p-10 text-center">
+                  <p className="text-3xl">📮</p>
+                  <p className="display mt-3 text-xl font-bold text-accent">
+                    ĐÃ ĐĂNG KÝ TRƯỚC ĐÓ
+                  </p>
+                  <p className="mt-3 text-sm text-muted">
+                    Số điện thoại <span className="text-foreground font-semibold">{form.phone}</span> đã
+                    được check-in từ trước. Vui lòng kiểm tra email để xem lại
+                    Event Pass của bạn, hoặc liên hệ staff tại sự kiện nếu cần hỗ trợ.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFieldErrors({});
+                      setState("idle");
+                    }}
+                    className="btn-ghost mt-6 !py-2 !px-4 text-xs"
+                  >
+                    [ Dùng số khác ]
+                  </button>
                 </div>
               </div>
             )}

@@ -26,6 +26,7 @@ interface CheckinDoc {
 }
 
 const KEY_STORAGE = "cxg_admin_key";
+const PAGE_SIZE = 50;
 
 export default function AdminPage() {
   const [key, setKey] = useState("");
@@ -34,6 +35,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [checkins, setCheckins] = useState<CheckinDoc[]>([]);
   const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -56,14 +58,14 @@ export default function AdminPage() {
   };
 
   const load = useCallback(
-    async (search = "") => {
+    async (search = "", newOffset = 0) => {
       setLoading(true);
       try {
         const headers = { "x-admin-key": key };
         const [statsRes, checkinsRes] = await Promise.all([
           fetch(`/api/admin/stats?event=${EVENT.slug}`, { headers }),
           fetch(
-            `/api/admin/checkins?event=${EVENT.slug}&limit=50${
+            `/api/admin/checkins?event=${EVENT.slug}&limit=${PAGE_SIZE}&offset=${newOffset}${
               search ? `&q=${encodeURIComponent(search)}` : ""
             }`,
             { headers }
@@ -77,6 +79,7 @@ export default function AdminPage() {
           const data = await checkinsRes.json();
           setCheckins(data.documents);
           setTotal(data.total);
+          setOffset(newOffset);
         }
       } finally {
         setLoading(false);
@@ -84,6 +87,28 @@ export default function AdminPage() {
     },
     [key]
   );
+
+  /**
+   * Tải CSV qua fetch (gửi kèm x-admin-key header) rồi lưu về máy.
+   * Link <a href> trực tiếp không gửi được header → sẽ bị 401.
+   */
+  const downloadCsv = async (type: "checkins" | "analytics") => {
+    try {
+      const res = await fetch(`/api/admin/export?type=${type}&event=${EVENT.slug}`, {
+        headers: { "x-admin-key": key },
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${type}-${EVENT.slug}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // ignore — user can retry
+    }
+  };
 
   useEffect(() => {
     const stored = sessionStorage.getItem(KEY_STORAGE);
@@ -130,24 +155,24 @@ export default function AdminPage() {
           <p className="text-sm text-muted">{EVENT.title} — {EVENT.slug}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <a
-            href={`/api/admin/export?type=checkins&event=${EVENT.slug}`}
-            target="_blank"
-            className="btn-ghost !py-2 !px-4 text-xs"
-          >
-            ⬇ CSV Check-in
-          </a>
-          <a
-            href={`/api/admin/export?type=analytics&event=${EVENT.slug}`}
-            target="_blank"
-            className="btn-ghost !py-2 !px-4 text-xs"
-          >
-            ⬇ CSV Analytics
-          </a>
           <button
             type="button"
             className="btn-ghost !py-2 !px-4 text-xs"
-            onClick={() => load(query)}
+            onClick={() => downloadCsv("checkins")}
+          >
+            ⬇ CSV Check-in
+          </button>
+          <button
+            type="button"
+            className="btn-ghost !py-2 !px-4 text-xs"
+            onClick={() => downloadCsv("analytics")}
+          >
+            ⬇ CSV Analytics
+          </button>
+          <button
+            type="button"
+            className="btn-ghost !py-2 !px-4 text-xs"
+            onClick={() => load(query, offset)}
           >
             ⟳ Refresh
           </button>
@@ -237,17 +262,17 @@ export default function AdminPage() {
           <div className="flex gap-2">
             <input
               className="field !w-56"
-              placeholder="Tìm theo tên…"
+              placeholder="Tìm tên / SĐT / email / code…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") load(query);
+                if (e.key === "Enter") load(query, 0);
               }}
             />
             <button
               type="button"
               className="btn-ghost !py-2 !px-4 text-xs"
-              onClick={() => load(query)}
+              onClick={() => load(query, 0)}
             >
               Tìm
             </button>
@@ -284,7 +309,7 @@ export default function AdminPage() {
                         className="h-10 w-10 rounded object-cover"
                       />
                     </td>
-                    <td className="px-4 py-2 font-mono font-bold text-accent">
+                    <td className="px-4 py-2 font-bold tracking-wide text-accent">
                       {c.player_code}
                     </td>
                     <td className="px-4 py-2">{c.full_name}</td>
@@ -299,6 +324,31 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+
+        {total > PAGE_SIZE && (
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <button
+              type="button"
+              disabled={offset === 0}
+              onClick={() => load(query, Math.max(0, offset - PAGE_SIZE))}
+              className="btn-ghost !py-2 !px-4 text-xs disabled:opacity-40"
+            >
+              ← Trang trước
+            </button>
+            <span className="text-muted">
+              Trang {Math.floor(offset / PAGE_SIZE) + 1} /{" "}
+              {Math.ceil(total / PAGE_SIZE)} — {total} check-in
+            </span>
+            <button
+              type="button"
+              disabled={offset + PAGE_SIZE >= total}
+              onClick={() => load(query, offset + PAGE_SIZE)}
+              className="btn-ghost !py-2 !px-4 text-xs disabled:opacity-40"
+            >
+              Trang sau →
+            </button>
+          </div>
+        )}
       </section>
     </main>
   );

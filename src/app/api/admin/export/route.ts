@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { listAllDocs, toCsv } from "@/lib/admin-data";
 import { APPWRITE } from "@/lib/config";
+import { Query } from "node-appwrite";
 
 export const runtime = "nodejs";
 
@@ -15,9 +16,7 @@ export async function GET(req: NextRequest) {
 
   try {
     if (type === "checkins") {
-      const queries = event
-        ? [`equal("event_id", ["${event}"])`]
-        : [];
+      const queries = event ? [Query.equal("event_id", event)] : [];
       const rows = await listAllDocs(APPWRITE.colCheckins, queries);
       const csv = toCsv(rows, [
         "player_code",
@@ -36,7 +35,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (type === "analytics") {
-      const queries = event ? [`equal("event_id", ["${event}"])`] : [];
+      const queries = event ? [Query.equal("event_id", event)] : [];
       const rows = await listAllDocs(APPWRITE.colVisits, queries);
       const csv = toCsv(rows, [
         "$createdAt",

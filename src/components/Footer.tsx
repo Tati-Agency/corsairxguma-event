@@ -5,11 +5,22 @@ export default function Footer() {
     <footer className="section-divider py-12">
       <div className="container-c">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <img
-            src="/logos/corsair.svg"
-            alt={EVENT.title}
-            className="h-14 md:h-16"
-          />
+          <div className="flex items-center gap-4">
+            <img
+              src="/logos/corsair.svg"
+              alt={EVENT.title}
+              className="h-14 md:h-16"
+            />
+            {/* Tagline chuẩn brand book — tích hợp cùng logo, màu Bright Yellow */}
+            <span
+              className="hidden sm:block text-[0.65rem] tracking-[0.3em] text-accent uppercase border-l border-line pl-4"
+              style={{ fontFamily: "var(--font-display)", fontVariationSettings: '"wdth" 125' }}
+            >
+              Worlds
+              <br />
+              Ahead
+            </span>
+          </div>
           <nav className="flex gap-6 text-sm text-muted">
             <a href="#arena" className="transition-colors hover:text-accent">
               Event Arena

@@ -1,5 +1,5 @@
-/* ============================================================
-   CORSAIR × GUMAYUSI — Visual effects (hero, scanline, grain)
+﻿/* ============================================================
+   CORSAIR Ã— GUMAYUSI â€” Visual effects (hero, scanline, grain)
    ============================================================ */
 
 .hero {
@@ -19,14 +19,14 @@
   content: "";
   position: absolute;
   border-radius: 9999px;
-  /* Perf: no blur filter — the radial gradient falloff already reads as a glow */
+  /* Perf: no blur filter â€” the radial gradient falloff already reads as a glow */
   opacity: 0.55;
   will-change: transform;
 }
 .hero-aura::before {
   width: 720px;
   height: 720px;
-  background: radial-gradient(circle, rgba(255, 212, 0, 0.32), transparent 60%);
+  background: radial-gradient(circle, rgba(236, 232, 26, 0.32), transparent 60%);
   top: -260px;
   right: -180px;
   animation: aura-drift-a 18s var(--ease-out-quart) infinite alternate;
@@ -95,8 +95,9 @@
   justify-content: center;
   gap: 0.5rem;
   background: var(--color-accent);
-  color: #050505;
+  color: #000000;
   font-family: var(--font-display);
+  font-variation-settings: "wdth" 125;
   font-weight: 700;
   font-size: 0.95rem;
   text-transform: uppercase;
@@ -109,7 +110,7 @@
     background 0.4s var(--ease-out-quart),
     transform 0.3s var(--ease-out-quart),
     box-shadow 0.4s var(--ease-out-quart);
-  box-shadow: 0 8px 30px -8px rgba(255, 212, 0, 0.5);
+  box-shadow: 0 8px 30px -8px rgba(236, 232, 26, 0.5);
   isolation: isolate;
 }
 .btn-accent::before {
@@ -125,7 +126,7 @@
 .btn-accent:hover {
   background: var(--color-accent-2);
   transform: translateY(-1px);
-  box-shadow: 0 14px 40px -8px rgba(255, 212, 0, 0.7);
+  box-shadow: 0 14px 40px -8px rgba(236, 232, 26, 0.7);
 }
 .btn-accent:hover::before { transform: translateX(120%); }
 .btn-accent:active { transform: translateY(0) scale(0.985); }
@@ -160,7 +161,7 @@
 .btn-ghost:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
-  background: rgba(255, 212, 0, 0.04);
+  background: rgba(236, 232, 26, 0.04);
 }
 
 /* ---------- Reveal (scroll entry) ----------
@@ -208,7 +209,7 @@
 .field:focus {
   border-color: var(--color-accent);
   background: var(--color-surface-2);
-  box-shadow: 0 0 0 4px rgba(255, 212, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 4px rgba(236, 232, 26, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .field::placeholder { color: rgba(167, 167, 167, 0.55); }
 .label {
@@ -236,7 +237,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 50%, rgba(255, 212, 0, 0.12));
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 50%, rgba(236, 232, 26, 0.12));
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -258,13 +259,13 @@
 .pass-card {
   position: relative;
   background:
-    linear-gradient(155deg, rgba(255, 212, 0, 0.12) 0%, transparent 45%),
+    linear-gradient(155deg, rgba(236, 232, 26, 0.12) 0%, transparent 45%),
     var(--color-surface);
-  border: 1px solid rgba(255, 212, 0, 0.4);
+  border: 1px solid rgba(236, 232, 26, 0.4);
   border-radius: var(--radius-lg);
   box-shadow:
     0 30px 80px -20px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 212, 0, 0.08),
+    0 0 0 1px rgba(236, 232, 26, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
@@ -293,18 +294,19 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 212, 0, 0.12), transparent 50%);
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(236, 232, 26, 0.12), transparent 50%);
   opacity: 0;
   transition: opacity 0.5s var(--ease-out-quart);
   pointer-events: none;
 }
 .zone:hover {
-  border-color: rgba(255, 212, 0, 0.4);
+  border-color: rgba(236, 232, 26, 0.4);
   transform: translateY(-2px);
 }
 .zone:hover::before { opacity: 1; }
 .zone-num {
   font-family: var(--font-display);
+  font-variation-settings: "wdth" 125;
   font-size: 3rem;
   font-weight: 700;
   color: var(--color-line-strong);
@@ -315,7 +317,7 @@
 /* ---------- Nav (frosted glass) ---------- */
 .nav-blur {
   position: relative;
-  background: rgba(5, 5, 5, 0.72);
+  background: rgba(0, 0, 0, 0.72);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
           backdrop-filter: blur(8px) saturate(140%);
   border-bottom: 1px solid var(--color-line);
@@ -345,20 +347,41 @@
 }
 
 /* ---------- Hero / section title ---------- */
+/* Hero theo typography của CORSAIR x GUMAYUSI LP (partner-gumayusi):
+   - Subhead: Saira thường weight 500, vàng #ECE81A, tracking 2px
+   - Headline: Saira Expanded (wdth 125) weight 300 (Light), trắng, rất to
+   Không dùng bold 700 như trước — đúng bản gốc. */
 .hero-title {
   font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 0.86;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
-  font-size: clamp(3.5rem, 13vw, 9.5rem);
 }
-.hero-title .accent {
+.hero-subhead {
+  display: block;
   color: var(--color-accent);
-  text-shadow: 0 0 80px rgba(255, 212, 0, 0.35);
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.125em; /* ~2px tracking như subhead-2 gốc */
+  font-size: clamp(0.65rem, 1.2vw, 0.9rem);
+}
+@media (min-width: 768px) {
+  .hero-subhead { font-size: 1.125rem; }
+}
+.hero-main {
+  display: block;
+  color: var(--color-text);
+  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
+  font-weight: 300; /* bản Expanded Light đứng riêng — đúng font gốc CORSAIR */
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  font-size: clamp(2.5rem, 6.5vw, 5rem); /* reference: 2.5/4/5rem */
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .hero-main { white-space: normal; }
 }
 .section-title {
   font-family: var(--font-display);
+  font-variation-settings: "wdth" 125;
   font-weight: 700;
   line-height: 0.95;
   text-transform: uppercase;
@@ -385,7 +408,7 @@
   align-items: center;
   gap: 0.4rem;
   background: var(--color-accent);
-  color: #050505;
+  color: #000000;
   font-family: var(--font-display);
   font-size: 0.7rem;
   font-weight: 700;
@@ -393,11 +416,11 @@
   letter-spacing: 0.18em;
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
-  box-shadow: 0 4px 14px -4px rgba(255, 212, 0, 0.5);
+  box-shadow: 0 4px 14px -4px rgba(236, 232, 26, 0.5);
 }
 
 /* ============================================================
-   Animations — page-level
+   Animations â€” page-level
    ============================================================ */
 
 /* ---------- Hero title: line-by-line entrance on load ---------- */
@@ -419,7 +442,7 @@
   height: 2px;
   z-index: 70;
   pointer-events: none;
-  background: rgba(255, 212, 0, 0.08);
+  background: rgba(236, 232, 26, 0.08);
 }
 .scroll-progress-bar {
   height: 100%;
@@ -427,11 +450,11 @@
   background: var(--color-accent);
   transform: scaleX(0);
   transform-origin: left;
-  box-shadow: 0 0 12px rgba(255, 212, 0, 0.5);
+  box-shadow: 0 0 12px rgba(236, 232, 26, 0.5);
 }
 
 /* ============================================================
-   Event Arena — interactive floor plan
+   Event Arena â€” interactive floor plan
    ============================================================ */
 
 /* Zone areas on the SVG map: hover + active sync with tooltip */
@@ -443,8 +466,8 @@
 }
 .arena-zone:hover,
 .arena-zone.is-active {
-  fill: rgba(255, 212, 0, 0.1);
-  stroke: rgba(255, 212, 0, 0.65);
+  fill: rgba(236, 232, 26, 0.1);
+  stroke: rgba(236, 232, 26, 0.65);
 }
 .arena-glow { animation: arena-glow 3.2s ease-in-out infinite; }
 @keyframes arena-glow {
@@ -452,12 +475,12 @@
   50%      { opacity: 1; }
 }
 
-/* Hotspot pulse — runs only ~40% of each cycle (cheaper than animate-ping) */
+/* Hotspot pulse â€” runs only ~40% of each cycle (cheaper than animate-ping) */
 .hotspot-pulse {
   position: absolute;
   inset: -12px;
   border-radius: 9999px;
-  background: rgba(255, 212, 0, 0.28);
+  background: rgba(236, 232, 26, 0.28);
   animation: hotspot-pulse 2.8s ease-out infinite;
   pointer-events: none;
 }

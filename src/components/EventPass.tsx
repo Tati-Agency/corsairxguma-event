@@ -3,23 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import type { CheckinSuccess } from "@/lib/checkin";
+import { buildQrPayload, formatDateOnly, maskEmail, maskPhone } from "@/lib/checkin";
 import { EVENT } from "@/lib/config";
 
 export default function EventPass({ pass }: { pass: CheckinSuccess }) {
   const qrRef = useRef<HTMLCanvasElement>(null);
   const passCardRef = useRef<HTMLDivElement>(null);
   const [shareMsg, setShareMsg] = useState<string | null>(null);
+  const qrPayload = buildQrPayload(pass);
 
   // Draw QR
   useEffect(() => {
     if (!qrRef.current) return;
-    QRCode.toCanvas(qrRef.current, `CHECKIN:${pass.playerCode}`, {
+    QRCode.toCanvas(qrRef.current, qrPayload, {
       width: 180,
       margin: 1,
-      color: { dark: "#050505", light: "#ffffff" },
+      color: { dark: "#000000", light: "#ffffff" },
       errorCorrectionLevel: "M",
     }).catch(() => {});
-  }, [pass.playerCode]);
+  }, [qrPayload]);
 
   const handleSave = async () => {
     // Rasterize the pass card to PNG for download
@@ -80,20 +82,26 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
           <div className="rounded bg-white p-2">
             <canvas ref={qrRef} className="block h-[120px] w-[120px] md:h-[160px] md:w-[160px]" />
           </div>
-          <div className="min-w-0">
-            <p className="label !mb-1">Player Code</p>
+          <div className="min-w-0 flex-1">
+            <p className="label !mb-1">Ticket Code</p>
             <p className="display truncate text-3xl md:text-4xl font-bold text-accent">
               {pass.playerCode}
             </p>
             <p className="mt-3 label !mb-1">Checked in as</p>
             <p className="truncate font-semibold">{pass.fullName}</p>
+            {(pass.phone || pass.email) && (
+              <div className="mt-2 space-y-0.5 text-xs text-muted">
+                {pass.phone && <p>📱 {maskPhone(pass.phone)}</p>}
+                {pass.email && <p className="truncate">✉ {maskEmail(pass.email)}</p>}
+              </div>
+            )}
           </div>
         </div>
 
         {/* footer strip */}
         <div className="mt-6 flex items-center justify-between border-t border-line pt-4 text-xs text-muted">
-          <span>✓ CHECKED IN</span>
-          <span className="font-mono">#{pass.playerCode}</span>
+          <span>✓ CHECKED IN{formatDateOnly(pass.createdAt) ? ` · ${formatDateOnly(pass.createdAt)}` : ""}</span>
+          <span className="display tracking-wider">#{pass.playerCode}</span>
         </div>
 
         {/* decorative corner */}

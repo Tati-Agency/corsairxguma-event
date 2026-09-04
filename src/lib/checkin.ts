@@ -14,6 +14,9 @@ export interface CheckinSuccess {
   ok: true;
   playerCode: string;
   fullName: string;
+  phone?: string;
+  email?: string;
+  createdAt?: string;
 }
 
 export interface CheckinFailure {
@@ -24,6 +27,53 @@ export interface CheckinFailure {
 }
 
 export type CheckinResult = CheckinSuccess | CheckinFailure;
+
+// ---- Masking (cho QR & Event Pass — staff xem đầy đủ trong /admin) ----
+
+/** SĐT: chỉ hiện 4 số cuối — VD: ••••1234 */
+export function maskPhone(phone?: string): string {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+  return `••••${digits.slice(-4)}`;
+}
+
+/** Email: 3 ký tự đầu + 6 ký tự cuối — VD: ngu••••il.com */
+export function maskEmail(email?: string): string {
+  if (!email) return "";
+  if (email.length <= 9) return `${email.slice(0, 3)}•••`;
+  return `${email.slice(0, 3)}••••${email.slice(-6)}`;
+}
+
+/** Thời gian: chỉ ngày, không giờ — VD: 09/03/2026 */
+export function formatDateOnly(iso?: string): string {
+  const d = iso ? new Date(iso) : new Date();
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+/**
+ * Nội dung mã QR: mã vé + thông tin đã điền (SĐT/email đã mask, ngày không giờ).
+ * Định dạng text để staff quét bằng camera là đọc được ngay.
+ * Các pass cũ (lưu localStorage trước khi có phone/email) sẽ tự bỏ dòng thiếu.
+ */
+export function buildQrPayload(pass: CheckinSuccess): string {
+  const lines = [
+    "CORSAIR x GUMAYUSI - EVENT TICKET",
+    `CODE: ${pass.playerCode}`,
+    `NAME: ${pass.fullName}`,
+  ];
+  const maskedPhone = maskPhone(pass.phone);
+  const maskedEmail = maskEmail(pass.email);
+  const date = formatDateOnly(pass.createdAt);
+  if (maskedPhone) lines.push(`PHONE: ${maskedPhone}`);
+  if (maskedEmail) lines.push(`EMAIL: ${maskedEmail}`);
+  if (date) lines.push(`DATE: ${date}`);
+  return lines.join("\n");
+}
 
 export const PASS_STORAGE_KEY = "cxg_event_pass";
 
@@ -54,7 +104,7 @@ const ERR_MESSAGE: Record<string, string> = {
   photo_required: "Vui lòng chọn hoặc chụp một hình ảnh.",
   photo_too_large: "Ảnh quá lớn — hãy thử lại (tối đa ~1MB).",
   photo_invalid_type: "Định dạng ảnh không hỗ trợ (JPG/PNG/WEBP).",
-  already_checked_in: "Số điện thoại này đã check-in rồi. Hãy liên hệ staff nếu cần hỗ trợ.",
+  already_checked_in: "Đã đăng ký trước đó! Vui lòng kiểm tra email để xem lại Event Pass, hoặc liên hệ staff nếu cần hỗ trợ.",
   too_many_requests: "Bạn thao tác quá nhanh — thử lại sau ít phút.",
   server_error: "Hệ thống bận. Vui lòng thử lại.",
   server_busy: "Hệ thống bận. Vui lòng thử lại.",

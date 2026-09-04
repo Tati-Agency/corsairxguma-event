@@ -20,8 +20,15 @@ export async function GET(req: NextRequest) {
     const queries: string[] = [];
     if (event) queries.push(Query.equal("event_id", event));
     if (q) {
-      // Appwrite v1.6+ supports search on string attributes if index exists
-      queries.push(Query.search("full_name", q));
+      // Tìm đa trường: tên, SĐT, email, player code
+      queries.push(
+        Query.or([
+          Query.contains("full_name", q),
+          Query.contains("phone", q),
+          Query.contains("email", q),
+          Query.contains("player_code", q),
+        ])
+      );
     }
 
     const { tablesDB } = getAppwrite();

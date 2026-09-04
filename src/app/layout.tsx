@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Saira_Condensed, Saira } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const display = Saira_Condensed({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const body = Saira({
-  subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-body",
+// Brand book: SAIRA (Omnibus-Type) — self-host từ /fonts, không phụ thuộc Google Fonts CDN.
+// Variable font với 2 trục: wght 100-900 và wdth 50-125.
+// Expanded (125%) cho headline, Normal (100%) cho body — map qua font-stretch trong CSS.
+const saira = localFont({
+  src: "../../fonts/Saira/Saira-VariableFont_wdth,wght.ttf",
+  weight: "100 900",
+  variable: "--font-saira",
   display: "swap",
 });
 
@@ -29,7 +25,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi" className={`${display.variable} ${body.variable}`}>
+    <html lang="vi" className={saira.variable}>
       <body>{children}</body>
     </html>
   );

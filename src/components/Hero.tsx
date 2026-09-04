@@ -62,14 +62,17 @@ export default function Hero() {
       <div className="container-c relative z-10 flex min-h-[92vh] flex-col justify-center py-28">
         {/* Title reveals line-by-line on load (pure CSS, runs pre-hydration) */}
         <h1 className="hero-title">
-          <span className="hero-line" style={{ animationDelay: "0.1s" }}>
-            READY TO
+          <span
+            className="hero-subhead hero-line"
+            style={{ animationDelay: "0.1s" }}
+          >
+            PRE-ORDER
           </span>
           <span
-            className="hero-line accent"
+            className="hero-main hero-line"
             style={{ animationDelay: "0.25s" }}
           >
-            ENTER?
+            CORSAIR x GUMAYUSI
           </span>
         </h1>
 

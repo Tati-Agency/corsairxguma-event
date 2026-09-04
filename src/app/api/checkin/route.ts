@@ -128,7 +128,9 @@ export async function POST(req: NextRequest) {
       ok: true,
       playerCode: `${PLAYER_CODE_PREFIX}-${playerCode}`,
       fullName,
-      createdAt: doc.createdAt,
+      phone,
+      email,
+      createdAt: doc.$createdAt,
     });
   } catch (err) {
     console.error("[checkin]", err);
