@@ -72,7 +72,13 @@ export default function Hero() {
             className="hero-main hero-line"
             style={{ animationDelay: "0.25s" }}
           >
-            CORSAIR <span className="hero-x">x</span> GUMAYUSI
+            CORSAIR <span className="hero-x">x</span>
+          </span>
+          <span
+            className="hero-main hero-line"
+            style={{ animationDelay: "0.4s" }}
+          >
+            GUMAYUSI
           </span>
         </h1>
 
