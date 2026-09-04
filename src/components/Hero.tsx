@@ -47,7 +47,8 @@ export default function Hero() {
             decoding="async"
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-r from-bg/90 via-bg/60 to-transparent" />
+        {/* Overlay: mobile đậm hơn (text đè lên ảnh full-bleed), desktop giữ nguyên */}
+        <div className="absolute inset-0 bg-gradient-to-r from-bg/95 via-bg/80 to-bg/25 md:from-bg/90 md:via-bg/60 md:to-transparent" />
       </div>
 
       <div className="hero-aura">
@@ -59,7 +60,7 @@ export default function Hero() {
       <span className="corner-bracket bl" />
       <span className="corner-bracket br" />
 
-      <div className="container-c relative z-10 flex min-h-[92vh] flex-col justify-center py-28">
+      <div className="container-c relative z-10 flex min-h-[92svh] flex-col justify-center py-28">
         {/* Title reveals line-by-line on load (pure CSS, runs pre-hydration) */}
         <h1 className="hero-title">
           <span
@@ -83,26 +84,27 @@ export default function Hero() {
         </h1>
 
         <Reveal delay={120}>
-          <p className="mt-7 max-w-xl text-base md:text-lg text-muted leading-relaxed">
+          <p className="mt-5 max-w-xl text-base text-muted leading-relaxed md:mt-7 md:text-lg">
             Sự kiện gặp gỡ {EVENT.title} — một ngày chỉ dành cho fan.
             Check-in, trải nghiệm gear đỉnh cao và giữ lại khoảnh khắc của riêng bạn.
           </p>
         </Reveal>
 
         <Reveal delay={240}>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <a href="#checkin" className="btn-accent">
+          {/* Mobile: nút stack dọc full-width — touch target to, dễ bấm; desktop: ngang */}
+          <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-4">
+            <a href="#checkin" className="btn-accent w-full sm:w-auto">
               [ Enter Event ]
               <span className="arrow">→</span>
             </a>
-            <a href="#arena" className="btn-ghost">
+            <a href="#arena" className="btn-ghost w-full sm:w-auto">
               Khám phá khu vực
             </a>
           </div>
         </Reveal>
 
         <Reveal delay={360}>
-          <div className="mt-14 flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted">
+          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted md:mt-14">
             <span className="flex items-center gap-2">
               <span className="text-accent">▸</span> {EVENT.date}
             </span>

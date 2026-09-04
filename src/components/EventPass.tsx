@@ -77,14 +77,14 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
           </span>
         </div>
 
-        {/* body */}
-        <div className="mt-6 flex items-center gap-6">
-          <div className="rounded bg-white p-2">
+        {/* body — mobile: QR xếp trên, info dưới (code 13+ ký tự không vừa cột hẹp) */}
+        <div className="mt-6 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
+          <div className="rounded-lg bg-white p-2">
             <canvas ref={qrRef} className="block h-[120px] w-[120px] md:h-[160px] md:w-[160px]" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="label !mb-1">Ticket Code</p>
-            <p className="display truncate text-3xl md:text-4xl font-bold text-accent">
+            <p className="display truncate text-2xl font-bold text-accent sm:text-3xl md:text-4xl">
               {pass.playerCode}
             </p>
             <p className="mt-3 label !mb-1">Checked in as</p>
@@ -109,10 +109,10 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <button type="button" onClick={handleSave} className="btn-accent !py-2.5 !px-5 text-xs md:text-sm">
+        <button type="button" onClick={handleSave} className="btn-accent !py-3 !px-5 text-xs md:text-sm">
           ⬇ Lưu Pass
         </button>
-        <button type="button" onClick={handleShare} className="btn-ghost !py-2.5 !px-5 text-xs md:text-sm">
+        <button type="button" onClick={handleShare} className="btn-ghost !py-3 !px-5 text-xs md:text-sm">
           Chia sẻ
         </button>
       </div>

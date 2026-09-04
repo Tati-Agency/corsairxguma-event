@@ -3,7 +3,7 @@ import Reveal from "./Reveal";
 
 export default function EventIntro() {
   return (
-    <section className="section-divider py-20 md:py-32">
+    <section className="section-divider py-16 md:py-32">
       <div className="container-c grid gap-12 md:grid-cols-2 md:items-center">
         <Reveal variant="left">
           <h2 className="section-title">

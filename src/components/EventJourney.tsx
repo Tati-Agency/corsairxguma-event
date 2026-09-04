@@ -55,7 +55,7 @@ const PRODUCTS: {
 
 export default function EventJourney() {
   return (
-    <section className="section-divider cv-auto py-20 md:py-32">
+    <section className="section-divider cv-auto py-16 md:py-32">
       <div className="container-c">
         <Reveal>
           <h2 className="section-title section-title-light">TRUSTED BY THE LEGEND</h2>
@@ -64,7 +64,7 @@ export default function EventJourney() {
         <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {PRODUCTS.map((product, i) => (
             <Reveal key={product.name} delay={i * 90} variant="zoom">
-              <div className="relative flex h-full flex-col bg-[#1a1a1a] md:flex-row">
+              <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-[#1a1a1a] md:flex-row">
                 {product.bestseller && (
                   <span className="absolute left-0 top-7 z-10 bg-[#ece81a] py-1.5 pl-4 pr-6 text-[11px] font-bold uppercase tracking-wider text-black [clip-path:polygon(0_0,100%_0,calc(100%-14px)_100%,0_100%)]">
                     Bestseller
@@ -93,7 +93,7 @@ export default function EventJourney() {
                     {product.specs.map((spec) => (
                       <div
                         key={spec.label}
-                        className="grid grid-cols-[minmax(118px,150px)_1fr] items-baseline border-b border-white/15 py-2"
+                        className="grid grid-cols-[minmax(92px,150px)_1fr] items-baseline border-b border-white/15 py-2"
                       >
                         <dt className="text-[11px] font-bold uppercase tracking-wider text-white">
                           {spec.label}

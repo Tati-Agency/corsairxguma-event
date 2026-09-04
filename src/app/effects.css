@@ -4,7 +4,8 @@
 
 .hero {
   position: relative;
-  min-height: 92vh;
+  min-height: 92vh; /* fallback cho trình duyệt cũ */
+  min-height: 92svh; /* mobile: tính theo viewport an toàn (thanh địa chỉ động) */
   overflow: hidden;
   border-bottom: 1px solid var(--color-line);
 }
@@ -200,9 +201,10 @@
   border: 1px solid var(--color-line);
   color: var(--color-text);
   padding: 0.95rem 1.1rem;
-  font-size: 0.95rem;
+  /* ≥16px — dưới ngưỡng này iOS Safari tự zoom trang khi focus input */
+  font-size: 1rem;
   outline: none;
-  border-radius: 0.625rem;
+  border-radius: var(--radius-sm); /* đồng bộ tier 3 (8px) — tier trong nhỏ hơn tier ngoài */
   transition: border-color 0.4s var(--ease-out-quart), background 0.4s var(--ease-out-quart);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
@@ -212,6 +214,12 @@
   box-shadow: 0 0 0 4px rgba(236, 232, 26, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .field::placeholder { color: rgba(167, 167, 167, 0.55); }
+
+/* Mobile: aura thu nhỏ lại — giảm diện tích layer composite trên GPU yếu */
+@media (max-width: 767px) {
+  .hero-aura::before { width: 420px; height: 420px; top: -180px; right: -140px; }
+  .hero-aura::after  { width: 360px; height: 360px; bottom: -160px; left: -140px; }
+}
 .label {
   display: block;
   font-size: 0.7rem;

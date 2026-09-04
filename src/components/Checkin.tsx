@@ -121,7 +121,7 @@ export default function Checkin() {
   );
 
   return (
-    <section id="checkin" className="section-divider scroll-mt-20 py-20 md:py-32">
+    <section id="checkin" className="section-divider scroll-mt-20 py-16 md:py-32">
       <div className="container-c">
         <Reveal>
           <span className="eyebrow">Check In</span>
@@ -132,7 +132,7 @@ export default function Checkin() {
           <Reveal delay={100}>
             {state === "verifying" && (
               <div className="card">
-                <div className="card-core !p-10 text-center">
+                <div className="card-core !p-6 text-center md:!p-10">
                   <p className="display text-xl font-bold">VERIFYING…</p>
                   <p className="mt-2 text-sm text-muted">
                     Đang kiểm tra trạng thái của bạn.
@@ -211,7 +211,6 @@ export default function Checkin() {
                       ref={fileInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
-                      capture="user"
                       className="hidden"
                       onChange={(e) => onPickPhoto(e.target.files?.[0])}
                     />
@@ -221,7 +220,7 @@ export default function Checkin() {
                         <img
                           src={photoPreview}
                           alt="Xem trước ảnh của bạn"
-                          className="h-20 w-20 rounded object-cover border border-line"
+                          className="h-20 w-20 rounded-lg object-cover border border-line"
                         />
                         <button
                           type="button"
@@ -276,7 +275,7 @@ export default function Checkin() {
 
             {state === "checking-in" && (
               <div className="card">
-                <div className="card-core !p-10 text-center">
+                <div className="card-core !p-6 text-center md:!p-10">
                   <div className="mx-auto mb-6 h-10 w-10 animate-spin rounded-full border-2 border-line border-t-accent" />
                   <p className="display text-xl font-bold">CHECKING YOU IN…</p>
                   <p className="mt-2 text-sm text-muted">
@@ -288,7 +287,7 @@ export default function Checkin() {
 
             {state === "duplicate" && (
               <div className="card border-accent/40">
-                <div className="card-core !p-10 text-center">
+                <div className="card-core !p-6 text-center md:!p-10">
                   <p className="text-3xl">📮</p>
                   <p className="display mt-3 text-xl font-bold text-accent">
                     ĐÃ ĐĂNG KÝ TRƯỚC ĐÓ
@@ -314,7 +313,7 @@ export default function Checkin() {
 
             {state === "error" && (
               <div className="card border-red-500/40">
-                <div className="card-core !p-10 text-center">
+                <div className="card-core !p-6 text-center md:!p-10">
                   <p className="display text-xl font-bold text-red-400">
                     ĐÃ CÓ LỖI XẢY RA
                   </p>
@@ -336,7 +335,7 @@ export default function Checkin() {
 
             {state === "success" && (
               <div className="card border-accent/40">
-                <div className="card-core !p-10 text-center">
+                <div className="card-core !p-6 text-center md:!p-10">
                   <p className="display text-3xl font-bold text-accent">✓ CHECKED IN</p>
                   <p className="mt-3 text-sm text-muted">
                     Chúc mừng {pass?.fullName}! Bạn đã chính thức có mặt tại sự
@@ -360,7 +359,7 @@ export default function Checkin() {
             ) : (
               <Reveal delay={200}>
                 <div className="card h-full">
-                  <div className="card-core !p-8 text-center flex flex-col items-center justify-center min-h-[260px]">
+                  <div className="card-core !p-6 text-center flex flex-col items-center justify-center min-h-[260px] md:!p-8">
                     <p className="display text-2xl font-bold text-line">EVENT PASS</p>
                     <p className="mt-3 text-sm text-muted">
                       Event Pass cá nhân của bạn sẽ xuất hiện tại đây sau khi

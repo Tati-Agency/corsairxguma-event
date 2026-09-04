@@ -12,7 +12,7 @@ const ARENA_IMAGES: { src: string; alt: string }[] = [
 
 export default function EventArena() {
   return (
-    <section id="arena" className="section-divider scroll-mt-20 py-20 md:py-32">
+    <section id="arena" className="section-divider scroll-mt-20 py-16 md:py-32">
       <div className="container-c">
         <Reveal>
           <h2 className="section-title section-title-light">EVENT ARENA</h2>
@@ -21,7 +21,7 @@ export default function EventArena() {
         <div className="mt-12 grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3">
           {ARENA_IMAGES.map((img, i) => (
             <Reveal key={img.src} delay={i * 90} variant="zoom">
-              <figure className="group overflow-hidden border border-white/15 bg-[#1a1a1a]">
+              <figure className="group overflow-hidden rounded-xl border border-white/15 bg-[#1a1a1a]">
                 <img
                   src={img.src}
                   alt={img.alt}

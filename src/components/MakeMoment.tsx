@@ -93,7 +93,7 @@ export default function MakeMoment() {
   return (
     <section
       ref={sectionRef}
-      className="section-divider cv-auto py-20 md:py-32"
+      className="section-divider cv-auto py-16 md:py-32"
     >
       <div className="container-c">
         <Reveal>
@@ -115,7 +115,7 @@ export default function MakeMoment() {
                     key={`${copy}-${src}`}
                     className="w-[85vw] shrink-0 snap-center sm:w-[70vw] md:w-[45vw] lg:w-[32vw]"
                   >
-                    <div className="aspect-[16/10] overflow-hidden rounded-lg">
+                    <div className="aspect-[16/10] overflow-hidden rounded-xl">
                       <img
                         src={src}
                         alt={`Gallery ${i + 1}`}
