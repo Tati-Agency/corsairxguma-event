@@ -12,3 +12,7 @@ research/
 *.log
 /fonts/
 guidelines/
+
+# Temp reference-analysis artifacts (khong commit)
+/_*
+/_refcss/

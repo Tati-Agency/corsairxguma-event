@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    CORSAIR Ã— GUMAYUSI â€” Visual effects (hero, scanline, grain)
    ============================================================ */
 
@@ -164,6 +164,29 @@
   color: var(--color-accent);
   background: rgba(236, 232, 26, 0.04);
 }
+
+/* ---------- Watch Video CTA (hero mobile only) ----------
+   Rectangular, Saira Expanded Light, no glow, no sweep —
+   bám đúng CTA "WATCH VIDEO" vàng phẳng trên corsair.com/us/en/s/partner-gumayusi. */
+.btn-watch-video {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent);
+  color: #000;
+  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
+  font-weight: 300;
+  font-variation-settings: normal;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.95rem 2.25rem;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.4s var(--ease-out-quart);
+}
+.btn-watch-video:hover { background: var(--color-accent-2); }
 
 /* ---------- Reveal (scroll entry) ----------
    Perf: only animate opacity + transform (compositor-friendly, no blur filter) */
@@ -384,7 +407,8 @@
   font-size: clamp(2.5rem, 6.5vw, 5rem); /* reference: 2.5/4/5rem */
   white-space: nowrap;
 }
-@media (max-width: 480px) {
+@media (max-width: 767px) {
+  /* Mobile: cho phép headline wrap — 1 dòng sẽ tràn viewport */
   .hero-main { white-space: normal; }
 }
 /* Chữ "x" trong CORSAIR x GUMAYUSI — thu nhỏ, nâng nhẹ cho cân optical */
