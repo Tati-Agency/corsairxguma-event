@@ -125,7 +125,7 @@ export default function Checkin() {
       <div className="container-c">
         <Reveal>
           <span className="eyebrow">Check In</span>
-          <h2 className="section-title mt-4">READY TO ENTER?</h2>
+          <h2 className="section-title section-title-light mt-4">READY TO ENTER?</h2>
         </Reveal>
 
         <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:items-start">

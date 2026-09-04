@@ -9,7 +9,7 @@ export default function EventArena() {
     <section id="arena" className="section-divider scroll-mt-20 py-20 md:py-32">
       <div className="container-c">
         <Reveal>
-          <h2 className="section-title">EVENT ARENA</h2>
+          <h2 className="section-title section-title-light">EVENT ARENA</h2>
         </Reveal>
 
         <Reveal delay={120}>

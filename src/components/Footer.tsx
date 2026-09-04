@@ -11,15 +11,6 @@ export default function Footer() {
               alt={EVENT.title}
               className="h-14 md:h-16"
             />
-            {/* Tagline chuẩn brand book — tích hợp cùng logo, màu Bright Yellow */}
-            <span
-              className="hidden sm:block text-[0.65rem] tracking-[0.3em] text-accent uppercase border-l border-line pl-4"
-              style={{ fontFamily: "var(--font-display)", fontVariationSettings: '"wdth" 125' }}
-            >
-              Worlds
-              <br />
-              Ahead
-            </span>
           </div>
           <nav className="flex gap-6 text-sm text-muted">
             <a href="#arena" className="transition-colors hover:text-accent">
