@@ -124,7 +124,7 @@ export default function Checkin() {
     <section id="checkin" className="section-divider scroll-mt-20 py-16 md:py-32">
       <div className="container-c">
         <Reveal>
-          <span className="eyebrow">Check In</span>
+          <span className="eyebrow">Đăng ký</span>
           <h2 className="section-title section-title-light mt-4">READY TO ENTER?</h2>
         </Reveal>
 

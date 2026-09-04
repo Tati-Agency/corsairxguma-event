@@ -90,10 +90,10 @@ export default function Hero() {
           </p>
         </Reveal>
 
-        {/* Mobile: CTA rectangular giống WATCH VIDEO trên LP gốc */}
+        {/* Mobile: CTA rectangular dẫn xuống form đăng ký */}
         <Reveal delay={240} className="mt-8 md:hidden">
           <a href="#checkin" className="btn-watch-video">
-            [ Watch Video ]
+            Đăng ký
           </a>
         </Reveal>
 
