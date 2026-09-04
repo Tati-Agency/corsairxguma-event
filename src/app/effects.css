@@ -361,10 +361,10 @@
   font-family: var(--font-body);
   font-weight: 500;
   letter-spacing: 0.125em; /* ~2px tracking như subhead-2 gốc */
-  font-size: clamp(0.65rem, 1.2vw, 0.9rem);
+  font-size: clamp(0.8rem, 1.5vw, 1.1rem);
 }
 @media (min-width: 768px) {
-  .hero-subhead { font-size: 1.125rem; }
+  .hero-subhead { font-size: 1.35rem; }
 }
 .hero-main {
   display: block;
@@ -378,6 +378,12 @@
 }
 @media (max-width: 480px) {
   .hero-main { white-space: normal; }
+}
+/* Chữ "x" trong CORSAIR x GUMAYUSI — thu nhỏ, nâng nhẹ cho cân optical */
+.hero-x {
+  font-size: 0.55em;
+  vertical-align: 0.12em;
+  letter-spacing: 0;
 }
 .section-title {
   font-family: var(--font-display);
