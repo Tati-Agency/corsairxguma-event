@@ -66,7 +66,7 @@ export default function EventJourney() {
             <Reveal key={product.name} delay={i * 90} variant="zoom">
               <div className="relative flex h-full flex-col bg-[#1a1a1a] md:flex-row">
                 {product.bestseller && (
-                  <span className="absolute left-0 top-7 z-10 bg-[#ffc907] py-1.5 pl-4 pr-6 text-[11px] font-bold uppercase tracking-wider text-black [clip-path:polygon(0_0,100%_0,calc(100%-14px)_100%,0_100%)]">
+                  <span className="absolute left-0 top-7 z-10 bg-[#ece81a] py-1.5 pl-4 pr-6 text-[11px] font-bold uppercase tracking-wider text-black [clip-path:polygon(0_0,100%_0,calc(100%-14px)_100%,0_100%)]">
                     Bestseller
                   </span>
                 )}
@@ -108,9 +108,9 @@ export default function EventJourney() {
                       href={product.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block bg-[#ffc907] px-8 py-3 text-xs font-bold uppercase tracking-wider text-black transition-colors duration-200 hover:bg-[#ffd94d]"
+                      className="inline-block bg-[#ece81a] px-8 py-3 text-xs font-bold tracking-wider text-black transition-colors duration-200 hover:bg-white"
                     >
-                      SHOP NOW
+                      Tìm hiểu thêm →
                     </a>
                   </div>
                 </div>
