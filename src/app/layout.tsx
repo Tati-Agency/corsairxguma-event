@@ -6,7 +6,7 @@ import "./globals.css";
 // Variable font với 2 trục: wght 100-900 và wdth 50-125.
 // Expanded (125%) cho headline, Normal (100%) cho body — map qua font-stretch trong CSS.
 const saira = localFont({
-  src: "../../fonts/Saira/Saira-VariableFont_wdth,wght.ttf",
+  src: "../../public/fonts/Saira/Saira-VariableFont_wdth,wght.ttf",
   weight: "100 900",
   variable: "--font-saira",
   display: "swap",
