@@ -661,6 +661,12 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
     line-height: 1.1;
     letter-spacing: 0.01em;
   }
+  /* Mobile: panel đồng hồ — nới padding đáy để rail "Road to the star"
+     không chạm 2 góc border dưới (desktop giữ nguyên). */
+  .count-core { padding-bottom: clamp(28px, 7vw, 34px); }
+  /* Mobile: thu ngắn rail + chữ vào trong vài px, tránh chạm góc dưới. */
+  .count-rail-row { padding-inline: 4px; }
+  .count-rail { margin-inline: 4px; }
 }
 /* ---- Finished ---- */
 .count-core[data-finished] .count-star { animation: count-star-fin 1.5s ease-in-out infinite; }
