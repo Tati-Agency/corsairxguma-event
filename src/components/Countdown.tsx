@@ -6,7 +6,7 @@ import Reveal from "./Reveal";
 /* ============================================================
    GUMA Countdown — "ROAD TO THE STAR"
    - Ngôi sao GUMA vàng chạy dọc đường thẳng = tiến trình 14 ngày
-     (mở cổng đăng ký ngày 22.09.2026).
+     (mở cổng pre-order ngày 22.09.2026).
    - Số đếm cuộn kiểu rolling-digit (Saira Expanded Light).
    - Road to the star: đường # + phần trăm.
    Perf: rAF chỉ chạy khi trong viewport (IntersectionObserver).
@@ -179,7 +179,7 @@ export default function Countdown() {
     // Chạy 1 frame ngay để không bao giờ đứng ở 00:00:00
     onVisible([{ isIntersecting: true } as IntersectionObserverEntry]);
 
-    // Đúng giờ mở cổng ngay cả khi tab đang sleep
+    // Đúng giờ mở cổng pre-order ngay cả khi tab đang sleep
     const alarm = window.setTimeout(finish, Math.max(0, end - Date.now()));
 
     return () => {
@@ -221,7 +221,8 @@ export default function Countdown() {
 
           <Reveal delay={220}>
             <p className="mx-auto mt-6 max-w-[52ch] text-sm leading-relaxed text-muted md:text-base">
-              Cổng đăng ký tham gia chương trình{" "}
+              Cổng{" "}
+              <strong className="text-text">pre-order</strong>{" "}
               <strong className="text-text">GUMAYUSI Collection</strong> chính thức mở ngày{" "}
               <strong className="text-text">22.09.2026</strong>.
             </p>
@@ -349,7 +350,7 @@ export default function Countdown() {
             <p className="mx-auto mt-8 max-w-[46ch] text-xs leading-relaxed text-muted md:text-sm">
               Mỗi hộp sản phẩm{" "}
               <strong className="text-text">GUMAYUSI Collection</strong> đều có 2 fan card dành
-              riêng cho chủ nhân của nó. Giữ hóa đơn mua hàng để đăng ký khi cổng mở.
+              riêng cho chủ nhân của nó. Giữ hóa đơn mua hàng để đăng ký khi cổng pre-order mở.
             </p>
           </Reveal>
         </div>
