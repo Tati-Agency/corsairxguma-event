@@ -13,9 +13,9 @@ const saira = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "CORSAIR × GUMAYUSI — Event Check-in",
+  title: "CORSAIR × GUMAYUSI — Đăng ký tham gia",
   description:
-    "Check-in sự kiện CORSAIR × GUMAYUSI. Nhận Event Pass cá nhân của bạn.",
+    "Đăng ký tham gia chương trình CORSAIR × GUMAYUSI dành riêng cho chủ nhân GUMAYUSI Collection. Xác minh hóa đơn mua hàng và nhận mã tham gia của bạn.",
   icons: {
     icon: "/logos/corsairlogo.svg",
   },

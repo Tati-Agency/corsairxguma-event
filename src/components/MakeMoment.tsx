@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
 
 const SLIDES = [
-  "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768188103/akamai/landing/Gumayusi/guma-gallery-01.png",
-  "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768188102/akamai/landing/Gumayusi/guma-gallery-02.png",
-  "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768269010/akamai/landing/Gumayusi/guma-gallery-03.png",
-  "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768269020/akamai/landing/Gumayusi/guma-gallery-04.png",
+  "https://assets.corsair.com/image/upload/f_auto,q_auto/v1784853690/akamai/landing/Gumayusi/refresh/guma-gallery-01.png",
+  "https://assets.corsair.com/image/upload/f_auto,q_auto/v1784853694/akamai/landing/Gumayusi/refresh/guma-gallery-02.png",
+  "https://assets.corsair.com/image/upload/f_auto,q_auto/v1784853690/akamai/landing/Gumayusi/refresh/guma-gallery-03.png",
+  "https://assets.corsair.com/image/upload/f_auto,q_auto/v1784853694/akamai/landing/Gumayusi/refresh/guma-gallery-04.png",
 ];
 
 /** Render 3 copies of the set so we can teleport between copies seamlessly. */

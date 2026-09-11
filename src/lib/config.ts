@@ -5,10 +5,20 @@
 export const EVENT = {
   slug: process.env.NEXT_PUBLIC_EVENT_SLUG ?? "corsair-guma-2026",
   title: "CORSAIR × GUMAYUSI",
-  subtitle: "EVENT 2026",
+  subtitle: "GUMA COLLECTION 2026",
   date: "25.10.2026",
   time: "09:00 — 18:00",
   venue: "Sảnh NEXT250 - Nina Next Space, 180/1 Nguyễn Tất Thành, Phường Xóm Chiếu, Thành phố Hồ Chí Minh",
+} as const;
+
+/**
+ * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
+ * sản phẩm GUMA Collection (xác minh bằng hóa đơn mua hàng).
+ */
+export const CAMPAIGN = {
+  title: "GUMA REGISTER",
+  codeLabel: "Mã tham gia",
+  materialLabel: "Hóa đơn mua hàng",
 } as const;
 
 /** Prefix used for player codes, e.g. GUMA-8F3K */

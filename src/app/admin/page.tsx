@@ -191,7 +191,7 @@ export default function AdminPage() {
               value={stats.uniqueVisits}
               accent
             />
-            <StatCard label="Tổng check-in" value={stats.totalCheckins} />
+            <StatCard label="Tổng đăng ký" value={stats.totalCheckins} />
             <StatCard
               label="Conversion rate"
               value={`${stats.conversionRate}%`}
@@ -222,7 +222,7 @@ export default function AdminPage() {
 
             {/* Check-in timeline */}
             <div className="border border-line bg-surface p-6">
-              <h2 className="display text-lg font-bold">CHECK-IN THEO GIỜ</h2>
+              <h2 className="display text-lg font-bold">ĐĂNG KÝ THEO GIỜ</h2>
               {Object.keys(stats.byHour).length === 0 ? (
                 <p className="mt-4 text-sm text-muted">Chưa có dữ liệu.</p>
               ) : (
@@ -256,8 +256,8 @@ export default function AdminPage() {
       <section className="mt-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="display text-2xl font-bold">DANH SÁCH KHÁCH</h2>
-            <p className="text-sm text-muted">Tổng: {total} check-in</p>
+            <h2 className="display text-2xl font-bold">DANH SÁCH ĐĂNG KÝ</h2>
+            <p className="text-sm text-muted">Tổng: {total} đăng ký</p>
           </div>
           <div className="flex gap-2">
             <input
@@ -295,7 +295,7 @@ export default function AdminPage() {
               {checkins.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted">
-                    Chưa có check-in nào.
+                    Chưa có đăng ký nào.
                   </td>
                 </tr>
               ) : (

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const phoneRaw = String(form.get("phone") ?? "").trim();
     const email = String(form.get("email") ?? "").trim().toLowerCase();
     const consent = form.get("consent") === "true";
-    const photo = form.get("photo");
+    const invoice = form.get("invoice");
 
     if (!NAME_RE.test(fullName)) return errorJson("invalid_name", 400, "fullName");
 
@@ -49,10 +49,10 @@ export async function POST(req: NextRequest) {
 
     if (!consent) return errorJson("consent_required", 400, "consent");
 
-    if (!(photo instanceof File)) return errorJson("photo_required", 400, "photo");
-    if (photo.size > MAX_PHOTO_BYTES) return errorJson("photo_too_large", 400, "photo");
-    if (!ALLOWED_PHOTO_TYPES.includes(photo.type))
-      return errorJson("photo_invalid_type", 400, "photo");
+    if (!(invoice instanceof File)) return errorJson("invoice_required", 400, "invoice");
+    if (invoice.size > MAX_PHOTO_BYTES) return errorJson("invoice_too_large", 400, "invoice");
+    if (!ALLOWED_PHOTO_TYPES.includes(invoice.type))
+      return errorJson("invoice_invalid_type", 400, "invoice");
 
     const { tablesDB, storage } = getAppwrite();
 
@@ -73,13 +73,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ---- Upload photo ----
-    const photoBuffer = Buffer.from(await photo.arrayBuffer());
-    const ext = photo.type === "image/png" ? "png" : "jpg";
+    // ---- Upload invoice ----
+    const invoiceBuffer = Buffer.from(await invoice.arrayBuffer());
     const file = await storage.createFile(
       APPWRITE.bucketPhotos,
       "unique()",
-      InputFile.fromBuffer(photoBuffer, "photo.jpg")
+      InputFile.fromBuffer(invoiceBuffer, "invoice.jpg")
     );
 
     // ---- Generate unique player code ----

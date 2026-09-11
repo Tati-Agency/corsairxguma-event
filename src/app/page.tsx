@@ -1,9 +1,9 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import EventIntro from "@/components/EventIntro";
+import Countdown from "@/components/Countdown";
 import EventJourney from "@/components/EventJourney";
 import EventArena from "@/components/EventArena";
-import Checkin from "@/components/Checkin";
+import Register from "@/components/Register";
 import MakeMoment from "@/components/MakeMoment";
 import Footer from "@/components/Footer";
 import Tracker from "@/components/Tracker";
@@ -18,10 +18,10 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
-        <EventIntro />
+        <Countdown />
         <EventJourney />
         <EventArena />
-        <Checkin />
+        <Register />
         <MakeMoment />
       </main>
       <Footer />

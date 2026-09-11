@@ -7,7 +7,7 @@ export interface CheckinPayload {
   phone: string;
   email: string;
   consent: boolean;
-  photo: File;
+  invoice: File;
 }
 
 export interface CheckinSuccess {
@@ -75,7 +75,7 @@ export function buildQrPayload(pass: CheckinSuccess): string {
   });
 }
 
-export const PASS_STORAGE_KEY = "cxg_event_pass";
+export const PASS_STORAGE_KEY = "cxg_reg_ticket";
 
 export function savePassToLocal(pass: CheckinSuccess): void {
   try {
@@ -100,11 +100,11 @@ const ERR_MESSAGE: Record<string, string> = {
   invalid_name: "Họ tên không hợp lệ (2–80 ký tự).",
   invalid_phone: "Số điện thoại không hợp lệ (VD: 09xx xxx xxx).",
   invalid_email: "Email không hợp lệ.",
-  consent_required: "Bạn cần đồng ý cho việc lưu hình ảnh để tiếp tục.",
-  photo_required: "Vui lòng chọn hoặc chụp một hình ảnh.",
-  photo_too_large: "Ảnh quá lớn — hãy thử lại (tối đa ~1MB).",
-  photo_invalid_type: "Định dạng ảnh không hỗ trợ (JPG/PNG/WEBP).",
-  already_checked_in: "Đã đăng ký trước đó! Vui lòng kiểm tra email để xem lại Event Pass, hoặc liên hệ staff nếu cần hỗ trợ.",
+  consent_required: "Bạn cần xác nhận hóa đơn và đồng ý cho lưu lại để tiếp tục.",
+  invoice_required: "Vui lòng tải lên ảnh hóa đơn mua hàng.",
+  invoice_too_large: "Ảnh hóa đơn quá lớn — hãy thử lại (tối đa ~1MB).",
+  invoice_invalid_type: "Định dạng ảnh hóa đơn không hỗ trợ (JPG/PNG/WEBP).",
+  already_checked_in: "Số điện thoại này đã đăng ký! Vui lòng kiểm tra email để xem lại mã tham gia, hoặc liên hệ staff nếu cần hỗ trợ.",
   too_many_requests: "Bạn thao tác quá nhanh — thử lại sau ít phút.",
   server_error: "Hệ thống bận. Vui lòng thử lại.",
   server_busy: "Hệ thống bận. Vui lòng thử lại.",
@@ -133,8 +133,8 @@ export async function submitCheckin(
     form.set("consent", String(payload.consent));
 
     try {
-      const photoBlob = await compressImage(payload.photo);
-      form.set("photo", photoBlob, "photo.jpg");
+      const invoiceBlob = await compressImage(payload.invoice);
+      form.set("invoice", invoiceBlob, "invoice.jpg");
 
       const res = await fetch("/api/checkin", { method: "POST", body: form });
 

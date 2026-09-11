@@ -31,7 +31,7 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
       const { default: htmlToImage } = await import("html-to-image");
       const dataUrl = await htmlToImage.toPng(card, { pixelRatio: 2 });
       const link = document.createElement("a");
-      link.download = `event-pass-${pass.playerCode}.png`;
+      link.download = `registration-${pass.playerCode}.png`;
       link.href = dataUrl;
       link.click();
     } catch {
@@ -40,7 +40,7 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
   };
 
   const handleShare = async () => {
-    const text = `Tôi đã check-in tại ${EVENT.title}! Mã người chơi: ${pass.playerCode}`;
+    const text = `Tôi đã đăng ký tham gia chương trình ${EVENT.title}! Mã tham gia: ${pass.playerCode}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: EVENT.title, text });
@@ -70,7 +70,7 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
             <p className="display text-xs font-semibold tracking-[0.25em] text-muted">
               {EVENT.title}
             </p>
-            <p className="display text-2xl md:text-3xl font-bold">EVENT PASS</p>
+            <p className="display text-2xl md:text-3xl font-bold">REGISTRATION</p>
           </div>
           <span className="display border border-accent px-2.5 py-1 text-xs font-bold tracking-[0.2em] text-accent">
             {EVENT.subtitle}
@@ -83,11 +83,11 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
             <canvas ref={qrRef} className="block h-[120px] w-[120px] md:h-[160px] md:w-[160px]" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="label !mb-1">Ticket Code</p>
+            <p className="label !mb-1">Mã tham gia</p>
             <p className="display truncate text-2xl font-bold text-accent sm:text-3xl md:text-4xl">
               {pass.playerCode}
             </p>
-            <p className="mt-3 label !mb-1">Checked in as</p>
+            <p className="mt-3 label !mb-1">Đăng ký cho</p>
             <p className="truncate font-semibold">{pass.fullName}</p>
             {(pass.phone || pass.email) && (
               <div className="mt-2 space-y-0.5 text-xs text-muted">
@@ -100,7 +100,7 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
 
         {/* footer strip */}
         <div className="mt-6 flex items-center justify-between border-t border-line pt-4 text-xs text-muted">
-          <span>✓ CHECKED IN{formatDateOnly(pass.createdAt) ? ` · ${formatDateOnly(pass.createdAt)}` : ""}</span>
+          <span>✓ ĐÃ ĐĂNG KÝ{formatDateOnly(pass.createdAt) ? ` · ${formatDateOnly(pass.createdAt)}` : ""}</span>
           <span className="display tracking-wider">#{pass.playerCode}</span>
         </div>
 
@@ -110,7 +110,7 @@ export default function EventPass({ pass }: { pass: CheckinSuccess }) {
 
       <div className="mt-5 flex flex-wrap gap-3">
         <button type="button" onClick={handleSave} className="btn-accent !py-3 !px-5 text-xs md:text-sm">
-          ⬇ Lưu Pass
+          ⬇ Lưu phiếu
         </button>
         <button type="button" onClick={handleShare} className="btn-ghost !py-3 !px-5 text-xs md:text-sm">
           Chia sẻ

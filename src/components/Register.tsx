@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
-import EventPass from "./EventPass";
 import {
   submitCheckin,
   loadPassFromLocal,
@@ -10,7 +9,7 @@ import {
   type CheckinSuccess,
 } from "@/lib/checkin";
 
-type CheckInState =
+type RegisterState =
   | "idle"
   | "verifying"
   | "checking-in"
@@ -18,20 +17,20 @@ type CheckInState =
   | "error"
   | "duplicate";
 
-export default function Checkin() {
-  const [state, setState] = useState<CheckInState>("verifying");
+export default function Register() {
+  const [state, setState] = useState<RegisterState>("verifying");
   const [pass, setPass] = useState<CheckinSuccess | null>(null);
   const [error, setError] = useState("");
   const [retryInfo, setRetryInfo] = useState<string | null>(null);
   const [form, setForm] = useState({ fullName: "", phone: "", email: "" });
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [invoice, setInvoice] = useState<File | null>(null);
+  const [invoicePreview, setInvoicePreview] = useState<string | null>(null);
   const [consent, setConsent] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // VERIFY: check existing pass on mount
+  // VERIFY: kiểm tra phiếu đăng ký đã lưu trên máy
   useEffect(() => {
     const existing = loadPassFromLocal();
     if (existing) {
@@ -42,15 +41,15 @@ export default function Checkin() {
     }
   }, []);
 
-  const onPickPhoto = (file: File | undefined) => {
+  const onPickInvoice = (file: File | undefined) => {
     if (!file) return;
     if (!PHOTO_TYPES.includes(file.type)) {
-      setFieldErrors((fe) => ({ ...fe, photo: "photo_invalid_type" }));
+      setFieldErrors((fe) => ({ ...fe, invoice: "invoice_invalid_type" }));
       return;
     }
-    setFieldErrors((fe) => ({ ...fe, photo: "" }));
-    setPhoto(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    setFieldErrors((fe) => ({ ...fe, invoice: "" }));
+    setInvoice(file);
+    setInvoicePreview(URL.createObjectURL(file));
   };
 
   /** Live validation: cập nhật giá trị + đánh giá lỗi ngay khi gõ. */
@@ -77,13 +76,13 @@ export default function Checkin() {
         fullName: validateField("fullName", form.fullName),
         phone: validateField("phone", form.phone),
         email: validateField("email", form.email),
-        photo: photo ? "" : "photo_required",
+        invoice: invoice ? "" : "invoice_required",
         consent: consent ? "" : "consent_required",
       };
       setTouched({ fullName: true, phone: true, email: true });
       setFieldErrors(nextErrors);
 
-      const firstBad = ["fullName", "phone", "email", "photo", "consent"].find(
+      const firstBad = ["fullName", "phone", "email", "invoice", "consent"].find(
         (k) => nextErrors[k]
       );
       if (firstBad) {
@@ -97,16 +96,13 @@ export default function Checkin() {
       setState("checking-in");
 
       const result = await submitCheckin(
-        { ...form, consent, photo: photo! },
+        { ...form, consent, invoice: invoice! },
         (msg) => setRetryInfo(msg)
       );
 
       if (result.ok) {
         setPass(result);
         setState("success");
-        document
-          .getElementById("event-pass")
-          ?.scrollIntoView({ behavior: "smooth" });
       } else {
         setRetryInfo(null);
         if (result.error === "already_checked_in") {
@@ -117,18 +113,18 @@ export default function Checkin() {
         }
       }
     },
-    [form, photo, consent]
+    [form, invoice, consent]
   );
 
   return (
-    <section id="checkin" className="section-divider scroll-mt-20 py-16 md:py-32">
+    <section id="register" className="section-divider scroll-mt-20 py-16 md:py-32">
       <div className="container-c">
         <Reveal>
-          <span className="eyebrow">Đăng ký</span>
-          <h2 className="section-title section-title-light mt-4">READY TO ENTER?</h2>
+          <span className="eyebrow">Đăng ký tham gia</span>
+          <h2 className="section-title section-title-light mt-4">REGISTER NOW.</h2>
         </Reveal>
 
-        <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:items-start">
+        <div className="mx-auto mt-12 w-full max-w-2xl">
           <Reveal delay={100}>
             {state === "verifying" && (
               <div className="card">
@@ -206,20 +202,20 @@ export default function Checkin() {
                   </div>
 
                   <div>
-                    <span className="label">Hình ảnh của bạn *</span>
+                    <span className="label">Ảnh hóa đơn mua hàng *</span>
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
-                      onChange={(e) => onPickPhoto(e.target.files?.[0])}
+                      onChange={(e) => onPickInvoice(e.target.files?.[0])}
                     />
-                    {photoPreview ? (
+                    {invoicePreview ? (
                       <div className="flex items-center gap-4">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={photoPreview}
-                          alt="Xem trước ảnh của bạn"
+                          src={invoicePreview}
+                          alt="Xem trước ảnh hóa đơn của bạn"
                           className="h-20 w-20 rounded-lg object-cover border border-line"
                         />
                         <button
@@ -236,15 +232,15 @@ export default function Checkin() {
                         onClick={() => fileInputRef.current?.click()}
                         className="btn-ghost w-full !py-3 text-sm"
                       >
-                        📷 Chụp / chọn ảnh
+                        🧾 Tải ảnh hóa đơn
                       </button>
                     )}
-                    {fieldErrors.photo && (
-                      <FieldError msg={errorMessage(fieldErrors.photo)} />
+                    {fieldErrors.invoice && (
+                      <FieldError msg={errorMessage(fieldErrors.invoice)} />
                     )}
                     <p className="mt-2 text-xs text-muted">
-                      Ảnh được nén ngay trên máy bạn trước khi gửi — chỉ dùng
-                      cho sự kiện.
+                      Ảnh hóa đơn được nén ngay trên máy bạn trước khi gửi —
+                      chỉ dùng để xác minh việc mua sản phẩm GUMAYUSI Collection.
                     </p>
                   </div>
 
@@ -256,8 +252,8 @@ export default function Checkin() {
                       className="mt-0.5 h-4 w-4 shrink-0 accent-[#ece81a]"
                     />
                     <span>
-                      Tôi đồng ý cho ban tổ chức lưu hình ảnh này phục vụ sự
-                      kiện. *
+                      Tôi xác nhận hóa đơn trên là của tôi và đồng ý cho ban tổ
+                      chức lưu lại để xác minh việc mua sản phẩm GUMAYUSI Collection. *
                       {fieldErrors.consent && (
                         <FieldError msg={errorMessage("consent_required")} />
                       )}
@@ -266,7 +262,7 @@ export default function Checkin() {
                 </div>
 
                 <button type="submit" className="btn-accent mt-8 w-full">
-                  [ Check In ]
+                  [ Đăng ký ]
                   <span className="arrow">→</span>
                 </button>
                 </div>
@@ -277,7 +273,7 @@ export default function Checkin() {
               <div className="card">
                 <div className="card-core !p-6 text-center md:!p-10">
                   <div className="mx-auto mb-6 h-10 w-10 animate-spin rounded-full border-2 border-line border-t-accent" />
-                  <p className="display text-xl font-bold">CHECKING YOU IN…</p>
+                  <p className="display text-xl font-bold">ĐANG XÁC MINH…</p>
                   <p className="mt-2 text-sm text-muted">
                     {retryInfo ?? "Vui lòng giữ mở màn hình này."}
                   </p>
@@ -294,8 +290,8 @@ export default function Checkin() {
                   </p>
                   <p className="mt-3 text-sm text-muted">
                     Số điện thoại <span className="text-foreground font-semibold">{form.phone}</span> đã
-                    được check-in từ trước. Vui lòng kiểm tra email để xem lại
-                    Event Pass của bạn, hoặc liên hệ staff tại sự kiện nếu cần hỗ trợ.
+                    đăng ký từ trước. Vui lòng kiểm tra email để xem lại mã tham gia,
+                    hoặc liên hệ staff nếu cần hỗ trợ.
                   </p>
                   <button
                     type="button"
@@ -336,40 +332,15 @@ export default function Checkin() {
             {state === "success" && (
               <div className="card border-accent/40">
                 <div className="card-core !p-6 text-center md:!p-10">
-                  <p className="display text-3xl font-bold text-accent">✓ CHECKED IN</p>
+                  <p className="display text-3xl font-bold text-accent">✓ ĐÃ ĐĂNG KÝ</p>
                   <p className="mt-3 text-sm text-muted">
-                    Chúc mừng {pass?.fullName}! Bạn đã chính thức có mặt tại sự
-                    kiện.
+                    Chúc mừng {pass?.fullName}! Bạn đã ghi danh tham gia chương
+                    trình dành riêng cho chủ nhân GUMAYUSI Collection.
                   </p>
-                  <a href="#event-pass" className="btn-accent mt-6">
-                    [ View Event Pass ]
-                    <span className="arrow">→</span>
-                  </a>
                 </div>
               </div>
             )}
           </Reveal>
-
-          {/* ---------- RIGHT: inline pass ---------- */}
-          <div id="event-pass" className="scroll-mt-24">
-            {state === "success" && pass ? (
-              <Reveal delay={150}>
-                <EventPass pass={pass} />
-              </Reveal>
-            ) : (
-              <Reveal delay={200}>
-                <div className="card h-full">
-                  <div className="card-core !p-6 text-center flex flex-col items-center justify-center min-h-[260px] md:!p-8">
-                    <p className="display text-2xl font-bold text-line">EVENT PASS</p>
-                    <p className="mt-3 text-sm text-muted">
-                      Event Pass cá nhân của bạn sẽ xuất hiện tại đây sau khi
-                      check-in — kèm mã người chơi và mã QR dùng trong suốt sự kiện.
-                    </p>
-                  </div>
-                </div>
-              </Reveal>
-            )}
-          </div>
         </div>
       </div>
     </section>

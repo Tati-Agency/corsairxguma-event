@@ -1,35 +1,56 @@
 import Reveal from "./Reveal";
 
 /**
- * Event Arena — gallery khoảnh khắc sự kiện.
- * Khi sự kiện gần diễn ra, có thể khôi phục bản đồ khu vực tương tác tại đây.
+ * ROAD TO EXCELLENCE — thành tích của Gumayusi (content mới theo web gốc).
+ * THÀNH TÍCH 2026: Asian Games Final roster + MSI Champion.
  */
-const ARENA_IMAGES: { src: string; alt: string }[] = [
-  { src: "/img/1.jpg", alt: "Khoảnh khắc sự kiện Corsair x Gumayusi 1" },
-  { src: "/img/2.jpg", alt: "Khoảnh khắc sự kiện Corsair x Gumayusi 2" },
-  { src: "/img/3.jpg", alt: "Khoảnh khắc sự kiện Corsair x Gumayusi 3" },
+const ACHIEVEMENTS: { icon: string; label: string }[] = [
+  {
+    icon: "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768268967/akamai/landing/Gumayusi/Gumayusi_about-icon_01-MVP.png",
+    label: "WORLDS FINALS MVP IN 2025",
+  },
+  {
+    icon: "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768268968/akamai/landing/Gumayusi/Gumayusi_about-icon_02-WorldsChampion.png",
+    label: "THREE-TIME WORLDS CHAMPION 2023-2025",
+  },
+  {
+    icon: "https://assets.corsair.com/image/upload/f_auto/q_auto/v1768268969/akamai/landing/Gumayusi/Gumayusi_about-icon_03-AllPro.png",
+    label: "2026 ASIAN GAMES FINAL LoL ROSTER",
+  },
+  {
+    icon: "https://assets.corsair.com/image/upload/f_auto/q_auto/v1787945821/akamai/landing/Gumayusi/refresh/guma-msi.png",
+    label: "2026 MSI CHAMPION",
+  },
 ];
 
 export default function EventArena() {
   return (
-    <section id="arena" className="section-divider scroll-mt-20 py-16 md:py-32">
+    <section id="excellence" className="section-divider scroll-mt-20 py-16 md:py-32">
       <div className="container-c">
         <Reveal>
-          <h2 className="section-title section-title-light">EVENT ARENA</h2>
+          <h2 className="section-title section-title-light">ROAD TO EXCELLENCE</h2>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted md:text-base">
+            Từ KeSPA Cup 2018 đến MVP Worlds 2025 — Gumayusi chưa bao giờ
+            ngừng chứng minh bản thân, game sau game, chức vô địch sau chức
+            vô địch.
+          </p>
         </Reveal>
 
-        <div className="mt-12 grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3">
-          {ARENA_IMAGES.map((img, i) => (
-            <Reveal key={img.src} delay={i * 90} variant="zoom">
-              <figure className="group overflow-hidden rounded-xl border border-white/15 bg-[#1a1a1a]">
+        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {ACHIEVEMENTS.map((item, i) => (
+            <Reveal key={item.label} delay={i * 90} variant="zoom">
+              <div className="flex h-full flex-col items-center gap-4 rounded-xl border border-white/15 bg-[#1a1a1a] px-6 py-10 text-center">
                 <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                  src={item.icon}
+                  alt=""
+                  className="h-16 w-16 object-contain"
                   loading="lazy"
                   decoding="async"
                 />
-              </figure>
+                <p className="display text-sm font-semibold tracking-wide text-white">
+                  {item.label}
+                </p>
+              </div>
             </Reveal>
           ))}
         </div>

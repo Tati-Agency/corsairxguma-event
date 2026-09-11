@@ -247,6 +247,11 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   .arena-tip-inner, .arena-tip-line { animation: none; }
   .hero-line { opacity: 1; transform: none; }
   .section-title::after { transform: none; }
+  .count-shell { animation: none; opacity: 1; transform: none; }
+  .count-star-group, .count-star, .count-sun-halo,
+  .count-halo { animation: none; }
+  .count-cell--tick::before { animation: none; opacity: 0; }
+  .count-core[data-finished] .count-star { animation: none; }
 }
 
 /* ---------- Forms (double-bezel) ---------- */
@@ -449,6 +454,225 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   vertical-align: 0.12em;
   letter-spacing: 0;
 }
+/* Logo lockup CORSAIR x GUMAYUSI trong hero — to, căn giữa, như ảnh logo bản gốc (1030px) */
+.hero-logo {
+  display: block;
+  width: min(86vw, 880px);
+  height: auto;
+  margin-top: 1.5rem;
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
+}
+@media (min-width: 768px) {
+  .hero-logo { margin-top: 2rem; }
+}
+/* ============================================================
+   Product card — đúng kiểu TwoColumnBanner của web gốc
+   (aspect 4/3 desktop, 1/1 mobile; viền trắng mờ + corner bracket
+   trắng + zoom ảnh 1.05 khi hover; text căn giữa ở đáy card)
+   ============================================================ */
+.product-card {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.product-card:hover,
+.product-card:focus-visible {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.product-name {
+  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
+  font-weight: 300;
+  font-variation-settings: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.08;
+  font-size: clamp(1.5rem, 4.5vw, 2.75rem);
+  color: #ffffff;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.75);
+}
+.product-tagline {
+  font-family: var(--font-body);
+  font-size: clamp(0.75rem, 1.6vw, 1rem);
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  margin-top: 0.75rem;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.75);
+}
+/* Corner brackets trắng xuất hiện khi hover (như bản gốc) */
+.product-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  transition: opacity 225ms ease-in-out;
+  z-index: 2;
+  pointer-events: none;
+}
+.product-corner.tl { top: 0; left: 0; border-top: 2px solid #fff; border-left: 2px solid #fff; }
+.product-corner.tr { top: 0; right: 0; border-top: 2px solid #fff; border-right: 2px solid #fff; }
+.product-corner.bl { bottom: 0; left: 0; border-bottom: 2px solid #fff; border-left: 2px solid #fff; }
+.product-corner.br { bottom: 0; right: 0; border-bottom: 2px solid #fff; border-right: 2px solid #fff; }
+.group:hover .product-corner,
+.group:focus-visible .product-corner { opacity: 1; }
+/* Tiêu đề section căn giữa kiểu web gốc (bỏ gạch chân accent) */
+.section-title-plain {
+  text-align: center;
+}
+.section-title-plain::after { display: none; }
+
+/* ============================================================
+   GUMA Countdown —SIGNATURE PIECE ("GUMA SUN RISING")
+   Mặt trời GUMA vàng mọc dọc cung arc = tiến trình 14 ngày,
+   số cuộn kiểu rolling-digit, thanh chặng đường bằng #
+   ============================================================ */
+.count-halo {
+  position: absolute;
+  left: 50%;
+  top: -46px;
+  width: 70%;
+  height: 74px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(236, 232, 26, 0.22), transparent 70%);
+  pointer-events: none;
+  animation: count-halo-pulse 5s ease-in-out infinite;
+}
+@keyframes count-halo-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.count-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1.2px solid rgba(236, 232, 26, 0.55);
+  z-index: 2;
+  pointer-events: none;
+}
+.count-corner.tl { top: 0.9rem; left: 0.9rem; border-right: none; border-bottom: none; }
+.count-corner.tr { top: 0.9rem; right: 0.9rem; border-left: none; border-bottom: none; }
+.count-corner.bl { bottom: 0.9rem; left: 0.9rem; border-right: none; border-top: none; }
+.count-corner.br { bottom: 0.9rem; right: 0.9rem; border-left: none; border-top: none; }
+
+/* ---- Arc ---- */
+.count-arc-row { position: relative; height: clamp(56px, 8.5vw, 84px); margin-bottom: clamp(16px, 2.5vw, 24px); }
+.count-arc { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.count-arc-track { fill: none; stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.4; }
+.count-arc-notch { stroke: rgba(255, 255, 255, 0.16); stroke-width: 1.2; stroke-linecap: round; }
+.count-arc-fill {
+  fill: none; stroke: var(--color-accent); stroke-width: 1.6; stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(236, 232, 26, 0.65));
+  transition: stroke-dashoffset 1s linear;
+}
+.count-ghost { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.2; stroke-dasharray: 2 3; }
+
+/* ---- Ngôi sao GUMA ---- */
+.count-sun-halo { animation: count-halo-breathe 3.4s ease-in-out infinite; }
+@keyframes count-halo-breathe { 0%, 100% { opacity: 0.78; } 50% { opacity: 1; } }
+.count-star-group {
+  transform-box: fill-box; transform-origin: center;
+  animation: count-star-turn 16s linear infinite;
+}
+.count-star-rays line { stroke: rgba(255, 254, 244, 0.85); stroke-width: 1; stroke-linecap: round; }
+@keyframes count-star-turn { to { transform: rotate(360deg); } }
+.count-star {
+  fill: #fffef4;
+  transform-box: fill-box; transform-origin: center;
+  filter: drop-shadow(0 0 4px rgba(255, 254, 244, 0.9)) drop-shadow(0 0 10px rgba(236, 232, 26, 0.7));
+  animation: count-star-beat 2.6s ease-in-out infinite;
+}
+@keyframes count-star-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.16); } }
+
+/* ---- Rolling digits ---- */
+.count-digits {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(5px, 1.2vw, 14px);
+}
+.count-unit { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.count-cells { display: flex; gap: 2px; }
+.count-cell {
+  position: relative; height: var(--count-cell); width: calc(var(--count-cell) * 0.6);
+  overflow: hidden; border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.count-cell::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent 34%, transparent 66%, rgba(0, 0, 0, 0.42));
+}
+.count-cell--tick::before {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: rgba(236, 232, 26, 0.16);
+  animation: count-flash 0.4s var(--ease-out-quart) both;
+}
+@keyframes count-flash {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.count-strip {
+  display: flex; flex-direction: column;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.4, 1);
+  will-change: transform;
+}
+.count-strip span {
+  height: var(--count-cell); display: flex; align-items: center; justify-content: center;
+  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
+  font-weight: 300; font-variation-settings: normal;
+  font-size: calc(var(--count-cell) * 0.5); line-height: 1; color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+}
+.count-sep {
+  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
+  font-size: calc(var(--count-cell) * 0.42); color: var(--color-accent); line-height: 1;
+  align-self: center; padding: 0 1px calc(var(--count-cell) * 0.1);
+}
+.count-unit-label {
+  font-size: 10.5px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--color-muted); font-weight: 600;
+}
+
+/* ---- Progress rail ---- */
+.count-rail-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: clamp(16px, 2.5vw, 24px);
+  font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--color-muted); font-weight: 600;
+}
+.count-pct { color: var(--color-accent); }
+.count-rail { position: relative; height: 3px; margin-top: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
+.count-rail-fill {
+  position: absolute; inset: 0; transform-origin: left;
+  background: linear-gradient(90deg, rgba(236, 232, 26, 0.5), var(--color-accent));
+  box-shadow: 0 0 10px rgba(236, 232, 26, 0.7);
+}
+/* ---- Entrance ---- */
+.count-shell { animation: count-rise 1s var(--ease-out-expo) both; }
+@keyframes count-rise {
+  from { opacity: 0; transform: translateY(30px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Mobile: headline "EVERY SECOND COUNTS." — nới thoáng hơn (section-title
+   clamp 6vw hơi sát nhau), desktop giữ nguyên bản gốc. */
+.count-title { line-height: 0.95; }
+@media (max-width: 767px) {
+  .count-title {
+    font-size: clamp(1.5rem, 7vw, 2.1rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+  }
+}
+/* ---- Finished ---- */
+.count-core[data-finished] .count-star { animation: count-star-fin 1.5s ease-in-out infinite; }
+@keyframes count-star-fin { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+.count-core[data-finished] .count-star-group { animation-duration: 5s; }
+
+/* ---- Pause when off-screen ---- */
+.count-core[data-idle] .count-star-group,
+.count-core[data-idle] .count-star,
+.count-core[data-idle] .count-sun-halo,
+.count-core[data-idle] .count-halo,
+.count-core[data-idle] .count-dot-pulse { animation-play-state: paused; }
 .section-title {
   font-family: var(--font-display);
   font-variation-settings: "wdth" 125;

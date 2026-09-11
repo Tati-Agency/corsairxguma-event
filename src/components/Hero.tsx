@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { EVENT } from "@/lib/config";
 import Reveal from "./Reveal";
 
 export default function Hero() {
@@ -21,33 +20,20 @@ export default function Hero() {
 
   return (
     <section ref={sectionRef} id="top" className="hero">
-      {/* Preload the hero image for the current breakpoint (LCP) */}
-      <link
-        rel="preload"
-        as="image"
-        href="/guma-hero-desktop.png"
-        media="(min-width: 768px)"
-      />
-      <link
-        rel="preload"
-        as="image"
-        href="/guma-hero-mobile.png"
-        media="(max-width: 767px)"
-      />
+      {/* Preload the hero image (LCP) */}
+      <link rel="preload" as="image" href="/guma-hero.png" />
 
-      {/* Background image — one file per breakpoint (no double download) */}
+      {/* Background image — hero mới từ web gốc (1 ảnh cho cả breakpoint).
+          object-position 55% 0% và mobile brightness giảm như bản gốc. */}
       <div className="absolute inset-0 z-0">
-        <picture>
-          <source media="(min-width: 768px)" srcSet="/guma-hero-desktop.png" />
-          <img
-            src="/guma-hero-mobile.png"
-            alt="CORSAIR x GUMAYUSI"
-            className="h-full w-full object-cover object-[55%_0%]"
-            fetchPriority="high"
-            decoding="async"
-          />
-        </picture>
-        {/* Overlay: mobile dốc dưới-lên (đậm đáy, nhạt đỉnh — đúng ảnh tham chiếu), desktop gradient ngang như cũ */}
+        <img
+          src="/guma-hero.png"
+          alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
+          className="h-full w-full object-cover object-[50%_0%] brightness-[0.6] md:translate-x-0 md:object-[55%_0%] md:brightness-100"
+          fetchPriority="high"
+          decoding="async"
+        />
+        {/* Overlay: mobile dốc dưới-lên (đậm đáy, nhạt đỉnh), desktop gradient ngang */}
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-transparent md:bg-gradient-to-r md:from-bg/90 md:via-bg/60 md:to-transparent" />
       </div>
 
@@ -60,69 +46,31 @@ export default function Hero() {
       <span className="corner-bracket bl" />
       <span className="corner-bracket br" />
 
-      <div className="container-c relative z-10 flex min-h-[92svh] flex-col justify-end pb-16 py-28 md:justify-center md:pb-0">
-        {/* Title reveals line-by-line on load (pure CSS, runs pre-hydration) */}
+      {/* Layout đúng bản gốc: nội dung căn giữa, đặt ở đáy hero */}
+      <div className="container-c relative z-10 flex min-h-[92svh] flex-col items-center justify-end pb-16 pt-28 text-center">
         <h1 className="hero-title">
           <span
             className="hero-subhead hero-line"
             style={{ animationDelay: "0.1s" }}
           >
-            PRE-ORDER
+            I&apos;LL PROVE IT, EVERY GAME
           </span>
-          <span
-            className="hero-main hero-line"
+          <img
+            src="/logos/logo-corsairxguma.png"
+            alt="CORSAIR x GUMAYUSI"
+            className="hero-logo hero-line mx-auto"
             style={{ animationDelay: "0.25s" }}
-          >
-            CORSAIR <span className="hero-x">x</span>
-          </span>
-          <span
-            className="hero-main hero-line"
-            style={{ animationDelay: "0.4s" }}
-          >
-            GUMAYUSI
-          </span>
+          />
         </h1>
 
-        <Reveal delay={120} className="hidden md:block">
-          <p className="mt-5 max-w-xl text-base text-muted leading-relaxed md:mt-7 md:text-lg">
-            Sự kiện gặp gỡ {EVENT.title} — một ngày chỉ dành cho fan.
-            Check-in, trải nghiệm gear đỉnh cao và giữ lại khoảnh khắc của riêng bạn.
-          </p>
-        </Reveal>
-
-        {/* Mobile: CTA rectangular dẫn xuống form đăng ký */}
-        <Reveal delay={240} className="mt-8 md:hidden">
-          <a href="#checkin" className="btn-watch-video">
-            Đăng ký
+        <Reveal delay={240} className="mt-8 flex flex-row flex-wrap items-center justify-center gap-4">
+          <a href="#register" className="btn-accent">
+            [ Đăng ký ngay ]
+            <span className="arrow">→</span>
           </a>
-        </Reveal>
-
-        {/* Desktop: giữ nguyên 2 nút cũ */}
-        <Reveal delay={240} className="hidden md:block">
-          <div className="mt-8 flex flex-row flex-wrap gap-4">
-            <a href="#checkin" className="btn-accent">
-              [ Enter Event ]
-              <span className="arrow">→</span>
-            </a>
-            <a href="#arena" className="btn-ghost">
-              Khám phá khu vực
-            </a>
-          </div>
-        </Reveal>
-
-        {/* Meta line — chỉ desktop (mobile giữ ảnh sạch + đậm ở đáy) */}
-        <Reveal delay={360} className="hidden md:block">
-          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted md:mt-14">
-            <span className="flex items-center gap-2">
-              <span className="text-accent">▸</span> {EVENT.date}
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="text-accent">▸</span> {EVENT.time}
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="text-accent">▸</span> {EVENT.venue}
-            </span>
-          </div>
+          <a href="#excellence" className="btn-ghost hidden md:inline-flex">
+            Road to Excellence
+          </a>
         </Reveal>
       </div>
     </section>
