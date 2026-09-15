@@ -7,7 +7,7 @@ export interface CheckinPayload {
   phone: string;
   email: string;
   consent: boolean;
-  invoice: File;
+  invoices: File[];
 }
 
 export interface CheckinSuccess {
@@ -101,9 +101,11 @@ const ERR_MESSAGE: Record<string, string> = {
   invalid_phone: "Số điện thoại không hợp lệ (VD: 09xx xxx xxx).",
   invalid_email: "Email không hợp lệ.",
   consent_required: "Bạn cần xác nhận hóa đơn và đồng ý cho lưu lại để tiếp tục.",
-  invoice_required: "Vui lòng tải lên ảnh hóa đơn mua hàng.",
-  invoice_too_large: "Ảnh hóa đơn quá lớn — hãy thử lại (tối đa ~1MB).",
-  invoice_invalid_type: "Định dạng ảnh hóa đơn không hỗ trợ (JPG/PNG/WEBP).",
+  invoice_required: "Vui lòng tải lên ít nhất 1 ảnh hóa đơn mua hàng.",
+  invoice_too_many: "Tối đa 3 ảnh mỗi lượt đăng ký.",
+  invoice_too_large_per_file: "Mỗi ảnh tối đa 35MB — hãy chọn ảnh khác.",
+  invoice_soft_limit: "Mỗi ảnh nên dưới 20MB để upload nhanh hơn.",
+  invoice_invalid_type: "Định dạng ảnh không hỗ trợ (JPG/PNG/WEBP).",
   already_checked_in: "Số điện thoại này đã đăng ký! Vui lòng kiểm tra email để xem lại mã tham gia, hoặc liên hệ staff nếu cần hỗ trợ.",
   too_many_requests: "Bạn thao tác quá nhanh — thử lại sau ít phút.",
   server_error: "Hệ thống bận. Vui lòng thử lại.",
@@ -133,8 +135,12 @@ export async function submitCheckin(
     form.set("consent", String(payload.consent));
 
     try {
-      const invoiceBlob = await compressImage(payload.invoice);
-      form.set("invoice", invoiceBlob, "invoice.jpg");
+      // Compress từng ảnh rồi gửi — giữ nguyên thứ tự và tên file gốc
+      for (let i = 0; i < payload.invoices.length; i++) {
+        const compressed = await compressImage(payload.invoices[i]);
+        const ext = payload.invoices[i].name.split(".").pop()?.toLowerCase() || "jpg";
+        form.append("invoices", compressed, `invoice-${i + 1}.${ext === "png" || ext === "webp" ? ext : "jpg"}`);
+      }
 
       const res = await fetch("/api/checkin", { method: "POST", body: form });
 

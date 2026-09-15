@@ -23,8 +23,8 @@ export default function Register() {
   const [error, setError] = useState("");
   const [retryInfo, setRetryInfo] = useState<string | null>(null);
   const [form, setForm] = useState({ fullName: "", phone: "", email: "" });
-  const [invoice, setInvoice] = useState<File | null>(null);
-  const [invoicePreview, setInvoicePreview] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<File[]>([]);
+  const [invoicePreviews, setInvoicePreviews] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -41,15 +41,68 @@ export default function Register() {
     }
   }, []);
 
-  const onPickInvoice = (file: File | undefined) => {
-    if (!file) return;
-    if (!PHOTO_TYPES.includes(file.type)) {
-      setFieldErrors((fe) => ({ ...fe, invoice: "invoice_invalid_type" }));
+  // Cleanup object URLs khi unmount hoặc khi previews thay đổi
+  useEffect(() => {
+    return () => {
+      invoicePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onPickInvoices = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const incoming = Array.from(files);
+    const current = invoices.length;
+
+    // Validate từng file: type + soft 20MB (cảnh báo) + hard 35MB (chặn)
+    const valid: File[] = [];
+    let firstError = "";
+    for (const f of incoming) {
+      if (!PHOTO_TYPES.includes(f.type)) {
+        firstError = "invoice_invalid_type";
+        break;
+      }
+      if (f.size > HARD_MAX_BYTES_PER_PHOTO) {
+        firstError = "invoice_too_large_per_file";
+        break;
+      }
+      valid.push(f);
+    }
+    if (firstError) {
+      setFieldErrors((fe) => ({ ...fe, invoice: firstError }));
       return;
     }
-    setFieldErrors((fe) => ({ ...fe, invoice: "" }));
-    setInvoice(file);
-    setInvoicePreview(URL.createObjectURL(file));
+
+    // Tổng cộng không vượt quá max — chặn luôn
+    if (current + valid.length > MAX_PHOTOS) {
+      setFieldErrors((fe) => ({ ...fe, invoice: "invoice_too_many" }));
+      return;
+    }
+
+    // Cảnh báo soft nếu có ảnh > 20MB (vẫn cho phép, chỉ note)
+    const hasSoftOversize = valid.some((f) => f.size > SOFT_MAX_BYTES_PER_PHOTO);
+
+    setInvoices((prev) => [...prev, ...valid]);
+    setInvoicePreviews((prev) => [
+      ...prev,
+      ...valid.map((f) => URL.createObjectURL(f)),
+    ]);
+    setFieldErrors((fe) => ({
+      ...fe,
+      invoice: "",
+      ...(hasSoftOversize ? { invoiceSoft: "invoice_soft_limit" } : {}),
+    }));
+  };
+
+  const removeInvoice = (idx: number) => {
+    setInvoices((prev) => prev.filter((_, i) => i !== idx));
+    setInvoicePreviews((prev) => {
+      const removed = prev[idx];
+      if (removed) URL.revokeObjectURL(removed);
+      return prev.filter((_, i) => i !== idx);
+    });
+    setFieldErrors((fe) => ({ ...fe, invoice: "", invoiceSoft: "" }));
   };
 
   /** Live validation: cập nhật giá trị + đánh giá lỗi ngay khi gõ. */
@@ -76,7 +129,7 @@ export default function Register() {
         fullName: validateField("fullName", form.fullName),
         phone: validateField("phone", form.phone),
         email: validateField("email", form.email),
-        invoice: invoice ? "" : "invoice_required",
+        invoice: invoices.length > 0 ? "" : "invoice_required",
         consent: consent ? "" : "consent_required",
       };
       setTouched({ fullName: true, phone: true, email: true });
@@ -96,7 +149,7 @@ export default function Register() {
       setState("checking-in");
 
       const result = await submitCheckin(
-        { ...form, consent, invoice: invoice! },
+        { ...form, consent, invoices },
         (msg) => setRetryInfo(msg)
       );
 
@@ -113,7 +166,7 @@ export default function Register() {
         }
       }
     },
-    [form, invoice, consent]
+    [form, invoices, consent]
   );
 
   return (
@@ -208,39 +261,58 @@ export default function Register() {
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
-                      onChange={(e) => onPickInvoice(e.target.files?.[0])}
+                      multiple
+                      onChange={(e) => {
+                        onPickInvoices(e.target.files);
+                        e.target.value = ""; // cho phép chọn lại cùng file
+                      }}
                     />
-                    {invoicePreview ? (
-                      <div className="flex items-center gap-4">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={invoicePreview}
-                          alt="Xem trước ảnh hóa đơn của bạn"
-                          className="h-20 w-20 rounded-lg object-cover border border-line"
-                        />
-                        <button
-                          type="button"
-                          className="btn-ghost !py-2 !px-4 text-xs"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          Đổi ảnh
-                        </button>
+
+                    {invoicePreviews.length > 0 && (
+                      <div className="mt-3 grid grid-cols-3 gap-3">
+                        {invoicePreviews.map((url, i) => (
+                          <div key={url} className="relative">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={url}
+                              alt={`Ảnh hóa đơn ${i + 1}`}
+                              className="h-24 w-full rounded-lg object-cover border border-line"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeInvoice(i)}
+                              aria-label={`Xóa ảnh ${i + 1}`}
+                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/80 text-xs text-white hover:bg-red-500"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ) : (
+                    )}
+
+                    {invoices.length < MAX_PHOTOS && (
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="btn-ghost w-full !py-3 text-sm"
+                        className="btn-ghost mt-3 w-full !py-3 text-sm"
                       >
-                        🧾 Tải ảnh hóa đơn
+                        {invoices.length === 0
+                          ? "🧾 Tải ảnh hóa đơn"
+                          : `➕ Thêm ảnh (${invoices.length}/${MAX_PHOTOS})`}
                       </button>
                     )}
+
                     {fieldErrors.invoice && (
                       <FieldError msg={errorMessage(fieldErrors.invoice)} />
                     )}
+                    {fieldErrors.invoiceSoft && (
+                      <p className="mt-1.5 text-xs text-accent">
+                        {errorMessage(fieldErrors.invoiceSoft)}
+                      </p>
+                    )}
                     <p className="mt-2 text-xs text-muted">
-                      Ảnh hóa đơn được nén ngay trên máy bạn trước khi gửi —
-                      chỉ dùng để xác minh việc mua sản phẩm GUMAYUSI Collection.
+                      Giới hạn ảnh đăng tải là &lt;20mb, Tối đa 3 ảnh.
                     </p>
                   </div>
 
@@ -262,11 +334,9 @@ export default function Register() {
                 </div>
 
                 <button
-                  type="button"
+                  type="submit"
                   className="btn-accent mt-8 w-full"
-                  onClick={() => {
-                    document.getElementById("countdown")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
+                  disabled
                 >
                   [ Đăng ký sẽ được mở vào 22/9 ]
                 </button>
@@ -362,6 +432,9 @@ const NAME_RE = /^[\p{L}\p{M}'.\- ]{2,80}$/u;
 const PHONE_RE = /^0\d{8,10}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_PHOTOS = 3;
+const SOFT_MAX_BYTES_PER_PHOTO = 20 * 1024 * 1024; // 20MB/ảnh — khuyến nghị (note cho user)
+const HARD_MAX_BYTES_PER_PHOTO = 35 * 1024 * 1024; // 35MB/ảnh — chặn cứng (điện thoại chụp phân giải cao)
 
 function validateField(field: string, value: string): string {
   switch (field) {

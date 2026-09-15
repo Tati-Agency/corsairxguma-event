@@ -9,7 +9,8 @@ import { InputFile } from "node-appwrite/file";
 export const runtime = "nodejs";
 
 // ---- Validation ----
-const MAX_PHOTO_BYTES = 1 * 1024 * 1024; // client compresses to ~300KB, hard cap 1MB
+const MAX_PHOTOS_PER_CHECKIN = 3;
+const HARD_MAX_BYTES_PER_PHOTO = 35 * 1024 * 1024; // 35MB/ảnh — chừa cho điện thoại chụp phân giải cao
 const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const NAME_RE = /^[\p{L}\p{M}'.\- ]{2,80}$/u;
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     const phoneRaw = String(form.get("phone") ?? "").trim();
     const email = String(form.get("email") ?? "").trim().toLowerCase();
     const consent = form.get("consent") === "true";
-    const invoice = form.get("invoice");
+    const invoices = form.getAll("invoices").filter((v): v is File => v instanceof File);
 
     if (!NAME_RE.test(fullName)) return errorJson("invalid_name", 400, "fullName");
 
@@ -49,10 +50,15 @@ export async function POST(req: NextRequest) {
 
     if (!consent) return errorJson("consent_required", 400, "consent");
 
-    if (!(invoice instanceof File)) return errorJson("invoice_required", 400, "invoice");
-    if (invoice.size > MAX_PHOTO_BYTES) return errorJson("invoice_too_large", 400, "invoice");
-    if (!ALLOWED_PHOTO_TYPES.includes(invoice.type))
-      return errorJson("invoice_invalid_type", 400, "invoice");
+    if (invoices.length === 0) return errorJson("invoice_required", 400, "invoice");
+    if (invoices.length > MAX_PHOTOS_PER_CHECKIN)
+      return errorJson("invoice_too_many", 400, "invoice");
+    for (const f of invoices) {
+      if (f.size > HARD_MAX_BYTES_PER_PHOTO)
+        return errorJson("invoice_too_large_per_file", 400, "invoice");
+      if (!ALLOWED_PHOTO_TYPES.includes(f.type))
+        return errorJson("invoice_invalid_type", 400, "invoice");
+    }
 
     const { tablesDB, storage } = getAppwrite();
 
@@ -73,13 +79,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ---- Upload invoice ----
-    const invoiceBuffer = Buffer.from(await invoice.arrayBuffer());
-    const file = await storage.createFile(
-      APPWRITE.bucketPhotos,
-      "unique()",
-      InputFile.fromBuffer(invoiceBuffer, "invoice.jpg")
-    );
+    // ---- Upload từng invoice lên Storage, thu thập file IDs ----
+    const photoFileIds: string[] = [];
+    for (let i = 0; i < invoices.length; i++) {
+      const buffer = Buffer.from(await invoices[i].arrayBuffer());
+      const file = await storage.createFile(
+        APPWRITE.bucketPhotos,
+        "unique()",
+        InputFile.fromBuffer(buffer, `invoice-${i + 1}.jpg`)
+      );
+      photoFileIds.push(file.$id);
+    }
 
     // ---- Generate unique player code ----
     let playerCode = "";
@@ -116,7 +126,8 @@ export async function POST(req: NextRequest) {
         full_name: fullName,
         phone,
         email,
-        photo_file_id: file.$id,
+        photo_file_id: photoFileIds[0] ?? "",
+        photo_file_ids: photoFileIds,
         session_hash: hashIdentity(ip, ua),
         consent: true,
         user_agent: ua.slice(0, 250),
