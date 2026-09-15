@@ -10,6 +10,7 @@ import {
 } from "@/lib/checkin";
 import ProductSelector from "./ProductSelector";
 import RulesPanel from "./RulesPanel";
+import { EVENT_END_MS } from "@/lib/config";
 
 type RegisterState =
   | "idle"
@@ -31,6 +32,11 @@ export default function Register() {
   const [consent, setConsent] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  /** Nút Đăng ký chỉ được mở khi countdown finished (Date.now() >= EVENT_END_MS).
+      Poll mỗi giây để chuyển state đúng lúc. */
+  const [countdownFinished, setCountdownFinished] = useState(
+    typeof window !== "undefined" && Date.now() >= EVENT_END_MS
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // VERIFY: kiểm tra phiếu đăng ký đã lưu trên máy
@@ -43,6 +49,17 @@ export default function Register() {
       setState("idle");
     }
   }, []);
+
+  // Poll countdown state mỗi giây — khi đếm ngược kết thúc thì mở nút Đăng ký
+  useEffect(() => {
+    if (countdownFinished) return;
+    const id = window.setInterval(() => {
+      if (Date.now() >= EVENT_END_MS) {
+        setCountdownFinished(true);
+      }
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [countdownFinished]);
 
   // Cleanup object URLs khi unmount hoặc khi previews thay đổi
   useEffect(() => {
@@ -367,9 +384,11 @@ export default function Register() {
                 <button
                   type="submit"
                   className="btn-accent mt-8 w-full"
-                  disabled
+                  disabled={!countdownFinished}
                 >
-                  [ Đăng ký sẽ được mở vào 22/9 ]
+                  {countdownFinished
+                    ? "[ Đăng ký LUCKYDRAW ]"
+                    : "[ Đăng ký sẽ được mở vào 22/9 ]"}
                 </button>
                 </div>
               </form>

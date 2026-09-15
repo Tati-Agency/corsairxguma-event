@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
+import { EVENT_END_MS } from "@/lib/config";
 
 /* ============================================================
    GUMA Countdown — "ROAD TO THE STAR"
@@ -12,7 +13,8 @@ import Reveal from "./Reveal";
    Perf: rAF chỉ chạy khi trong viewport (IntersectionObserver).
    ============================================================ */
 
-const TARGET = new Date(2020, 0, 1, 0, 0, 0); // TEST: ngày trong quá khứ → finished ngay
+const TARGET_MS = EVENT_END_MS; // single source of truth từ lib/config.ts
+const TARGET = new Date(TARGET_MS);
 const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 
 // Đường chạy của ngôi sao — thẳng (không vòng cung)

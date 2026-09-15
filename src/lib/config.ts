@@ -12,6 +12,14 @@ export const EVENT = {
 } as const;
 
 /**
+ * Mốc thời gian kết thúc countdown = lúc mở cổng pre-order.
+ * Dùng chung giữa Countdown.tsx và Register.tsx để đồng bộ
+ * "khi nào nút đăng ký được mở".
+ * NOTE: hiện đang test với ngày quá khứ → countdown finished ngay.
+ */
+export const EVENT_END_MS = new Date(2020, 0, 1, 0, 0, 0).getTime();
+
+/**
  * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
  * sản phẩm GUMA Collection (xác minh bằng hóa đơn mua hàng).
  */
