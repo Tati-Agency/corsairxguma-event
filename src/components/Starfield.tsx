@@ -3,9 +3,15 @@ import type { CSSProperties } from "react";
 /**
  * Starfield overlay — subtle, brand-aligned (Corsair black + gold).
  *
- * Kỹ thuật: 3 layer `radial-gradient` lặp (background-repeat) với tile size
- * khác nhau để tránh lộ pattern. Hoạt động với MỌI kích thước section
- * (footer ngắn ~150px vẫn có sao, không bị clip như cách dùng vw/vh).
+ * Kỹ thuật: nhiều layer `radial-gradient` lặp (background-repeat). Để KHÔNG
+ * lộ pattern dạng "một khuôn/lưới":
+ *   - tile size lớn và KHÔNG là bội số của nhau (chu kỳ lặp rất dài)
+ *   - mỗi tile nhiều chấm, radius + opacity random riêng từng chấm
+ *   - background-position offset riêng từng layer (phá thế thẳng hàng)
+ *   - duration/delay twinkle lệch nhau, không pulse đồng loạt
+ *
+ * Hoạt động với MỌI kích thước section (footer ngắn ~150px vẫn có sao,
+ * không bị clip như cách dùng vw/vh trong box-shadow).
  *
  * Vị trí chấm sinh bằng PRNG CÓ SEED (mulberry32) → server và client ra
  * cùng kết quả, không bị hydration mismatch.
@@ -33,39 +39,75 @@ function mulberry32(seed: number) {
 }
 
 type LayerSpec = {
+  /** Seed riêng cho layer — đổi seed là đổi toàn bộ vị trí chấm. */
+  seed: number;
   tileW: number;
   tileH: number;
   dots: number;
-  radius: number;
-  alpha: number;
+  /** Mỗi chấm random radius trong khoảng [minR, maxR] (px). */
+  minR: number;
+  maxR: number;
+  /** Mỗi chấm random opacity trong khoảng [minA, maxA]. */
+  minA: number;
+  maxA: number;
   duration: string;
   delay: string;
+  /** Lệch gốc tile — phá thế thẳng hàng giữa các layer. */
+  offsetX: number;
+  offsetY: number;
 };
 
+/**
+ * 5 layer với tile size lớn, KHÔNG là bội số của nhau (793/619/487/311/173)
+ * → chu kỳ lặp cực dài, mắt không bắt được ô lặp. Delay/duration lệch pha
+ * để twinkle không nhấp nháy đồng loạt.
+ */
 function buildLayers(density: "low" | "medium"): LayerSpec[] {
-  const scale = density === "medium" ? 1.5 : 1;
+  const k = density === "medium" ? 1.4 : 1;
   return [
-    // lớp xa: nhiều chấm nhỏ, mờ, twinkle chậm
-    { tileW: 560, tileH: 380, dots: Math.round(12 * scale), radius: 1, alpha: 0.5, duration: "7s", delay: "0s" },
-    // lớp giữa
-    { tileW: 380, tileH: 260, dots: Math.round(8 * scale), radius: 1.2, alpha: 0.7, duration: "5s", delay: "1.4s" },
-    // lớp gần: ít chấm, to hơn, sáng hơn, twinkle nhanh hơn
-    { tileW: 240, tileH: 170, dots: Math.round(5 * scale), radius: 1.6, alpha: 0.9, duration: "3.5s", delay: "2.6s" },
+    // xa nhất: nhiều chấm li ti, mờ
+    {
+      seed: 1103, tileW: 793, tileH: 601, dots: Math.round(26 * k),
+      minR: 0.6, maxR: 1.1, minA: 0.16, maxA: 0.48,
+      duration: "9.1s", delay: "0s", offsetX: -137, offsetY: -89,
+    },
+    {
+      seed: 2207, tileW: 619, tileH: 457, dots: Math.round(19 * k),
+      minR: 0.7, maxR: 1.3, minA: 0.22, maxA: 0.6,
+      duration: "7.3s", delay: "2.1s", offsetX: -311, offsetY: -53,
+    },
+    {
+      seed: 3301, tileW: 487, tileH: 353, dots: Math.round(13 * k),
+      minR: 0.9, maxR: 1.6, minA: 0.28, maxA: 0.72,
+      duration: "5.9s", delay: "1.3s", offsetX: -89, offsetY: -223,
+    },
+    {
+      seed: 4409, tileW: 311, tileH: 233, dots: Math.round(8 * k),
+      minR: 1.1, maxR: 1.9, minA: 0.36, maxA: 0.86,
+      duration: "4.7s", delay: "3.4s", offsetX: -197, offsetY: -149,
+    },
+    // gần nhất: vài chấm to, sáng rõ
+    {
+      seed: 5501, tileW: 173, tileH: 131, dots: Math.round(5 * k),
+      minR: 1.3, maxR: 2.3, minA: 0.5, maxA: 1,
+      duration: "3.5s", delay: "0.7s", offsetX: -61, offsetY: -41,
+    },
   ];
 }
 
-function gradientFor(spec: LayerSpec, seed: number, gold: boolean) {
-  const rand = mulberry32(seed);
+function gradientFor(spec: LayerSpec, gold: boolean) {
+  const rand = mulberry32(spec.seed);
   const dots: string[] = [];
   for (let i = 0; i < spec.dots; i++) {
     const x = Math.round(rand() * spec.tileW);
     const y = Math.round(rand() * spec.tileH);
-    // Thỉnh thoảng đổi sang vàng nhạt khi color="gold"
-    const useGold = gold && rand() > 0.75;
+    const r = (spec.minR + rand() * (spec.maxR - spec.minR)).toFixed(2);
+    const a = (spec.minA + rand() * (spec.maxA - spec.minA)).toFixed(2);
+    // ~1/5 chấm ánh vàng khi bật color="gold"
+    const useGold = gold && rand() > 0.8;
     const rgb = useGold ? "236, 232, 26" : "255, 255, 255";
-    const a = (spec.alpha * (0.6 + rand() * 0.4)).toFixed(2);
     dots.push(
-      `radial-gradient(${spec.radius}px ${spec.radius}px at ${x}px ${y}px, rgba(${rgb}, ${a}), transparent 100%)`
+      `radial-gradient(${r}px ${r}px at ${x}px ${y}px, rgba(${rgb}, ${a}), transparent 100%)`
     );
   }
   return dots.join(",");
@@ -82,8 +124,9 @@ export default function Starfield({ density = "low", color = "white" }: Props) {
     >
       {specs.map((spec, i) => {
         const style: CSSProperties = {
-          backgroundImage: gradientFor(spec, 1000 + i * 37, gold),
+          backgroundImage: gradientFor(spec, gold),
           backgroundSize: `${spec.tileW}px ${spec.tileH}px`,
+          backgroundPosition: `${spec.offsetX}px ${spec.offsetY}px`,
           backgroundRepeat: "repeat",
           animationDuration: spec.duration,
           animationDelay: spec.delay,
