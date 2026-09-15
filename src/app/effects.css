@@ -842,9 +842,9 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   to   { opacity: 1; }
 }
 
-/* Khung vòng tròn: giữ tỉ lệ 16/9 để toạ độ user-unit khớp CSS %
-   (viewBox 160×90 với preserveAspectRatio="none" → scaleX = scaleY,
-   nên toạ độ tính cho ngôi sao không bị méo). */
+/* Khung tiến trình quanh video: giữ tỉ lệ 16/9 để toạ độ user-unit khớp CSS %
+   (viewBox 160×90 với preserveAspectRatio="none" → scaleX = scaleY, nên
+   bán kính bo góc và vị trí ngôi sao tính theo user-unit không bị méo). */
 .count-ring {
   position: relative;
   margin-inline: auto;
@@ -852,7 +852,7 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   max-width: 72rem;
   aspect-ratio: 16 / 9;
   transform-origin: top center;
-  /* Vòng "hiện ra từ phía trên, giữa khung video" rồi bung ra ôm quanh */
+  /* Khung "hiện ra từ phía trên, giữa khung video" rồi bung ra ôm quanh */
   animation: ring-emerge 800ms var(--ease-out-expo) both;
 }
 @keyframes ring-emerge {
