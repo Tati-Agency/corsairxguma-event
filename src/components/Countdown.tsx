@@ -29,13 +29,17 @@ const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 /** Thời gian khung đồng hồ đóng lại (khớp keyframes count-close trong CSS). */
 const CLOSE_MS = 650;
 /** Thời gian ngôi sao chạy 1 vòng quanh video. */
-const RING_LAP_MS = 5200;
+const RING_LAP_MS = 4800;
 /** Chờ khung bung ra xong mới cho sao chạy. */
 const RING_START_DELAY = 600;
 /** Quãng đường tăng tốc (2/3) — 1/3 còn lại giảm tốc về tốc độ ban đầu. */
 const RING_ACCEL_DISTANCE = 2 / 3;
-/** Tốc độ đỉnh / tốc độ ban đầu — càng lớn càng "vọt". */
-const RING_SPEED_GAIN = 1.35;
+/**
+ * Tốc độ đỉnh / tốc độ ban đầu. Đây là lever chính của cảm giác "vọt":
+ * 1.35 gần như không thấy khác biệt; ~2.6 cho đoạn giữa nhanh gấp ~2.6 lần
+ * lúc xuất phát; >3.5 bắt đầu giật vì đoạn đầu/cuối quá chậm.
+ */
+const RING_SPEED_GAIN = 2.6;
 /** Số mẫu khi tích phân số dựng bảng easing. */
 const RING_TABLE_N = 400;
 /** Cờ sessionStorage đánh dấu đã reveal. */
