@@ -915,17 +915,19 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
     transparent 74%
   );
 }
-/* Logo CORSAIR tô vàng: nền accent + mask chính file SVG.
+/* Logo CORSAIR: nền trắng + mask chính file SVG.
    File logo nhúng ảnh PNG base64 bên trong mask nên KHÔNG thể đổi `fill`
-   hay dùng filter để ra vàng — CSS mask lấy alpha của SVG, còn màu lấy từ
+   hay dùng filter để nhuộm màu — CSS mask lấy alpha của SVG, còn màu lấy từ
    background-color, nên đây là cách duy nhất giữ đúng hình logo.
-   Kích thước bằng ngôi sao (26×26) theo yêu cầu. */
+   Màu #fffef4 TRÙNG với ngôi sao (xem .count-ring-marker path) để hai
+   marker đồng bộ; phần "ánh vàng" đến từ quầng sáng .count-ring-halo.
+   Kích thước bằng ngôi sao (26×26). */
 .count-ring-logo {
   position: relative;
   display: block;
   width: 100%;
   height: 100%;
-  background-color: var(--color-accent);
+  background-color: #fffef4;
   -webkit-mask-image: url("/logos/corsairlogo.svg");
           mask-image: url("/logos/corsairlogo.svg");
   -webkit-mask-size: contain;
