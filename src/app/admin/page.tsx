@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [offset, setOffset] = useState(0);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,30 +58,56 @@ export default function AdminPage() {
     }
   };
 
+  /**
+   * Tải stats + danh sách check-in.
+   *
+   * Dùng Promise.allSettled (KHÔNG phải Promise.all) + bọc try/catch: lỗi mạng
+   * kiểu "Failed to fetch" (server đang restart/compile, mất kết nối) sẽ chỉ
+   * hiện thông báo trong trang, không ném ra unhandled rejection làm bung
+   * error overlay của Next. Một endpoint lỗi cũng không kéo đổ endpoint kia.
+   */
   const load = useCallback(
     async (search = "", newOffset = 0) => {
       setLoading(true);
-      try {
-        const headers = { "x-admin-key": key };
-        const [statsRes, checkinsRes] = await Promise.all([
-          fetch(`/api/admin/stats?event=${EVENT.slug}`, { headers }),
-          fetch(
-            `/api/admin/checkins?event=${EVENT.slug}&limit=${PAGE_SIZE}&offset=${newOffset}${
-              search ? `&q=${encodeURIComponent(search)}` : ""
-            }`,
-            { headers }
-          ),
-        ]);
-        if (statsRes.ok) {
-          const data = await statsRes.json();
-          setStats(data.stats);
+      setLoadError("");
+
+      const headers = { "x-admin-key": key };
+      const checkinsUrl = `/api/admin/checkins?event=${EVENT.slug}&limit=${PAGE_SIZE}&offset=${newOffset}${
+        search ? `&q=${encodeURIComponent(search)}` : ""
+      }`;
+
+      const [statsRes, checkinsRes] = await Promise.allSettled([
+        fetch(`/api/admin/stats?event=${EVENT.slug}`, { headers }),
+        fetch(checkinsUrl, { headers }),
+      ]);
+
+      /** Đọc JSON nếu request thành công; trả null cho mọi trường hợp lỗi. */
+      const readJson = async (r: PromiseSettledResult<Response>) => {
+        if (r.status !== "fulfilled" || !r.value.ok) return null;
+        try {
+          return await r.value.json();
+        } catch {
+          return null;
         }
-        if (checkinsRes.ok) {
-          const data = await checkinsRes.json();
-          setCheckins(data.documents);
-          setTotal(data.total);
+      };
+
+      try {
+        const statsData = await readJson(statsRes);
+        const checkinsData = await readJson(checkinsRes);
+
+        if (statsData?.stats) setStats(statsData.stats);
+        if (checkinsData?.documents) {
+          setCheckins(checkinsData.documents);
+          setTotal(checkinsData.total);
           setOffset(newOffset);
         }
+        if (!statsData || !checkinsData) {
+          setLoadError(
+            "Không tải được dữ liệu — có thể mất kết nối hoặc key đã hết hạn."
+          );
+        }
+      } catch {
+        setLoadError("Không tải được dữ liệu — có thể mất kết nối.");
       } finally {
         setLoading(false);
       }
@@ -180,6 +207,19 @@ export default function AdminPage() {
       </div>
 
       {loading && <p className="mt-6 text-sm text-muted">Đang tải…</p>}
+
+      {loadError && (
+        <div className="mt-6 flex flex-wrap items-center gap-4 border border-red-500/40 bg-red-500/5 px-4 py-3">
+          <p className="text-sm text-red-400">{loadError}</p>
+          <button
+            type="button"
+            className="btn-ghost !py-2 !px-4 text-xs"
+            onClick={() => load(query, offset)}
+          >
+            ⟳ Thử lại
+          </button>
+        </div>
+      )}
 
       {stats && (
         <section className="mt-8">
