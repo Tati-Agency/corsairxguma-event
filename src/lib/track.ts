@@ -28,7 +28,7 @@ export function trackPageView(): void {
       path: location.pathname,
     });
     // keepalive: the request survives page navigation away
-    fetch("/api/track", {
+    fetch("/api/visit", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: payload,

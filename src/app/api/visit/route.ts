@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[track]", err);
+    console.error("[visit]", err);
     // Analytics must never break the page
     return NextResponse.json({ ok: false }, { status: 202 });
   }

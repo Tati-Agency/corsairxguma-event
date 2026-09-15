@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("[admin/stats]", err);
+    console.error("[admin/summary]", err);
     return NextResponse.json({ ok: false, error: "server_error" }, { status: 500 });
   }
 }

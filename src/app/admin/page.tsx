@@ -42,8 +42,12 @@ interface CheckinDoc {
 const KEY_STORAGE = "cxg_admin_key";
 const PAGE_SIZE = 50;
 
-/** Lỗi mạng tạm thời thường tự khỏi → thử lại vài lần trước khi báo. */
-const MAX_TRIES = 3;
+/**
+ * Lỗi mạng tạm thời thường tự khỏi → thử lại vài lần trước khi báo.
+ * Để 2 (không phải 3): mỗi lần thử lại là 2 request (stats + checkins), mà
+ * trường hợp bị extension chặn thì thử lại chắc chắn vẫn fail → chỉ tổ spam log.
+ */
+const MAX_TRIES = 2;
 
 type LoadFailure = {
   kind: "network" | "auth" | "server";
@@ -51,7 +55,8 @@ type LoadFailure = {
 };
 
 const FAILURE_MSG: Record<LoadFailure["kind"], string> = {
-  network: "Không kết nối được server (có thể đang khởi động lại). Thử lại sau vài giây.",
+  network:
+    "Không kết nối được server. Nếu đang chạy local, kiểm tra extension chặn quảng cáo (uBlock/AdGuard/Brave) — chúng chặn theo từ khóa trong URL.",
   auth: "Key không đúng hoặc đã hết hạn. Bấm “Đăng nhập lại” để nhập key mới.",
   server: "Server lỗi khi đọc dữ liệu. Thử lại, hoặc xem log server để biết chi tiết.",
 };
@@ -86,7 +91,7 @@ export default function AdminPage() {
     e.preventDefault();
     setAuthError("");
     try {
-      const res = await fetch("/api/admin/stats", {
+      const res = await fetch("/api/admin/summary", {
         headers: { "x-admin-key": key },
       });
       if (res.ok) {
@@ -125,7 +130,7 @@ export default function AdminPage() {
 
       for (let attempt = 1; ; attempt++) {
         [statsRes, checkinsRes] = await Promise.allSettled([
-          fetch(`/api/admin/stats?event=${EVENT.slug}`, { headers }),
+          fetch(`/api/admin/summary?event=${EVENT.slug}`, { headers }),
           fetch(checkinsUrl, { headers }),
         ]);
 

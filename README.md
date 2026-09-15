@@ -25,8 +25,8 @@ src/
 │  ├─ admin/page.tsx           # Dashboard bảo vệ bằng ADMIN_KEY
 │  └─ api/
 │     ├─ checkin/route.ts      # POST — validate, dedupe, upload ảnh, sinh player_code
-│     ├─ track/route.ts        # POST — ghi visit log (dedupe theo session)
-│     └─ admin/                # stats / checkins / export CSV / photo proxy
+│     ├─ visit/route.ts        # POST — ghi visit log (dedupe theo session)
+│     └─ admin/                # summary / checkins / export CSV / photo proxy
 ├─ components/                 # Nav, Hero, Intro, Journey, Arena, Checkin, EventPass…
 └─ lib/                        # appwrite client, UA parser, rate limit, compress, retry
 ```
