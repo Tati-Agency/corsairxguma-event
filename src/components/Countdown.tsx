@@ -536,7 +536,8 @@ export default function Countdown() {
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <path className="count-ring-track" d={RING_PATH} />
+                  {/* Chỉ vẽ vệt vàng — không vẽ track xám full khung,
+                      để đường chỉ "sinh ra" khi ngôi sao đi qua. */}
                   <path ref={ringFillRef} className="count-ring-fill" d={RING_PATH} />
                 </svg>
 
@@ -562,6 +563,7 @@ export default function Countdown() {
                   className="count-ring-star"
                   style={{ left: "50%", top: "4.444%" }}
                 >
+                  <span className="count-ring-star-halo" aria-hidden="true" />
                   <svg width="26" height="26" viewBox="-8 -8 16 16" aria-hidden="true">
                     <path d={STAR_PATH} />
                   </svg>
