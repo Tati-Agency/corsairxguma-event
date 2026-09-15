@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EVENT } from "@/lib/config";
 import { GROUPS, SKU_LABEL, type GroupKey } from "@/lib/groups";
+import AnimatedNumber from "@/components/admin/AnimatedNumber";
+import Donut from "@/components/admin/Donut";
+import StatChart from "@/components/admin/StatChart";
 
 interface Stats {
   totalVisits: number;
@@ -14,6 +17,13 @@ interface Stats {
   byOs: Record<string, number>;
   byReferrer: Record<string, number>;
   byHour: Record<string, number>;
+  /** Chuỗi theo ngày cho biểu đồ (đã điền đủ ngày trống) */
+  byDay: { date: string; visits: number; checkins: number }[];
+}
+
+/** Sắp xếp entry của map theo giá trị giảm dần (dùng cho bar/chip). */
+function byValueDesc(obj: Record<string, number>): [string, number][] {
+  return Object.entries(obj).sort((a, b) => b[1] - a[1]);
 }
 
 interface CheckinDoc {
@@ -350,70 +360,120 @@ export default function AdminPage() {
 
       {stats && (
         <section className="mt-8">
-          {/* KPI cards */}
+          {/* KPI cards — số chạy animation */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard label="Tổng truy cập" value={stats.totalVisits} />
-            <StatCard
-              label="Truy cập thật (unique)"
-              value={stats.uniqueVisits}
-              accent
-            />
+            <StatCard label="Truy cập thật (unique)" value={stats.uniqueVisits} accent />
             <StatCard label="Tổng đăng ký" value={stats.totalCheckins} />
             <StatCard
               label="Conversion rate"
-              value={`${stats.conversionRate}%`}
+              value={stats.conversionRate}
+              decimals={1}
+              suffix="%"
               accent
             />
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            {/* Device breakdown */}
+          {/* Biểu đồ theo ngày */}
+          <div className="mt-6 border border-line bg-surface p-6">
+            <h2 className="display text-lg font-bold">TRUY CẬP &amp; ĐĂNG KÝ THEO NGÀY</h2>
+            <StatChart
+              labels={stats.byDay.map((d) => d.date)}
+              series={[
+                {
+                  label: "Lượt truy cập",
+                  color: "#c1c6c8",
+                  values: stats.byDay.map((d) => d.visits),
+                },
+                {
+                  label: "Đăng ký",
+                  color: "#ece81a",
+                  values: stats.byDay.map((d) => d.checkins),
+                },
+              ]}
+            />
+          </div>
+
+          {/* Thiết bị (donut) + Hệ điều hành + Đăng ký theo giờ */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <div className="border border-line bg-surface p-6">
               <h2 className="display text-lg font-bold">THIẾT BỊ TRUY CẬP</h2>
-              <div className="mt-4 space-y-3">
-                {Object.entries(stats.byDevice).map(([k, v]) => (
-                  <BarRow key={k} label={k} value={v} max={stats.totalVisits || 1} />
-                ))}
-              </div>
-              <h3 className="display mt-6 text-sm font-bold tracking-widest text-muted">
-                BROWSER
-              </h3>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {Object.entries(stats.byBrowser).map(([k, v]) => (
-                  <span key={k} className="border border-line px-2 py-1 text-xs">
-                    {k}: <strong className="text-text">{v}</strong>
-                  </span>
-                ))}
+              <div className="mt-5">
+                <Donut
+                  centerLabel="truy cập"
+                  centerValue={stats.totalVisits}
+                  slices={[
+                    { label: "mobile", value: stats.byDevice.mobile ?? 0, color: "#ece81a" },
+                    { label: "desktop", value: stats.byDevice.desktop ?? 0, color: "#8c8c8e" },
+                    { label: "tablet", value: stats.byDevice.tablet ?? 0, color: "#373638" },
+                  ]}
+                />
               </div>
             </div>
 
-            {/* Check-in timeline */}
+            <div className="border border-line bg-surface p-6">
+              <h2 className="display text-lg font-bold">HỆ ĐIỀU HÀNH</h2>
+              {Object.keys(stats.byOs).length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Chưa có dữ liệu.</p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {byValueDesc(stats.byOs).map(([k, v]) => (
+                    <BarRow key={k} label={k} value={v} max={stats.totalVisits || 1} />
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="border border-line bg-surface p-6">
               <h2 className="display text-lg font-bold">ĐĂNG KÝ THEO GIỜ</h2>
               {Object.keys(stats.byHour).length === 0 ? (
                 <p className="mt-4 text-sm text-muted">Chưa có dữ liệu.</p>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {Object.entries(stats.byHour).map(([hour, v]) => (
-                    <BarRow
-                      key={hour}
-                      label={hour}
-                      value={v}
-                      max={Math.max(...Object.values(stats.byHour), 1)}
-                    />
+                  {/* byHour: giữ thứ tự thời gian (key tăng dần), không sắp theo số lượng */}
+                  {Object.entries(stats.byHour)
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([hour, v]) => (
+                      <BarRow
+                        key={hour}
+                        label={hour}
+                        value={v}
+                        max={Math.max(...Object.values(stats.byHour), 1)}
+                      />
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Browser + Referrer */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="border border-line bg-surface p-6">
+              <h2 className="display text-lg font-bold">TRÌNH DUYỆT</h2>
+              {Object.keys(stats.byBrowser).length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Chưa có dữ liệu.</p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {byValueDesc(stats.byBrowser).map(([k, v]) => (
+                    <BarRow key={k} label={k} value={v} max={stats.totalVisits || 1} />
                   ))}
                 </div>
               )}
-              <h3 className="display mt-6 text-sm font-bold tracking-widest text-muted">
-                REFERRER
-              </h3>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {Object.entries(stats.byReferrer).map(([k, v]) => (
-                  <span key={k} className="border border-line px-2 py-1 text-xs">
-                    {k}: <strong className="text-text">{v}</strong>
-                  </span>
-                ))}
-              </div>
+            </div>
+
+            <div className="border border-line bg-surface p-6">
+              <h2 className="display text-lg font-bold">NGUỒN TRUY CẬP</h2>
+              {Object.keys(stats.byReferrer).length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Chưa có dữ liệu.</p>
+              ) : (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {byValueDesc(stats.byReferrer).map(([k, v]) => (
+                    <span key={k} className="border border-line px-2 py-1 text-xs">
+                      {k}: <strong className="text-text">{v}</strong>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -595,10 +655,14 @@ export default function AdminPage() {
 function StatCard({
   label,
   value,
+  suffix = "",
+  decimals = 0,
   accent = false,
 }: {
   label: string;
-  value: number | string;
+  value: number;
+  suffix?: string;
+  decimals?: number;
   accent?: boolean;
 }) {
   return (
@@ -609,7 +673,8 @@ function StatCard({
           accent ? "text-accent" : ""
         }`}
       >
-        {value}
+        {/* Số đếm chạy từ 0 → giá trị, xem components/admin/AnimatedNumber */}
+        <AnimatedNumber value={value} suffix={suffix} decimals={decimals} />
       </p>
     </div>
   );

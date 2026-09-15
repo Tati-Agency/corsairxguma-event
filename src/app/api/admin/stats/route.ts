@@ -38,12 +38,43 @@ export async function GET(req: NextRequest) {
       if (v.session_hash) uniqueSessions.add(String(v.session_hash));
     }
 
-    // ---- Check-in timeline by hour ----
+    // ---- Check-in timeline by hour (đã sắp xếp theo thời gian) ----
     const byHour: Record<string, number> = {};
     for (const c of evCheckins) {
       const createdAt = String(c.$createdAt ?? "");
       const hour = createdAt.slice(0, 13) + ":00";
       byHour[hour] = (byHour[hour] ?? 0) + 1;
+    }
+
+    // ---- Chuỗi theo NGÀY cho biểu đồ (truy cập + đăng ký) ----
+    // Điền đủ các ngày trống giữa ngày đầu và ngày cuối để biểu đồ không bị
+    // "nhảy" khoảng thời gian. Tối đa 400 ngày để tránh vòng lặp bất thường.
+    const dayKey = (iso: unknown) => String(iso ?? "").slice(0, 10);
+    const visitByDay = new Map<string, number>();
+    for (const v of evVisits) {
+      const d = dayKey(v.$createdAt);
+      if (d) visitByDay.set(d, (visitByDay.get(d) ?? 0) + 1);
+    }
+    const checkinByDay = new Map<string, number>();
+    for (const c of evCheckins) {
+      const d = dayKey(c.$createdAt);
+      if (d) checkinByDay.set(d, (checkinByDay.get(d) ?? 0) + 1);
+    }
+
+    const days = [...new Set([...visitByDay.keys(), ...checkinByDay.keys()])].sort();
+    const byDay: { date: string; visits: number; checkins: number }[] = [];
+    if (days.length > 0) {
+      const cursor = new Date(`${days[0]}T00:00:00Z`);
+      const last = new Date(`${days[days.length - 1]}T00:00:00Z`);
+      while (cursor <= last && byDay.length < 400) {
+        const key = cursor.toISOString().slice(0, 10);
+        byDay.push({
+          date: key,
+          visits: visitByDay.get(key) ?? 0,
+          checkins: checkinByDay.get(key) ?? 0,
+        });
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
+      }
     }
 
     const totalVisits = evVisits.length;
@@ -64,6 +95,7 @@ export async function GET(req: NextRequest) {
         byOs,
         byReferrer,
         byHour,
+        byDay,
       },
     });
   } catch (err) {
