@@ -29,11 +29,15 @@ const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 /** Thời gian khung đồng hồ đóng lại (khớp keyframes count-close trong CSS). */
 const CLOSE_MS = 650;
 /** Thời gian ngôi sao chạy 1 vòng quanh video. */
-const RING_LAP_MS = 4200;
+const RING_LAP_MS = 4000;
 /** Chờ khung bung ra xong mới cho sao chạy. */
 const RING_START_DELAY = 600;
-/** Quãng đường tăng tốc (2/3) — 1/3 còn lại giảm tốc về tốc độ ban đầu. */
-const RING_ACCEL_DISTANCE = 2 / 3;
+/**
+ * Mốc chia 2 pha theo quãng đường: 3/5 đầu tăng tốc, 2/5 cuối hãm.
+ * Tỉ lệ này quyết định đoạn cuối CHẬM tới đâu — 2/3 thì đoạn cuối chỉ
+ * chiếm ~28% thời gian (còn nhanh), 3/5 thì chiếm ~39% (chậm rõ).
+ */
+const RING_ACCEL_DISTANCE = 3 / 5;
 /**
  * Tốc độ đỉnh / tốc độ ban đầu. Đây là lever chính của cảm giác "vọt":
  * 1.35 gần như không thấy khác biệt; ~2.6 cho đoạn giữa nhanh gấp ~2.6 lần
@@ -41,11 +45,12 @@ const RING_ACCEL_DISTANCE = 2 / 3;
  */
 const RING_SPEED_GAIN = 2.6;
 /**
- * Độ "dốc" của cú hãm cuối: càng lớn thì tốc độ giữ càng lâu ở 1/3 cuối
- * rồi tụt càng sốc về tốc độ ban đầu. 2 = hãm trải đều, 3 = hãm rõ ở cuối,
- * 4+ = gần như giữ nguyên tốc độ rồi phanh gấp sát đích.
+ * Hình dạng cú hãm ở 2/5 cuối:
+ *   1   = giảm tốc đều suốt đoạn cuối → cả đoạn cuối đều chậm (đang dùng)
+ *   2-3 = giữ tốc độ cao lâu rồi mới tụt ở sát đích (đoạn cuối vẫn nhanh)
+ *   4+  = gần như phanh gấp đúng lúc về đích
  */
-const RING_BRAKE_P = 3;
+const RING_BRAKE_P = 1;
 /** Số mẫu khi tích phân số dựng bảng easing. */
 const RING_TABLE_N = 400;
 /** Cờ sessionStorage đánh dấu đã reveal. */
@@ -105,18 +110,18 @@ function buildRingPath(w: number, h: number) {
 }
 
 /* ---- Easing cho ngôi sao (vận tốc cho theo QUÃNG ĐƯỜNG s) ----
-   Chia 2 pha, đỉnh vận tốc đúng tại s = 2/3:
+   Chia 2 pha, đỉnh vận tốc đúng tại mốc RING_ACCEL_DISTANCE (= 3/5):
 
-     pha tăng tốc  (s ≤ 2/3):  v = v0 + d·smoothstep(s / (2/3))
+     pha tăng tốc  (s ≤ A):  v = v0 + d·smoothstep(s / A)
        → vào êm (đạo hàm 0 tại s=0) rồi tăng dần tới đỉnh.
 
-     pha hãm       (s > 2/3):  v = v0 + d·(1 - u^BRAKE_P),  u = (s-2/3)/(1/3)
-       → giữ tốc độ cao gần như suốt 1/3 cuối rồi mới TỤT MẠNH ở những %
-         cuối cùng, và về đúng tốc độ ban đầu tại s = 1.
-         BRAKE_P càng lớn thì cú hãm càng dồn về sát đích.
+     pha hãm       (s > A):  v = v0 + d·(1 - u^BRAKE_P),  u = (s-A)/(1-A)
+       → giảm dần và về ĐÚNG tốc độ ban đầu tại s = 1.
+         BRAKE_P = 1 → giảm đều cả đoạn cuối (đoạn cuối chậm thật);
+         BRAKE_P lớn → giữ tốc độ cao lâu rồi mới tụt sát đích.
 
-   (Trước đây dùng v = v0 + d·sin(π·s^P) — giảm tốc trải đều cả 1/3 cuối nên
-   nhìn không rõ cú hãm.)
+   (Bản đầu dùng v = v0 + d·sin(π·s^P) với mốc 2/3 — giảm tốc trải đều cả
+   1/3 cuối nên đoạn cuối vẫn nhanh, nhìn không ra cú hãm.)
 
    Vì v cho theo quãng đường nên phải tích phân số để đổi sang thời gian
    (t = ∫ ds/v), rồi tra ngược bảng để biết tại thời điểm t đã đi được bao
