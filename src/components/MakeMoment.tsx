@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
+import Starfield from "./Starfield";
 
 const SLIDES = [
   "https://assets.corsair.com/image/upload/f_auto,q_auto/v1784853690/akamai/landing/Gumayusi/refresh/guma-gallery-01.png",
@@ -95,7 +96,8 @@ export default function MakeMoment() {
       ref={sectionRef}
       className="section-divider cv-auto py-16 md:py-32"
     >
-      <div className="container-c">
+      <Starfield />
+      <div className="container-c relative z-10">
         <Reveal>
           <div
             className="relative mt-14"

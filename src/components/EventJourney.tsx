@@ -1,4 +1,5 @@
 import Reveal from "./Reveal";
+import Starfield from "./Starfield";
 
 type Product = {
   name: string;
@@ -47,7 +48,8 @@ export { PRODUCTS };
 export default function EventJourney() {
   return (
     <section id="collection" className="section-divider cv-auto py-16 scroll-mt-20 md:py-32">
-      <div className="container-c">
+      <Starfield />
+      <div className="container-c relative z-10">
         <Reveal>
           <h2 className="section-title section-title-light">
             THE GUMAYUSI COLLECTION

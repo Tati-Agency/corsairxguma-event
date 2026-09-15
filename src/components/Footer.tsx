@@ -1,7 +1,10 @@
+import Starfield from "./Starfield";
+
 export default function Footer() {
   return (
     <footer className="section-divider py-12">
-      <div className="container-c">
+      <Starfield density="medium" />
+      <div className="container-c relative z-10">
         <div className="border-t border-line pt-6 text-center text-xs text-muted">
           <p>© 2026 CORSAIR × GUMAYUSI — For the world&apos;s top players.</p>
           <p className="mt-2 tracking-wide">

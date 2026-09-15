@@ -10,6 +10,7 @@ import {
 } from "@/lib/checkin";
 import ProductSelector from "./ProductSelector";
 import RulesPanel from "./RulesPanel";
+import Starfield from "./Starfield";
 import { EVENT_END_MS } from "@/lib/config";
 
 type RegisterState =
@@ -200,7 +201,8 @@ export default function Register() {
 
   return (
     <section id="register" className="section-divider scroll-mt-20 py-16 md:py-32">
-      <div className="container-c">
+      <Starfield />
+      <div className="container-c relative z-10">
         <Reveal>
           <span className="eyebrow">Đăng ký tham gia</span>
           <h2 className="section-title section-title-light mt-4">REGISTER NOW.</h2>

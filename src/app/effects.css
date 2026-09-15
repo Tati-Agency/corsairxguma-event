@@ -864,7 +864,40 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 }
 
 /* ============================================================
-   Animations â€” page-level
+   Starfield — subtle background stars cho các section nền đen
+   (trừ Hero + Countdown đã có ảnh nền riêng).
+   - 3 layer radial-gradient lặp, tile size khác nhau tránh lộ pattern
+   - twinkle lệch pha giữa các layer (perf-friendly: chỉ animate opacity)
+   ============================================================ */
+.starfield {
+  z-index: 0;
+}
+/* Mỗi layer là 1 div full-size, background là tập radial-gradient lặp lại.
+   Kích thước tile + nội dung gradient sinh từ React (inline style). */
+.starfield-layer {
+  position: absolute;
+  inset: 0;
+  animation-name: star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: opacity;
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+/* Mobile: giảm tổng thể qua wrapper (opacity nhân xuống layer) —
+   không đặt trực tiếp trên .starfield-layer vì sẽ giết animation twinkle. */
+@media (max-width: 767px) {
+  .starfield { opacity: 0.65; }
+}
+/* Tôn trọng reduced-motion — giữ sao tĩnh, không twinkle */
+@media (prefers-reduced-motion: reduce) {
+  .starfield-layer { animation: none; opacity: 0.8; }
+}
+
+/* ============================================================
+   Animations — page-level
    ============================================================ */
 
 /* ---------- Hero title: line-by-line entrance on load ---------- */

@@ -1,4 +1,5 @@
 import Reveal from "./Reveal";
+import Starfield from "./Starfield";
 
 /**
  * ROAD TO EXCELLENCE — thành tích của Gumayusi (content mới theo web gốc).
@@ -26,7 +27,8 @@ const ACHIEVEMENTS: { icon: string; label: string }[] = [
 export default function EventArena() {
   return (
     <section id="excellence" className="section-divider scroll-mt-20 py-16 md:py-32">
-      <div className="container-c">
+      <Starfield />
+      <div className="container-c relative z-10">
         <Reveal>
           <h2 className="section-title section-title-light">ROAD TO EXCELLENCE</h2>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted md:text-base">
