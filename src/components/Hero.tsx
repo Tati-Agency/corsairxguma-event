@@ -57,32 +57,22 @@ export default function Hero() {
       <span className="corner-bracket bl" />
       <span className="corner-bracket br" />
 
-      {/* Desktop (md+): nội dung canh trái, 2 cột dọc cho subhead, 2 nút canh trái.
+      {/* Desktop (md+): nội dung canh trái, subhead 2 hàng ngang, nút canh trái ngay dưới.
           Mobile: giữ layout cũ — nội dung căn giữa, đặt ở đáy hero */}
-      <div className="container-c relative z-10 flex min-h-[92svh] flex-col items-center justify-end pb-16 pt-28 text-center md:flex-row md:items-end md:justify-start md:pb-20 md:text-left">
-        {/* Desktop: subhead xếp 2 cột dọc. Mobile: 1 dòng ngang (giữ nguyên). */}
-        <h1 className="hero-title md:flex md:items-end md:gap-6">
+      <div className="container-c relative z-10 flex min-h-[92svh] flex-col items-center justify-end pb-16 pt-28 text-center md:flex-col md:items-start md:justify-end md:pb-20 md:text-left">
+        {/* Subhead — mobile: 1 dòng ngang. Desktop: 2 hàng ngang rõ ràng */}
+        <h1 className="hero-title md:flex md:flex-col md:items-start md:gap-1">
           <span
             className="hero-subhead hero-line"
             style={{ animationDelay: "0.1s" }}
           >
             <span className="md:hidden">I&apos;LL PROVE IT, EVERY GAME</span>
-            <span className="hidden md:flex md:items-end md:gap-4">
-              <span className="flex flex-col leading-[0.95] tracking-tight">
-                {"I'LL PROVE IT,".split("").map((ch, i) => (
-                  <span key={`a-${i}`}>{ch}</span>
-                ))}
-              </span>
-              <span className="flex flex-col leading-[0.95] tracking-tight">
-                {"EVERY GAME".split("").map((ch, i) => (
-                  <span key={`b-${i}`}>{ch}</span>
-                ))}
-              </span>
-            </span>
+            <span className="hidden md:inline md:block">I&apos;LL PROVE IT,</span>
+            <span className="hidden md:inline md:block">EVERY GAME</span>
           </span>
         </h1>
 
-        <Reveal delay={240} className="mt-8 flex flex-row flex-wrap items-center justify-center gap-4 md:mt-0 md:ml-8 md:flex-col md:items-start md:justify-end md:gap-3">
+        <Reveal delay={240} className="mt-8 flex flex-row flex-wrap items-center justify-center gap-4 md:mt-6 md:justify-start">
           <a href="#register" className="btn-accent">
             [ Đăng ký LUCKYDRAW ]
             <span className="arrow">→</span>
