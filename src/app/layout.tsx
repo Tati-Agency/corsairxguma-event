@@ -12,12 +12,47 @@ const saira = localFont({
   display: "swap",
 });
 
+/** Domain production — dùng làm gốc cho URL tuyệt đối trong thẻ Open Graph. */
+const SITE_URL = "https://corsairgumayusilimitededition.com";
+const OG_TITLE = "CORSAIR × GUMAYUSI — Đăng ký tham gia";
+const OG_DESCRIPTION =
+  "Đăng ký tham gia chương trình CORSAIR × GUMAYUSI dành riêng cho chủ nhân GUMAYUSI Collection. Xác minh hóa đơn mua hàng và nhận mã tham gia của bạn.";
+/** Ảnh thumbnail khi share link — 1200×628 (tỉ lệ 1.91:1, chuẩn Open Graph). */
+const OG_IMAGE = {
+  url: "/img-bg-landscape.png",
+  width: 1200,
+  height: 628,
+  alt: "CORSAIR × GUMAYUSI — GUMAYUSI Collection",
+};
+
 export const metadata: Metadata = {
-  title: "CORSAIR × GUMAYUSI — Đăng ký tham gia",
-  description:
-    "Đăng ký tham gia chương trình CORSAIR × GUMAYUSI dành riêng cho chủ nhân GUMAYUSI Collection. Xác minh hóa đơn mua hàng và nhận mã tham gia của bạn.",
+  // metadataBase: Next dùng làm gốc để dựng URL tuyệt đối cho og:image,
+  // canonical… (Facebook/Zalo yêu cầu URL tuyệt đối, không nhận đường dẫn tương đối).
+  metadataBase: new URL(SITE_URL),
+  title: OG_TITLE,
+  description: OG_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: "/logos/corsairlogo.svg",
+  },
+  // Facebook / Messenger / Zalo / Discord / LinkedIn đọc nhóm thẻ này.
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "CORSAIR × GUMAYUSI",
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    locale: "vi_VN",
+    images: [OG_IMAGE],
+  },
+  // X (Twitter) đọc riêng nhóm twitter:*; summary_large_image = thẻ ảnh lớn.
+  twitter: {
+    card: "summary_large_image",
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
 };
 
