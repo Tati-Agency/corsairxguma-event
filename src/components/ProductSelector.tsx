@@ -77,11 +77,6 @@ export default function ProductSelector({ selectedSkus, onToggle }: Props) {
                 ✓
               </span>
             )}
-
-            {/* Tên sản phẩm */}
-            <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-end px-2 pb-3 text-center md:pb-4">
-              <p className="product-name !text-base md:!text-lg">{p.name}</p>
-            </div>
           </label>
         );
       })}
