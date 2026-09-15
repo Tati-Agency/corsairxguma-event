@@ -12,12 +12,11 @@ export const EVENT = {
 } as const;
 
 /**
- * Mốc thời gian kết thúc countdown = lúc mở cổng pre-order.
+ * Mốc thời gian kết thúc countdown = lúc mở cổng pre-order: 22/09/2026 00:00.
  * Dùng chung giữa Countdown.tsx và Register.tsx để đồng bộ
- * "khi nào nút đăng ký được mở".
- * NOTE: hiện đang test với ngày quá khứ → countdown finished ngay.
+ * "khi nào nút đăng ký được mở" + khi nào video YouTube tự hiện.
  */
-export const EVENT_END_MS = new Date(2020, 0, 1, 0, 0, 0).getTime();
+export const EVENT_END_MS = new Date(2026, 8, 22, 0, 0, 0).getTime();
 
 /**
  * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
