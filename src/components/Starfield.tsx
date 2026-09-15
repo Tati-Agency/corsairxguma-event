@@ -58,10 +58,11 @@ type LayerSpec = {
 };
 
 /**
- * 5 layer với tile size lớn, KHÔNG là bội số của nhau (793/619/487/311/233)
+ * 5 layer với tile size lớn, KHÔNG là bội số của nhau (793/619/487/373/277)
  * → chu kỳ lặp cực dài, mắt không bắt được ô lặp. Delay/duration lệch pha
  * để twinkle không nhấp nháy đồng loạt. Chấm trong mỗi layer được gom cụm
- * (xem gradientFor) nên phân bố lộn xộn, không rải đều.
+ * (xem gradientFor) nên phân bố lộn xộn, không rải đều. Số chấm giữ theo
+ * mật độ (dots ∝ diện tích tile) nên đổi tile không làm đổi độ dày sao.
  */
 function buildLayers(density: "low" | "medium"): LayerSpec[] {
   const k = density === "medium" ? 1.4 : 1;
@@ -83,13 +84,14 @@ function buildLayers(density: "low" | "medium"): LayerSpec[] {
       duration: "5.9s", delay: "1.3s", offsetX: -89, offsetY: -223,
     },
     {
-      seed: 4409, tileW: 311, tileH: 233, dots: Math.round(8 * k),
+      // tile lớn hơn bản cũ (311×233) để chu kỳ lặp thưa hơn
+      seed: 4409, tileW: 373, tileH: 277, dots: Math.round(11 * k),
       minR: 1.1, maxR: 1.9, minA: 0.36, maxA: 0.86,
       duration: "4.7s", delay: "3.4s", offsetX: -197, offsetY: -149,
     },
-    // gần nhất: vài chấm to, sáng rõ
+    // gần nhất: vài chấm to, sáng rõ (tile 277×211 thay cho 233×181)
     {
-      seed: 5501, tileW: 233, tileH: 181, dots: Math.round(6 * k),
+      seed: 5501, tileW: 277, tileH: 211, dots: Math.round(8 * k),
       minR: 1.3, maxR: 2.3, minA: 0.5, maxA: 1,
       duration: "3.5s", delay: "0.7s", offsetX: -61, offsetY: -41,
     },
@@ -104,16 +106,29 @@ function buildLayers(density: "low" | "medium"): LayerSpec[] {
  * trống như bầu trời thật. Một tỉ lệ nhỏ rải tự do để không thành "đốm".
  *
  * Lưu ý: background-repeat vẽ lại gradient theo từng tile và CẮT tại mép
- * tile (không wrap) — nên phải clamp tâm chấm cách mép tối thiểu `pad` px,
- * tránh hiện vệt sao bị cắt thành đường thẳng dọc/ngang ở mép tile.
+ * tile (không wrap) — nên chấm phải cách mép tối thiểu `pad` px, tránh bị
+ * cắt thành vệt ở đường nối giữa 2 tile.
+ *
+ * Cách đưa chấm vào trong biên: PHẢN CHIẾU (mirror), KHÔNG dùng clamp.
+ * Clamp sẽ dồn mọi chấm vượt biên về đúng một giá trị → chúng xếp thành
+ * đường thẳng ở mép tile, và vì tile lặp lại nên cả nền hiện ra thành LƯỚI
+ * đều đặn. Phản chiếu thì phân bố vẫn rải ra tự nhiên.
  */
 function gradientFor(spec: LayerSpec, gold: boolean) {
   const rand = mulberry32(spec.seed);
   const dots: string[] = [];
   const pad = spec.maxR + 1;
 
-  const clampX = (v: number) => Math.min(Math.max(v, pad), spec.tileW - pad);
-  const clampY = (v: number) => Math.min(Math.max(v, pad), spec.tileH - pad);
+  /** Dội giá trị ngoài [lo, hi] ngược vào trong, không dồn về biên. */
+  const mirror = (v: number, lo: number, hi: number) => {
+    const span = hi - lo;
+    if (span <= 0) return lo;
+    let t = (((v - lo) % (2 * span)) + 2 * span) % (2 * span);
+    if (t > span) t = 2 * span - t;
+    return lo + t;
+  };
+  const mirrorX = (v: number) => mirror(v, pad, spec.tileW - pad);
+  const mirrorY = (v: number) => mirror(v, pad, spec.tileH - pad);
 
   // Tâm các cụm — số cụm ~1/4 số chấm, tán rộng/hẹp ngẫu nhiên
   const clusterCount = Math.max(2, Math.round(spec.dots / 4));
@@ -132,12 +147,12 @@ function gradientFor(spec: LayerSpec, gold: boolean) {
       const c = clusters[Math.floor(rand() * clusters.length)];
       const ang = rand() * Math.PI * 2;
       const rad = Math.sqrt(rand()) * c.spread;
-      x = clampX(c.x + Math.cos(ang) * rad);
-      y = clampY(c.y + Math.sin(ang) * rad);
+      x = mirrorX(c.x + Math.cos(ang) * rad);
+      y = mirrorY(c.y + Math.sin(ang) * rad);
     } else {
       // Số ít rải tự do — phá cảm giác "cụm nào cũng giống cụm nào"
-      x = clampX(rand() * spec.tileW);
-      y = clampY(rand() * spec.tileH);
+      x = mirrorX(rand() * spec.tileW);
+      y = mirrorY(rand() * spec.tileH);
     }
 
     const r = (spec.minR + rand() * (spec.maxR - spec.minR)).toFixed(2);
