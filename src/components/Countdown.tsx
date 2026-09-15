@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
 
 /* ============================================================
@@ -51,6 +51,10 @@ export default function Countdown() {
   const railRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<HTMLDivElement>(null);
   const stripsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionElRef = useRef<HTMLElement>(null);
+  /** Khi countdown finished + user scroll tới section → mở rộng panel thành video YouTube.
+      Một chiều, không reset (F5 mới về false). */
+  const [videoMode, setVideoMode] = useState(false);
 
   useEffect(() => {
     const core = coreRef.current;
@@ -190,8 +194,31 @@ export default function Countdown() {
     };
   }, []);
 
+  // Trigger video mode khi user scroll tới section countdown (chỉ khi countdown đã finished).
+  // Một chiều — không reset khi user scroll lên/xuống lại.
+  useEffect(() => {
+    const section = sectionElRef.current;
+    if (!section) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Check finished: nếu data-finished đã được set (xem effect trên) → bật video
+          const core = coreRef.current;
+          if (core?.dataset.finished === "true") {
+            setVideoMode(true);
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(section);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <section
+      ref={sectionElRef}
       id="countdown"
       className="section-divider cv-auto relative scroll-mt-20 overflow-hidden py-24 md:py-36"
     >
@@ -208,41 +235,52 @@ export default function Countdown() {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/55" />
 
       <div className="container-c relative z-10">
-        <div className="mx-auto max-w-3xl text-center">
-          <Reveal delay={110}>
-            <h2
-              className="section-title section-title-light section-title-plain count-title mt-7"
-            >
-              EVERY SECOND
-              <br />
-              <span className="text-accent">COUNTS.</span>
-            </h2>
-          </Reveal>
+        <div className="mx-auto max-w-3xl text-center transition-all duration-700 md:max-w-5xl">
+          {/* Ẩn title + paragraph khi videoMode để video chiếm trọn spotlight */}
+          <div
+            className={`transition-all duration-700 ${
+              videoMode ? "max-h-0 overflow-hidden opacity-0" : "max-h-[500px] opacity-100"
+            }`}
+          >
+            <Reveal delay={110}>
+              <h2 className="section-title section-title-light section-title-plain count-title mt-7">
+                EVERY SECOND
+                <br />
+                <span className="text-accent">COUNTS.</span>
+              </h2>
+            </Reveal>
 
-          <Reveal delay={220}>
-            <p className="mx-auto mt-6 max-w-[52ch] text-sm leading-relaxed text-muted md:text-base">
-              Cổng{" "}
-              <strong className="text-text">pre-order</strong>{" "}
-              <strong className="text-text">GUMAYUSI Collection</strong> chính thức mở ngày{" "}
-              <strong className="text-text">22.09.2026</strong>.
-            </p>
-          </Reveal>
+            <Reveal delay={220}>
+              <p className="mx-auto mt-6 max-w-[52ch] text-sm leading-relaxed text-muted md:text-base">
+                Cổng <strong className="text-text">pre-order</strong>{" "}
+                <strong className="text-text">GUMAYUSI Collection</strong> chính thức mở ngày{" "}
+                <strong className="text-text">22.09.2026</strong>.
+              </p>
+            </Reveal>
+          </div>
 
-          {/* Panel đồng hồ — double-bezel signature */}
+          {/* Panel đồng hồ — double-bezel signature. Khi videoMode: mở rộng ra và chứa YouTube embed. */}
           <div
             ref={panelRef}
-            className="count-shell mx-auto mt-12 rounded-[26px] border border-white/10 bg-[#0c0c10] p-[6px]"
+            className={`count-shell mx-auto mt-12 rounded-[26px] border border-white/10 bg-[#0c0c10] p-[6px] transition-all duration-700 ${
+              videoMode ? "max-w-5xl" : ""
+            }`}
             style={{ animationDelay: "0.32s" }}
           >
             <div
               ref={coreRef}
-              className="count-core relative overflow-hidden rounded-[20px] px-[clamp(14px,4vw,38px)] pb-[clamp(18px,3.5vw,28px)] pt-[clamp(22px,4vw,34px)] text-center"
+              className={`count-core relative overflow-hidden rounded-[20px] px-[clamp(14px,4vw,38px)] pb-[clamp(18px,3.5vw,28px)] pt-[clamp(22px,4vw,34px)] text-center transition-all duration-700 ${
+                videoMode ? "aspect-video p-0" : ""
+              }`}
               style={{
                 ["--count-cell" as string]: "clamp(40px, 10.5vw, 82px)",
-                background:
-                  "linear-gradient(180deg, rgba(236,232,26,0.06) 0%, transparent 150px), radial-gradient(130% 95% at 50% 0%, #111116 0%, #0a0a0e 55%, #060609 100%)",
+                background: videoMode
+                  ? "#000"
+                  : "linear-gradient(180deg, rgba(236,232,26,0.06) 0%, transparent 150px), radial-gradient(130% 95% at 50% 0%, #111116 0%, #0a0a0e 55%, #060609 100%)",
               }}
             >
+              {!videoMode && (
+                <>
               <div className="count-halo" />
               <span className="count-corner tl" />
               <span className="count-corner tr" />
@@ -343,6 +381,19 @@ export default function Countdown() {
               <div className="count-rail">
                 <div className="count-rail-fill" ref={railRef} style={{ transform: "scaleX(0)" }} />
               </div>
+                </>
+              )}
+
+              {/* Khi videoMode: hiện YouTube embed thay cho toàn bộ nội dung đồng hồ */}
+              {videoMode && (
+                <iframe
+                  className="absolute inset-0 h-full w-full rounded-[20px]"
+                  src="https://www.youtube.com/embed/TrLuWaVNUSc?autoplay=1&rel=0"
+                  title="GUMAYUSI Collection"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              )}
             </div>
           </div>
         </div>
