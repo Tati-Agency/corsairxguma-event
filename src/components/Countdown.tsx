@@ -32,6 +32,12 @@ const CLOSE_MS = 650;
 const RING_LAP_MS = 5200;
 /** Chờ khung bung ra xong mới cho sao chạy. */
 const RING_START_DELAY = 600;
+/** Quãng đường tăng tốc (2/3) — 1/3 còn lại giảm tốc về tốc độ ban đầu. */
+const RING_ACCEL_DISTANCE = 2 / 3;
+/** Tốc độ đỉnh / tốc độ ban đầu — càng lớn càng "vọt". */
+const RING_SPEED_GAIN = 1.35;
+/** Số mẫu khi tích phân số dựng bảng easing. */
+const RING_TABLE_N = 400;
 /** Cờ sessionStorage đánh dấu đã reveal. */
 const REVEAL_KEY = "cxg_countdown_revealed";
 
@@ -86,6 +92,56 @@ function buildRingPath(w: number, h: number) {
     `A ${r} ${r} 0 0 0 ${x1 - r} ${y0}`,
     "Z",
   ].join(" ");
+}
+
+/* ---- Easing cho ngôi sao ----
+   Vận tốc được cho theo QUÃNG ĐƯỜNG s:
+     v(s) = v0 + A·sin(π·s^P)
+   với P chọn sao cho đỉnh vận tốc rơi đúng tại s = 2/3. Nhờ vậy:
+   bắt đầu ở tốc độ gốc → tăng tốc trong 2/3 quãng đường → giảm tốc trong
+   1/3 còn lại và về ĐÚNG tốc độ ban đầu (không dừng hẳn) → cảm giác nhanh
+   mà vẫn mượt, không bị "hãm" ở cuối.
+
+   Vì v cho theo quãng đường nên phải tích phân số để đổi sang thời gian
+   (t = ∫ ds/v), rồi tra ngược bảng để biết tại thời điểm t đã đi được bao
+   xa. Bảng dựng 1 lần ở module scope nên không tốn gì lúc chạy. */
+const RING_EASE_TABLE = (() => {
+  const P = Math.log(0.5) / Math.log(RING_ACCEL_DISTANCE);
+  const v0 = 1;
+  const A = v0 * (RING_SPEED_GAIN - 1);
+  const speed = (s: number) => v0 + A * Math.sin(Math.PI * Math.pow(s, P));
+
+  const ts: number[] = [0];
+  const ss: number[] = [0];
+  let t = 0;
+  const ds = 1 / RING_TABLE_N;
+  for (let i = 1; i <= RING_TABLE_N; i++) {
+    const sPrev = (i - 1) * ds;
+    const sCur = i * ds;
+    // hình thang, lấy vận tốc tại trung điểm đoạn
+    t += ds / speed((sPrev + sCur) / 2);
+    ts.push(t);
+    ss.push(sCur);
+  }
+  // chuẩn hoá để tổng thời gian = 1
+  for (let i = 0; i < ts.length; i++) ts[i] /= t;
+  return { ts, ss };
+})();
+
+/** Quãng đường đã đi tại thời điểm t (0..1) — tra bảng + nội suy tuyến tính. */
+function ringEase(t: number) {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  const { ts, ss } = RING_EASE_TABLE;
+  let lo = 0;
+  let hi = ts.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (ts[mid] <= t) lo = mid;
+    else hi = mid;
+  }
+  const span = ts[hi] - ts[lo] || 1;
+  return ss[lo] + (ss[hi] - ss[lo]) * ((t - ts[lo]) / span);
 }
 
 /**
@@ -381,15 +437,12 @@ export default function Countdown() {
     path.style.strokeDashoffset = `${total}`;
     placeStarOnPath(star, path, 0, total, ringBox.w, ringBox.h);
 
-    const smooth = (t: number) =>
-      t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-
     let raf = 0;
     const startAt = performance.now() + RING_START_DELAY;
 
     const loop = (now: number) => {
       const t = Math.min(1, Math.max(0, (now - startAt) / RING_LAP_MS));
-      const e = smooth(t);
+      const e = ringEase(t);
       placeStarOnPath(star, path, e, total, ringBox.w, ringBox.h);
       path.style.strokeDashoffset = `${total * (1 - e)}`;
       if (t < 1) raf = requestAnimationFrame(loop);
