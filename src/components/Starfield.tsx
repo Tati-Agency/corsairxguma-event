@@ -58,16 +58,17 @@ type LayerSpec = {
 };
 
 /**
- * 5 layer với tile size lớn, KHÔNG là bội số của nhau (793/619/487/311/173)
+ * 5 layer với tile size lớn, KHÔNG là bội số của nhau (793/619/487/311/233)
  * → chu kỳ lặp cực dài, mắt không bắt được ô lặp. Delay/duration lệch pha
- * để twinkle không nhấp nháy đồng loạt.
+ * để twinkle không nhấp nháy đồng loạt. Chấm trong mỗi layer được gom cụm
+ * (xem gradientFor) nên phân bố lộn xộn, không rải đều.
  */
 function buildLayers(density: "low" | "medium"): LayerSpec[] {
   const k = density === "medium" ? 1.4 : 1;
   return [
     // xa nhất: nhiều chấm li ti, mờ
     {
-      seed: 1103, tileW: 793, tileH: 601, dots: Math.round(26 * k),
+      seed: 1103, tileW: 793, tileH: 601, dots: Math.round(34 * k),
       minR: 0.6, maxR: 1.1, minA: 0.16, maxA: 0.48,
       duration: "9.1s", delay: "0s", offsetX: -137, offsetY: -89,
     },
@@ -88,26 +89,64 @@ function buildLayers(density: "low" | "medium"): LayerSpec[] {
     },
     // gần nhất: vài chấm to, sáng rõ
     {
-      seed: 5501, tileW: 173, tileH: 131, dots: Math.round(5 * k),
+      seed: 5501, tileW: 233, tileH: 181, dots: Math.round(6 * k),
       minR: 1.3, maxR: 2.3, minA: 0.5, maxA: 1,
       duration: "3.5s", delay: "0.7s", offsetX: -61, offsetY: -41,
     },
   ];
 }
 
+/**
+ * Sinh gradient cho 1 layer.
+ *
+ * Để không trông "rải đều một khuôn", phần lớn chấm được gom thành CỤM
+ * (cluster) với tâm + bán kính tán ngẫu nhiên → có vùng sao dày, có vùng
+ * trống như bầu trời thật. Một tỉ lệ nhỏ rải tự do để không thành "đốm".
+ *
+ * Lưu ý: background-repeat vẽ lại gradient theo từng tile và CẮT tại mép
+ * tile (không wrap) — nên phải clamp tâm chấm cách mép tối thiểu `pad` px,
+ * tránh hiện vệt sao bị cắt thành đường thẳng dọc/ngang ở mép tile.
+ */
 function gradientFor(spec: LayerSpec, gold: boolean) {
   const rand = mulberry32(spec.seed);
   const dots: string[] = [];
+  const pad = spec.maxR + 1;
+
+  const clampX = (v: number) => Math.min(Math.max(v, pad), spec.tileW - pad);
+  const clampY = (v: number) => Math.min(Math.max(v, pad), spec.tileH - pad);
+
+  // Tâm các cụm — số cụm ~1/4 số chấm, tán rộng/hẹp ngẫu nhiên
+  const clusterCount = Math.max(2, Math.round(spec.dots / 4));
+  const clusters = Array.from({ length: clusterCount }, () => ({
+    x: rand() * spec.tileW,
+    y: rand() * spec.tileH,
+    spread: 24 + rand() * 140,
+  }));
+
   for (let i = 0; i < spec.dots; i++) {
-    const x = Math.round(rand() * spec.tileW);
-    const y = Math.round(rand() * spec.tileH);
+    let x: number;
+    let y: number;
+
+    if (rand() < 0.78) {
+      // Trong cụm: phân bố đĩa đều (sqrt để không dồn về tâm)
+      const c = clusters[Math.floor(rand() * clusters.length)];
+      const ang = rand() * Math.PI * 2;
+      const rad = Math.sqrt(rand()) * c.spread;
+      x = clampX(c.x + Math.cos(ang) * rad);
+      y = clampY(c.y + Math.sin(ang) * rad);
+    } else {
+      // Số ít rải tự do — phá cảm giác "cụm nào cũng giống cụm nào"
+      x = clampX(rand() * spec.tileW);
+      y = clampY(rand() * spec.tileH);
+    }
+
     const r = (spec.minR + rand() * (spec.maxR - spec.minR)).toFixed(2);
     const a = (spec.minA + rand() * (spec.maxA - spec.minA)).toFixed(2);
     // ~1/5 chấm ánh vàng khi bật color="gold"
     const useGold = gold && rand() > 0.8;
     const rgb = useGold ? "236, 232, 26" : "255, 255, 255";
     dots.push(
-      `radial-gradient(${r}px ${r}px at ${x}px ${y}px, rgba(${rgb}, ${a}), transparent 100%)`
+      `radial-gradient(${r}px ${r}px at ${Math.round(x)}px ${Math.round(y)}px, rgba(${rgb}, ${a}), transparent 100%)`
     );
   }
   return dots.join(",");
