@@ -8,6 +8,7 @@ export interface CheckinPayload {
   email: string;
   consent: boolean;
   invoices: File[];
+  purchasedSkus: string[];
 }
 
 export interface CheckinSuccess {
@@ -102,6 +103,7 @@ const ERR_MESSAGE: Record<string, string> = {
   invalid_email: "Email không hợp lệ.",
   consent_required: "Bạn cần xác nhận hóa đơn và đồng ý cho lưu lại để tiếp tục.",
   invoice_required: "Vui lòng tải lên ít nhất 1 ảnh hóa đơn mua hàng.",
+  purchased_required: "Vui lòng chọn ít nhất 1 sản phẩm đã mua.",
   invoice_too_many: "Tối đa 3 ảnh mỗi lượt đăng ký.",
   invoice_too_large_per_file: "Mỗi ảnh tối đa 35MB — hãy chọn ảnh khác.",
   invoice_soft_limit: "Mỗi ảnh nên dưới 20MB để upload nhanh hơn.",
@@ -140,6 +142,10 @@ export async function submitCheckin(
         const compressed = await compressImage(payload.invoices[i]);
         const ext = payload.invoices[i].name.split(".").pop()?.toLowerCase() || "jpg";
         form.append("invoices", compressed, `invoice-${i + 1}.${ext === "png" || ext === "webp" ? ext : "jpg"}`);
+      }
+      // Gửi SKU đã mua (mỗi SKU là 1 field — server getAll + dedup)
+      for (const sku of payload.purchasedSkus) {
+        form.append("purchasedSkus", sku);
       }
 
       const res = await fetch("/api/checkin", { method: "POST", body: form });

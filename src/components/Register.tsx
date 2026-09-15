@@ -8,6 +8,7 @@ import {
   errorMessage,
   type CheckinSuccess,
 } from "@/lib/checkin";
+import ProductSelector from "./ProductSelector";
 
 type RegisterState =
   | "idle"
@@ -25,6 +26,7 @@ export default function Register() {
   const [form, setForm] = useState({ fullName: "", phone: "", email: "" });
   const [invoices, setInvoices] = useState<File[]>([]);
   const [invoicePreviews, setInvoicePreviews] = useState<string[]>([]);
+  const [purchasedSkus, setPurchasedSkus] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -95,6 +97,13 @@ export default function Register() {
     }));
   };
 
+  const togglePurchasedSku = (sku: string) => {
+    setPurchasedSkus((prev) =>
+      prev.includes(sku) ? prev.filter((s) => s !== sku) : [...prev, sku]
+    );
+    setFieldErrors((fe) => ({ ...fe, purchased: "" }));
+  };
+
   const removeInvoice = (idx: number) => {
     setInvoices((prev) => prev.filter((_, i) => i !== idx));
     setInvoicePreviews((prev) => {
@@ -129,13 +138,14 @@ export default function Register() {
         fullName: validateField("fullName", form.fullName),
         phone: validateField("phone", form.phone),
         email: validateField("email", form.email),
+        purchased: purchasedSkus.length > 0 ? "" : "purchased_required",
         invoice: invoices.length > 0 ? "" : "invoice_required",
         consent: consent ? "" : "consent_required",
       };
       setTouched({ fullName: true, phone: true, email: true });
       setFieldErrors(nextErrors);
 
-      const firstBad = ["fullName", "phone", "email", "invoice", "consent"].find(
+      const firstBad = ["fullName", "phone", "email", "purchased", "invoice", "consent"].find(
         (k) => nextErrors[k]
       );
       if (firstBad) {
@@ -149,7 +159,7 @@ export default function Register() {
       setState("checking-in");
 
       const result = await submitCheckin(
-        { ...form, consent, invoices },
+        { ...form, consent, invoices, purchasedSkus },
         (msg) => setRetryInfo(msg)
       );
 
@@ -166,7 +176,7 @@ export default function Register() {
         }
       }
     },
-    [form, invoices, consent]
+    [form, invoices, purchasedSkus, consent]
   );
 
   return (
@@ -252,6 +262,20 @@ export default function Register() {
                     {fieldErrors.email && (
                       <FieldError msg={errorMessage(fieldErrors.email)} />
                     )}
+                  </div>
+
+                  <div>
+                    <span className="label">Sản phẩm GUMAYUSI Collection đã mua *</span>
+                    <ProductSelector
+                      selectedSkus={purchasedSkus}
+                      onToggle={togglePurchasedSku}
+                    />
+                    {fieldErrors.purchased && (
+                      <FieldError msg={errorMessage(fieldErrors.purchased)} />
+                    )}
+                    <p className="mt-2 text-xs text-muted">
+                      Chọn 1 hoặc nhiều sản phẩm — dùng để xác minh quyền tham gia lucky-draw.
+                    </p>
                   </div>
 
                   <div>

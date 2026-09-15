@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
     const email = String(form.get("email") ?? "").trim().toLowerCase();
     const consent = form.get("consent") === "true";
     const invoices = form.getAll("invoices").filter((v): v is File => v instanceof File);
+    const purchasedSkusRaw = form.getAll("purchasedSkus").map((v) => String(v)).filter(Boolean);
+    // Dedup + giới hạn 4 SKU (đúng 4 sp GUMA hiện có)
+    const purchasedSkus = Array.from(new Set(purchasedSkusRaw)).slice(0, 4);
 
     if (!NAME_RE.test(fullName)) return errorJson("invalid_name", 400, "fullName");
 
@@ -49,6 +52,9 @@ export async function POST(req: NextRequest) {
       return errorJson("invalid_email", 400, "email");
 
     if (!consent) return errorJson("consent_required", 400, "consent");
+
+    if (purchasedSkus.length === 0)
+      return errorJson("purchased_required", 400, "purchased");
 
     if (invoices.length === 0) return errorJson("invoice_required", 400, "invoice");
     if (invoices.length > MAX_PHOTOS_PER_CHECKIN)
@@ -128,6 +134,7 @@ export async function POST(req: NextRequest) {
         email,
         photo_file_id: photoFileIds[0] ?? "",
         photo_file_ids: photoFileIds,
+        purchased_skus: purchasedSkus,
         session_hash: hashIdentity(ip, ua),
         consent: true,
         user_agent: ua.slice(0, 250),
