@@ -8,9 +8,10 @@ type Props = {
 };
 
 /**
- * Chọn sản phẩm đã mua — dùng card giống product card ở THE GUMAYUSI COLLECTION.
- * Khi chọn: scale 1.05 + 4 corner-brackets trắng hiện (giống .product-card:hover).
- * Multi-select: bấm vào card nào toggle SKU đó.
+ * Chọn sản phẩm đã mua — dùng ảnh + bracket vàng (khác product-card trắng ở
+ * THE GUMAYUSI COLLECTION) để user không nhầm 2 khu vực.
+ * Hover: bracket vàng mở + ảnh zoom 1.05.
+ * Click: giữ bracket + zoom cố định. Click lần 2: tắt.
  */
 export default function ProductSelector({ selectedSkus, onToggle }: Props) {
   return (
@@ -20,8 +21,10 @@ export default function ProductSelector({ selectedSkus, onToggle }: Props) {
         return (
           <label
             key={p.sku}
-            className={`group product-card relative block aspect-square cursor-pointer overflow-hidden border transition-transform md:aspect-[4/3] ${
-              checked ? "scale-[1.03] border-white/40" : ""
+            className={`group relative block aspect-square cursor-pointer overflow-hidden rounded-lg border border-white/10 transition-all md:aspect-[4/3] ${
+              checked
+                ? "scale-[1.03] border-accent shadow-[0_0_0_1px_rgba(236,232,26,0.4)]"
+                : ""
             }`}
           >
             <input
@@ -43,32 +46,35 @@ export default function ProductSelector({ selectedSkus, onToggle }: Props) {
               decoding="async"
             />
 
-            {/* Gradient chân card giữ chữ đọc được trên ảnh sáng */}
-            <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
-
-            {/* 4 corner brackets — luôn hiện khi checked, hover khi chưa */}
-            <span
-              className={`product-corner tl transition-opacity ${
-                checked ? "opacity-100" : "group-hover:opacity-100"
-              }`}
-            />
-            <span
-              className={`product-corner tr transition-opacity ${
-                checked ? "opacity-100" : "group-hover:opacity-100"
-              }`}
-            />
-            <span
-              className={`product-corner bl transition-opacity ${
-                checked ? "opacity-100" : "group-hover:opacity-100"
-              }`}
-            />
-            <span
-              className={`product-corner br transition-opacity ${
-                checked ? "opacity-100" : "group-hover:opacity-100"
+            {/* Lớp tối nhẹ khi chưa chọn để ảnh không cháy sáng */}
+            <div
+              className={`absolute inset-0 bg-black/30 transition-opacity ${
+                checked ? "opacity-0" : "group-hover:opacity-0"
               }`}
             />
 
-            {/* Border brackets + zoom là đủ để biểu thị "đã chọn" — không cần check icon */}
+            {/* 4 corner brackets VÀNG — phân biệt với product-card trắng.
+                Hover: mở. Click: giữ cố định. */}
+            <span
+              className={`product-corner-accent tl ${
+                checked ? "opacity-100" : "group-hover:opacity-100"
+              }`}
+            />
+            <span
+              className={`product-corner-accent tr ${
+                checked ? "opacity-100" : "group-hover:opacity-100"
+              }`}
+            />
+            <span
+              className={`product-corner-accent bl ${
+                checked ? "opacity-100" : "group-hover:opacity-100"
+              }`}
+            />
+            <span
+              className={`product-corner-accent br ${
+                checked ? "opacity-100" : "group-hover:opacity-100"
+              }`}
+            />
           </label>
         );
       })}
