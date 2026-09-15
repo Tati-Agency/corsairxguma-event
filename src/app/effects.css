@@ -536,16 +536,18 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 .group:hover .product-corner-accent,
 .group:focus-visible .product-corner-accent { opacity: 1; }
 
-/* ---------- CTA tech: bracket vàng staggered + URL placeholder ----------
+/* ---------- CTA tech: bracket vàng staggered + URL mở xuống dưới ----------
    Dùng cho nút "Tìm hiểu thêm" trong product card.
    - 4 bracket vàng scale-in stagger theo góc (cubic-bezier mượt)
-   - URL placeholder fade-in bên cạnh nút */
+   - URL placeholder absolute bên dưới nút, fade + slide xuống khi hover
+   - Cả wrapper dịch lên nhẹ để chừa chỗ cho URL không bị đè */
 .cta-tech {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
   isolation: isolate;
+  transition: transform 280ms var(--ease-out-expo);
 }
 .cta-tech__btn {
   position: relative;
@@ -553,6 +555,10 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   /* layer cao hơn bracket */
 }
 .cta-tech__url {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-top: 0.5rem;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -561,16 +567,20 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--color-accent);
-  max-width: 0;
+  max-width: 240px;
+  width: max-content;
+  text-align: center;
   opacity: 0;
-  overflow: hidden;
+  pointer-events: none;
   white-space: nowrap;
-  transition: max-width 320ms var(--ease-out-expo), opacity 220ms ease 60ms;
+  transform: translateX(-50%) translateY(-6px);
+  transition:
+    opacity 220ms ease,
+    transform 320ms var(--ease-out-expo);
 }
 .cta-tech__url::before {
   content: "→";
   display: inline-block;
-  transform: translateX(-4px);
   transition: transform 320ms var(--ease-out-expo);
 }
 /* Brackets (4 góc vàng) — staggered scale-in */
@@ -614,6 +624,9 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   border-top: none;
 }
 /* Hover state — staggered animation */
+.cta-tech:hover {
+  transform: translateY(-6px);
+}
 .cta-tech:hover .cta-tech__bracket {
   opacity: 1;
   transform: scale(1);
@@ -623,8 +636,9 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 .cta-tech:hover .cta-tech__bracket.bl { transition-delay: 160ms, 120ms; }
 .cta-tech:hover .cta-tech__bracket.br { transition-delay: 240ms, 180ms; }
 .cta-tech:hover .cta-tech__url {
-  max-width: 220px;
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 200ms;
 }
 .cta-tech:hover .cta-tech__url::before {
   transform: translateX(0);
@@ -635,7 +649,7 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 .cta-tech:not(:hover) .cta-tech__bracket.bl { transition-delay: 80ms, 0ms; }
 .cta-tech:not(:hover) .cta-tech__bracket.br { transition-delay: 0ms, 0ms; }
 .cta-tech:not(:hover) .cta-tech__url {
-  transition: max-width 280ms var(--ease-out-expo), opacity 160ms ease;
+  transition-delay: 0ms;
 }
 /* Tiêu đề section căn giữa kiểu web gốc (bỏ gạch chân accent) */
 .section-title-plain {
