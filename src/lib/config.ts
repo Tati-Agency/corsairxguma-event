@@ -16,7 +16,7 @@ export const EVENT = {
  * Dùng chung giữa Countdown.tsx và Register.tsx để đồng bộ
  * "khi nào nút đăng ký được mở" + khi nào video YouTube tự hiện.
  */
-export const EVENT_END_MS = new Date(2020, 0, 1, 0, 0, 0).getTime(); // TEST: ngày quá khứ → finished ngay
+export const EVENT_END_MS = new Date(2026, 8, 22, 0, 0, 0).getTime();
 
 /**
  * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
