@@ -25,7 +25,7 @@ export default function Register() {
   const [pass, setPass] = useState<CheckinSuccess | null>(null);
   const [error, setError] = useState("");
   const [retryInfo, setRetryInfo] = useState<string | null>(null);
-  const [form, setForm] = useState({ fullName: "", phone: "", email: "" });
+  const [form, setForm] = useState({ fullName: "", phone: "", email: "", address: "" });
   const [invoices, setInvoices] = useState<File[]>([]);
   const [invoicePreviews, setInvoicePreviews] = useState<string[]>([]);
   const [purchasedSkus, setPurchasedSkus] = useState<string[]>([]);
@@ -134,7 +134,7 @@ export default function Register() {
 
   /** Live validation: cập nhật giá trị + đánh giá lỗi ngay khi gõ. */
   const updateField = (
-    field: "fullName" | "phone" | "email",
+    field: "fullName" | "phone" | "email" | "address",
     value: string
   ) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -156,18 +156,19 @@ export default function Register() {
         fullName: validateField("fullName", form.fullName),
         phone: validateField("phone", form.phone),
         email: validateField("email", form.email),
+        address: validateField("address", form.address),
         purchased: purchasedSkus.length > 0 ? "" : "purchased_required",
         invoice: invoices.length > 0 ? "" : "invoice_required",
         consent: consent ? "" : "consent_required",
       };
-      setTouched({ fullName: true, phone: true, email: true });
+      setTouched({ fullName: true, phone: true, email: true, address: true });
       setFieldErrors(nextErrors);
 
-      const firstBad = ["fullName", "phone", "email", "purchased", "invoice", "consent"].find(
+      const firstBad = ["fullName", "phone", "email", "address", "purchased", "invoice", "consent"].find(
         (k) => nextErrors[k]
       );
       if (firstBad) {
-        if (["fullName", "phone", "email"].includes(firstBad)) {
+        if (["fullName", "phone", "email", "address"].includes(firstBad)) {
           document.getElementById(firstBad)?.focus();
         }
         return;
@@ -285,6 +286,23 @@ export default function Register() {
                     />
                     {fieldErrors.email && (
                       <FieldError msg={errorMessage(fieldErrors.email)} />
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="label" htmlFor="address">Địa chỉ *</label>
+                    <textarea
+                      id="address"
+                      className={"field min-h-[80px] resize-y" + (fieldErrors.address ? " !border-red-400/70" : "")}
+                      placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+                      value={form.address}
+                      maxLength={512}
+                      required
+                      onChange={(e) => updateField("address", e.target.value)}
+                      onBlur={() => markTouched("address")}
+                    />
+                    {fieldErrors.address && (
+                      <FieldError msg={errorMessage(fieldErrors.address)} />
                     )}
                   </div>
 
@@ -495,6 +513,12 @@ function validateField(field: string, value: string): string {
       return PHONE_RE.test(value.replace(/[\s.\-()]/g, "")) ? "" : "invalid_phone";
     case "email":
       return EMAIL_RE.test(value.trim()) ? "" : "invalid_email";
+    case "address":
+      // Bắt buộc, tối đa 512 ký tự (mirror Appwrite schema)
+      const t = value.trim();
+      if (t.length < 5) return "invalid_address";
+      if (t.length > 512) return "invalid_address";
+      return "";
     default:
       return "";
   }

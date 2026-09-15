@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     const fullName = String(form.get("fullName") ?? "").trim();
     const phoneRaw = String(form.get("phone") ?? "").trim();
     const email = String(form.get("email") ?? "").trim().toLowerCase();
+    const address = String(form.get("address") ?? "").trim();
     const consent = form.get("consent") === "true";
     const invoices = form.getAll("invoices").filter((v): v is File => v instanceof File);
     const purchasedSkusRaw = form.getAll("purchasedSkus").map((v) => String(v)).filter(Boolean);
@@ -50,6 +51,9 @@ export async function POST(req: NextRequest) {
 
     if (!EMAIL_RE.test(email) || email.length > 120)
       return errorJson("invalid_email", 400, "email");
+
+    if (address.length < 5 || address.length > 512)
+      return errorJson("invalid_address", 400, "address");
 
     if (!consent) return errorJson("consent_required", 400, "consent");
 
@@ -132,6 +136,7 @@ export async function POST(req: NextRequest) {
         full_name: fullName,
         phone,
         email,
+        address,
         photo_file_id: photoFileIds[0] ?? "",
         photo_file_ids: photoFileIds,
         purchased_skus: purchasedSkus,

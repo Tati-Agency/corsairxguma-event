@@ -6,6 +6,7 @@ export interface CheckinPayload {
   fullName: string;
   phone: string;
   email: string;
+  address: string;
   consent: boolean;
   invoices: File[];
   purchasedSkus: string[];
@@ -101,6 +102,7 @@ const ERR_MESSAGE: Record<string, string> = {
   invalid_name: "Họ tên không hợp lệ (2–80 ký tự).",
   invalid_phone: "Số điện thoại không hợp lệ (VD: 09xx xxx xxx).",
   invalid_email: "Email không hợp lệ.",
+  invalid_address: "Vui lòng nhập địa chỉ (tối đa 512 ký tự).",
   consent_required: "Bạn cần xác nhận hóa đơn và đồng ý cho lưu lại để tiếp tục.",
   invoice_required: "Vui lòng tải lên ít nhất 1 ảnh hóa đơn mua hàng.",
   purchased_required: "Vui lòng chọn ít nhất 1 sản phẩm đã mua.",
@@ -134,6 +136,7 @@ export async function submitCheckin(
     form.set("fullName", payload.fullName);
     form.set("phone", payload.phone);
     form.set("email", payload.email);
+    form.set("address", payload.address);
     form.set("consent", String(payload.consent));
 
     try {
