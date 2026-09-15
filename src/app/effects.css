@@ -254,7 +254,7 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   .count-core[data-finished] .count-star { animation: none; }
   /* Đóng khung + vòng tròn: bỏ animation, hiện thẳng trạng thái cuối */
   .count-shell--closing { animation: none !important; opacity: 0; }
-  .count-reveal, .count-ring { animation: none; opacity: 1; transform: none; }
+  .count-ring--in { animation: none; opacity: 1; transform: none; }
 }
 
 /* ---------- Forms (double-bezel) ---------- */
@@ -834,25 +834,20 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 /* ============================================================
    Countdown REVEAL — video YouTube + vòng tròn ngôi sao ôm quanh
    ============================================================ */
-.count-reveal {
-  animation: count-reveal-in 700ms var(--ease-out-expo) both;
-}
-@keyframes count-reveal-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Khung tiến trình quanh video: giữ tỉ lệ 16/9 để toạ độ user-unit khớp CSS %
-   (viewBox 160×90 với preserveAspectRatio="none" → scaleX = scaleY, nên
-   bán kính bo góc và vị trí ngôi sao tính theo user-unit không bị méo). */
+/* Khung chứa video (luôn hiện, ở MỌI phase) + khung tiến trình (chỉ reveal).
+   Video dùng inset % nên khung này là mốc toạ độ cho cả ring lẫn ngôi sao:
+   path dựng theo pixel thật của khung (xem buildRingPath trong Countdown.tsx)
+   nên viewBox khớp 1:1, bán kính bo góc và vị trí sao không bị méo. */
 .count-ring {
   position: relative;
   margin-inline: auto;
   width: 100%;
   max-width: 72rem;
   aspect-ratio: 16 / 9;
+}
+/* Khi reveal: khung "hiện ra từ phía trên, giữa khung video" rồi bung ra ôm quanh */
+.count-ring--in {
   transform-origin: top center;
-  /* Khung "hiện ra từ phía trên, giữa khung video" rồi bung ra ôm quanh */
   animation: ring-emerge 800ms var(--ease-out-expo) both;
 }
 @keyframes ring-emerge {

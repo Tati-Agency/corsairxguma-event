@@ -418,14 +418,15 @@ export default function Countdown() {
     return () => window.clearTimeout(t);
   }, [phase]);
 
-  // Chỉ mount iframe khi thật sự cần — tránh video tự chạy ngoài màn hình.
+  // Chỉ mount iframe khi section vào viewport — tránh video tự chạy ngoài
+  // màn hình. Video có mặt ở MỌI phase (nằm trên khung đồng hồ).
   useEffect(() => {
-    if (phase === "reveal" && inView) setVideoMounted(true);
-  }, [phase, inView]);
+    if (inView) setVideoMounted(true);
+  }, [inView]);
 
   // Đo kích thước thật của khung để dựng path theo pixel (xem buildRingPath).
+  // Đo ngay từ đầu (không đợi reveal) để lúc reveal không bị trễ 1 frame.
   useEffect(() => {
-    if (phase !== "reveal") return;
     const el = ringWrapRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(([entry]) => {
@@ -438,7 +439,7 @@ export default function Countdown() {
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [phase]);
+  }, []);
 
   // Animation khung: sao chạy 1 vòng ngược kim đồng hồ, vệt vàng lớn dần
   // đúng tới vị trí ngôi sao (không có line vẽ sẵn từ trước).
@@ -524,11 +525,93 @@ export default function Countdown() {
             </Reveal>
           </div>
 
-          {/* Panel đồng hồ — đóng lại (thu nhỏ) khi chuyển sang reveal */}
+          {/* VIDEO YOUTUBE — LUÔN nằm NGAY TRÊN khung đồng hồ (kể cả khi
+              countdown còn đang chạy). Khung tiến trình + ngôi sao chỉ được
+              thêm vào sau khi countdown kết thúc và user cuộn tới (reveal).
+              Vì video luôn ở cùng một vị trí trong cây DOM nên khi chuyển
+              phase nó KHÔNG bị unmount → không bị phát lại từ đầu. */}
+          <div
+            className={`count-ring mt-10 ${phase === "reveal" ? "count-ring--in" : ""}`}
+            ref={ringWrapRef}
+          >
+            {/* Chỉ render sau khi đo được kích thước — tránh viewBox rỗng */}
+            {phase === "reveal" && ringBox.w > 0 && (
+              <svg
+                className="count-ring-svg"
+                viewBox={`0 0 ${ringBox.w} ${ringBox.h}`}
+                aria-hidden="true"
+              >
+                {/* Chỉ vẽ vệt vàng — không vẽ track nền, để đường chỉ
+                    "sinh ra" đúng tới đâu ngôi sao đi qua tới đó. */}
+                <path
+                  ref={ringFillRef}
+                  className="count-ring-fill"
+                  d={buildRingPath(ringBox.w, ringBox.h)}
+                />
+              </svg>
+            )}
+
+            {/* Khung video — nằm gọn bên trong khung tiến trình.
+                inset khớp với RING_RATIO_INSET (x 6/160 = 3.75%, y 4/90 =
+                4.44% + chừa khe) để đường viền ôm sát quanh video. */}
+            <div className="absolute inset-x-[5.6%] inset-y-[7.8%] overflow-hidden rounded-[12px] bg-black md:rounded-[18px]">
+              {videoMounted && (
+                <iframe
+                  key={unmuted ? "unmuted" : "muted"}
+                  className="absolute inset-0 h-full w-full"
+                  src={`https://www.youtube.com/embed/TrLuWaVNUSc?autoplay=1&mute=${unmuted ? 0 : 1}&rel=0&playsinline=1`}
+                  title="GUMAYUSI Collection"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              )}
+            </div>
+
+            {/* Ngôi sao chạy dọc viền khung — vị trí do rAF cập nhật */}
+            {phase === "reveal" && (
+              <div
+                ref={ringStarRef}
+                className="count-ring-star"
+                style={{ left: "50%", top: "4.444%" }}
+              >
+                <span className="count-ring-star-halo" aria-hidden="true" />
+                <svg width="26" height="26" viewBox="-8 -8 16 16" aria-hidden="true">
+                  <path d={STAR_PATH} />
+                </svg>
+              </div>
+            )}
+
+            {/* Toggle bật/tắt tiếng — desktop góc trên-phải, mobile giữa-dưới video */}
+            <button
+              type="button"
+              onClick={() => setUnmuted((v) => !v)}
+              aria-label={unmuted ? "Tắt tiếng video" : "Bật tiếng video"}
+              className="absolute z-10 flex items-center gap-2 rounded-full border border-accent bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-accent backdrop-blur transition-all hover:bg-accent hover:text-black left-1/2 bottom-[10%] -translate-x-1/2 md:left-auto md:right-[8%] md:top-[10%] md:bottom-auto md:translate-x-0 md:translate-y-0"
+            >
+              {unmuted ? (
+                /* Speaker ON (có tiếng) */
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+              ) : (
+                /* Speaker MUTED (tắt tiếng) */
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+              )}
+              <span className="md:inline">{unmuted ? "Tắt tiếng" : "Bật tiếng"}</span>
+            </button>
+          </div>
+
+          {/* Panel đồng hồ — đóng lại (thu nhỏ) rồi biến mất khi reveal */}
           {phase !== "reveal" && (
             <div
               ref={panelRef}
-              className={`count-shell mx-auto mt-12 rounded-[26px] border border-white/10 bg-[#0c0c10] p-[6px] ${
+              className={`count-shell mx-auto mt-8 rounded-[26px] border border-white/10 bg-[#0c0c10] p-[6px] ${
                 phase === "closing" ? "count-shell--closing" : ""
               }`}
               style={{ animationDelay: "0.32s" }}
@@ -646,82 +729,6 @@ export default function Countdown() {
             </div>
           )}
 
-          {/* Reveal — video YouTube ở trên, khung tiến trình ngôi sao ôm quanh video */}
-          {phase === "reveal" && (
-            <div className="count-reveal mt-8">
-              <div className="count-ring" ref={ringWrapRef}>
-                {/* Chỉ render sau khi đo được kích thước — tránh viewBox rỗng */}
-                {ringBox.w > 0 && (
-                  <svg
-                    className="count-ring-svg"
-                    viewBox={`0 0 ${ringBox.w} ${ringBox.h}`}
-                    aria-hidden="true"
-                  >
-                    {/* Chỉ vẽ vệt vàng — không vẽ track nền, để đường chỉ
-                        "sinh ra" đúng tới đâu ngôi sao đi qua tới đó. */}
-                    <path
-                      ref={ringFillRef}
-                      className="count-ring-fill"
-                      d={buildRingPath(ringBox.w, ringBox.h)}
-                    />
-                  </svg>
-                )}
-
-                {/* Khung video — nằm gọn bên trong khung tiến trình.
-                    inset khớp với RING_RATIO_INSET (x 6/160 = 3.75%, y 4/90 =
-                    4.44% + chừa khe) để đường viền ôm sát quanh video. */}
-                <div className="absolute inset-x-[5.6%] inset-y-[7.8%] overflow-hidden rounded-[12px] bg-black md:rounded-[18px]">
-                  {videoMounted && (
-                    <iframe
-                      key={unmuted ? "unmuted" : "muted"}
-                      className="absolute inset-0 h-full w-full"
-                      src={`https://www.youtube.com/embed/TrLuWaVNUSc?autoplay=1&mute=${unmuted ? 0 : 1}&rel=0&playsinline=1`}
-                      title="GUMAYUSI Collection"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
-                  )}
-                </div>
-
-                {/* Ngôi sao chạy dọc viền khung — vị trí do rAF cập nhật */}
-                <div
-                  ref={ringStarRef}
-                  className="count-ring-star"
-                  style={{ left: "50%", top: "4.444%" }}
-                >
-                  <span className="count-ring-star-halo" aria-hidden="true" />
-                  <svg width="26" height="26" viewBox="-8 -8 16 16" aria-hidden="true">
-                    <path d={STAR_PATH} />
-                  </svg>
-                </div>
-
-                {/* Toggle bật/tắt tiếng — desktop góc trên-phải, mobile giữa-dưới video */}
-                <button
-                  type="button"
-                  onClick={() => setUnmuted((v) => !v)}
-                  aria-label={unmuted ? "Tắt tiếng video" : "Bật tiếng video"}
-                  className="absolute z-10 flex items-center gap-2 rounded-full border border-accent bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-accent backdrop-blur transition-all hover:bg-accent hover:text-black left-1/2 bottom-[10%] -translate-x-1/2 md:left-auto md:right-[8%] md:top-[10%] md:bottom-auto md:translate-x-0 md:translate-y-0"
-                >
-                  {unmuted ? (
-                    /* Speaker ON (có tiếng) */
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                    </svg>
-                  ) : (
-                    /* Speaker MUTED (tắt tiếng) */
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                      <line x1="23" y1="9" x2="17" y2="15" />
-                      <line x1="17" y1="9" x2="23" y2="15" />
-                    </svg>
-                  )}
-                  <span className="md:inline">{unmuted ? "Tắt tiếng" : "Bật tiếng"}</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </section>
