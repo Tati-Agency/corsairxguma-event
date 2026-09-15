@@ -77,8 +77,8 @@ export default function Hero() {
             [ Đăng ký LUCKYDRAW ]
             <span className="arrow">→</span>
           </a>
-          <a href="#excellence" className="btn-ghost hidden md:inline-flex">
-            Road to Excellence
+          <a href="#collection" className="btn-ghost hidden md:inline-flex">
+            PRE-ORDER
           </a>
         </Reveal>
       </div>
