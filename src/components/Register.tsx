@@ -9,6 +9,7 @@ import {
   type CheckinSuccess,
 } from "@/lib/checkin";
 import ProductSelector from "./ProductSelector";
+import RulesPanel from "./RulesPanel";
 
 type RegisterState =
   | "idle"
@@ -187,7 +188,13 @@ export default function Register() {
           <h2 className="section-title section-title-light mt-4">REGISTER NOW.</h2>
         </Reveal>
 
-        <div className="mx-auto mt-12 w-full max-w-2xl">
+        {/* Desktop (md+): grid 2 cột — thể lệ trái, form phải.
+            Mobile: stack dọc — thể lệ trên, form dưới (giống Google Form). */}
+        <div className="mt-12 grid grid-cols-1 items-start gap-8 md:grid-cols-2">
+          <Reveal>
+            <RulesPanel />
+          </Reveal>
+
           <Reveal delay={100}>
             {state === "verifying" && (
               <div className="card">
