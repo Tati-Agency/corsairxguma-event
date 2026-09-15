@@ -554,7 +554,7 @@ export default function Countdown() {
             {/* Khung video — nằm gọn bên trong khung tiến trình.
                 inset khớp với RING_RATIO_INSET (x 6/160 = 3.75%, y 4/90 =
                 4.44% + chừa khe) để đường viền ôm sát quanh video. */}
-            <div className="absolute inset-x-[5.6%] inset-y-[7.8%] overflow-hidden rounded-[12px] bg-black md:rounded-[18px]">
+            <div className="absolute inset-x-[5.6%] inset-y-[7.8%] overflow-hidden rounded-[12px] border border-white/15 bg-black md:rounded-[18px]">
               {videoMounted && (
                 <iframe
                   key={unmuted ? "unmuted" : "muted"}
@@ -611,7 +611,7 @@ export default function Countdown() {
           {phase !== "reveal" && (
             <div
               ref={panelRef}
-              className={`count-shell mx-auto mt-8 rounded-[26px] border border-white/10 bg-[#0c0c10] p-[6px] ${
+              className={`count-shell mx-auto mt-4 rounded-[26px] border border-white/10 bg-[#0c0c10] p-[6px] ${
                 phase === "closing" ? "count-shell--closing" : ""
               }`}
               style={{ animationDelay: "0.32s" }}
