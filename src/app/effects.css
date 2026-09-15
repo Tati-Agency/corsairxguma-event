@@ -515,20 +515,22 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 .group:focus-visible .product-corner { opacity: 1; }
 
 /* Corner brackets vàng — dùng riêng cho ProductSelector (form chọn SP đã mua).
-   Vàng #ECE81A để phân biệt với product-card trắng ở THE GUMAYUSI COLLECTION. */
+   Vàng #ECE81A để phân biệt với product-card trắng ở THE GUMAYUSI COLLECTION.
+   Bo tròn 2 đầu cạnh (border-radius 2px) để khớp với rounded-lg của card. */
 .product-corner-accent {
   position: absolute;
   width: 22px;
   height: 22px;
+  border-radius: 2px;
   opacity: 0;
   transition: opacity 225ms ease-in-out;
   z-index: 2;
   pointer-events: none;
 }
-.product-corner-accent.tl { top: 0; left: 0; border-top: 2.5px solid var(--color-accent); border-left: 2.5px solid var(--color-accent); }
-.product-corner-accent.tr { top: 0; right: 0; border-top: 2.5px solid var(--color-accent); border-right: 2.5px solid var(--color-accent); }
-.product-corner-accent.bl { bottom: 0; left: 0; border-bottom: 2.5px solid var(--color-accent); border-left: 2.5px solid var(--color-accent); }
-.product-corner-accent.br { bottom: 0; right: 0; border-bottom: 2.5px solid var(--color-accent); border-right: 2.5px solid var(--color-accent); }
+.product-corner-accent.tl { top: 0; left: 0; border-top: 2.5px solid var(--color-accent); border-left: 2.5px solid var(--color-accent); border-top-left-radius: var(--radius-sm); }
+.product-corner-accent.tr { top: 0; right: 0; border-top: 2.5px solid var(--color-accent); border-right: 2.5px solid var(--color-accent); border-top-right-radius: var(--radius-sm); }
+.product-corner-accent.bl { bottom: 0; left: 0; border-bottom: 2.5px solid var(--color-accent); border-left: 2.5px solid var(--color-accent); border-bottom-left-radius: var(--radius-sm); }
+.product-corner-accent.br { bottom: 0; right: 0; border-bottom: 2.5px solid var(--color-accent); border-right: 2.5px solid var(--color-accent); border-bottom-right-radius: var(--radius-sm); }
 .group:hover .product-corner-accent,
 .group:focus-visible .product-corner-accent { opacity: 1; }
 /* Tiêu đề section căn giữa kiểu web gốc (bỏ gạch chân accent) */
