@@ -51,9 +51,7 @@ export default function EventJourney() {
           {PRODUCTS.map((product, i) => (
             <Reveal key={product.name} delay={i * 90}>
               <a
-                href={product.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#countdown"
                 aria-label={`${product.name} — Tìm hiểu thêm`}
                 className="product-card group relative block aspect-square overflow-hidden border md:aspect-[4/3]"
               >

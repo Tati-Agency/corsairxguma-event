@@ -12,7 +12,7 @@ import Reveal from "./Reveal";
    Perf: rAF chỉ chạy khi trong viewport (IntersectionObserver).
    ============================================================ */
 
-const TARGET = new Date(2026, 8, 22, 12, 0, 0); // 22/09/2026 12:00
+const TARGET = new Date(2026, 8, 22, 0, 0, 0); // 22/09/2026 00:00
 const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 
 // Đường chạy của ngôi sao — thẳng (không vòng cung)
@@ -347,11 +347,6 @@ export default function Countdown() {
           </div>
 
           <Reveal delay={420}>
-            <p className="mx-auto mt-8 max-w-[46ch] text-xs leading-relaxed text-muted md:text-sm">
-              Mỗi hộp sản phẩm{" "}
-              <strong className="text-text">GUMAYUSI Collection</strong> đều có 2 fan card dành
-              riêng cho chủ nhân của nó. Giữ hóa đơn mua hàng để đăng ký khi cổng pre-order mở.
-            </p>
           </Reveal>
         </div>
       </div>

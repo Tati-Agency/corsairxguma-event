@@ -65,7 +65,7 @@ export default function Hero() {
 
         <Reveal delay={240} className="mt-8 flex flex-row flex-wrap items-center justify-center gap-4">
           <a href="#register" className="btn-accent">
-            [ Đăng ký ngay ]
+            [ Đăng ký GA ]
             <span className="arrow">→</span>
           </a>
           <a href="#excellence" className="btn-ghost hidden md:inline-flex">

@@ -261,9 +261,14 @@ export default function Register() {
                   </label>
                 </div>
 
-                <button type="submit" className="btn-accent mt-8 w-full">
-                  [ Đăng ký ]
-                  <span className="arrow">→</span>
+                <button
+                  type="button"
+                  className="btn-accent mt-8 w-full"
+                  onClick={() => {
+                    document.getElementById("countdown")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                >
+                  [ Đăng ký sẽ được mở vào 22/9 ]
                 </button>
                 </div>
               </form>
