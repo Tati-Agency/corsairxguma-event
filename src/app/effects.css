@@ -867,14 +867,16 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   height: 100%;
   overflow: visible;
 }
-/* Vệt sáng chạy theo chân ngôi sao — chỉ có path này, không có track nền */
+/* Vệt sáng chạy theo chân ngôi sao — chỉ có path này, không có track nền.
+   KHÔNG dùng vector-effect: non-scaling-stroke ở đây — nó khiến Chrome tính
+   stroke-dasharray theo không gian màn hình trong khi getTotalLength() trả
+   user-unit, làm vệt sáng bị sai (hiện sẵn thành nhiều đoạn).
+   Toạ độ path đã là pixel thật nên nét vẽ đúng tỉ lệ, không cần vector-effect. */
 .count-ring-fill {
   fill: none;
   stroke: var(--color-accent);
   stroke-width: 2.5;
   stroke-linecap: round;
-  /* Giữ nét mảnh đều dù viewBox bị kéo giãn */
-  vector-effect: non-scaling-stroke;
   filter: drop-shadow(0 0 6px rgba(236, 232, 26, 0.8));
 }
 /* Ngôi sao chạy dọc viền khung — rAF set left/top theo % */

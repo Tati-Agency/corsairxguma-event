@@ -29,9 +29,9 @@ const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 /** Thời gian khung đồng hồ đóng lại (khớp keyframes count-close trong CSS). */
 const CLOSE_MS = 650;
 /** Thời gian ngôi sao chạy 1 vòng quanh video. */
-const RING_LAP_MS = 2600;
-/** Chờ vòng tròn bung ra xong mới cho sao chạy. */
-const RING_START_DELAY = 500;
+const RING_LAP_MS = 5200;
+/** Chờ khung bung ra xong mới cho sao chạy. */
+const RING_START_DELAY = 600;
 /** Cờ sessionStorage đánh dấu đã reveal. */
 const REVEAL_KEY = "cxg_countdown_revealed";
 
@@ -50,45 +50,59 @@ const NOTCHES = Array.from({ length: 9 }, (_, i) => notchAt((i + 1) / 10));
 const STAR_PATH =
   "M 0 -6.5 L 1.5 -1.5 L 6.5 0 L 1.5 1.5 L 0 6.5 L -1.5 1.5 L -6.5 0 L -1.5 -1.5 Z";
 
-/* ---- Khung tiến trình quanh video (toạ độ user-unit, viewBox 160×90) ----
+/* ---- Khung tiến trình quanh video ----
    Khung CHỮ NHẬT BO GÓC ôm sát viền khung video. Bắt đầu tại ĐỈNH GIỮA
    rồi chạy NGƯỢC KIM ĐỒNG HỒ (sweep-flag 0): trên-trái → trái → dưới →
    phải → trên-phải → về đỉnh (đoạn Z khép lại). Nhờ vậy vệt sáng cũng
    lớn dần theo đúng chiều ngôi sao.
-   viewBox cùng tỉ lệ 16/9 với khung chứa nên user-unit là hình vuông,
-   bán kính bo góc không bị méo. */
-const RING_VB_W = 160;
-const RING_VB_H = 90;
-const RING_INSET_X = 6;
-const RING_INSET_Y = 4;
-const RING_RADIUS = 5;
-const RING_PATH = [
-  `M ${RING_VB_W / 2} ${RING_INSET_Y}`,
-  `L ${RING_INSET_X + RING_RADIUS} ${RING_INSET_Y}`,
-  `A ${RING_RADIUS} ${RING_RADIUS} 0 0 0 ${RING_INSET_X} ${RING_INSET_Y + RING_RADIUS}`,
-  `L ${RING_INSET_X} ${RING_VB_H - RING_INSET_Y - RING_RADIUS}`,
-  `A ${RING_RADIUS} ${RING_RADIUS} 0 0 0 ${RING_INSET_X + RING_RADIUS} ${RING_VB_H - RING_INSET_Y}`,
-  `L ${RING_VB_W - RING_INSET_X - RING_RADIUS} ${RING_VB_H - RING_INSET_Y}`,
-  `A ${RING_RADIUS} ${RING_RADIUS} 0 0 0 ${RING_VB_W - RING_INSET_X} ${RING_VB_H - RING_INSET_Y - RING_RADIUS}`,
-  `L ${RING_VB_W - RING_INSET_X} ${RING_INSET_Y + RING_RADIUS}`,
-  `A ${RING_RADIUS} ${RING_RADIUS} 0 0 0 ${RING_VB_W - RING_INSET_X - RING_RADIUS} ${RING_INSET_Y}`,
-  "Z",
-].join(" ");
+
+   Path dựng theo PIXEL thật của khung (viewBox khớp 1:1, không scale) và
+   KHÔNG dùng `vector-effect: non-scaling-stroke`: khi có non-scaling-stroke,
+   Chrome tính `stroke-dasharray` theo không gian màn hình còn
+   `getTotalLength()` vẫn trả user-unit → hai đơn vị lệch nhau, dash bị sai
+   nên vệt vàng hiện sẵn thành nhiều đoạn thay vì lớn dần theo ngôi sao.
+   Tỉ lệ inset / bo góc giữ nguyên theo thiết kế gốc 160×90. */
+const RING_RATIO_INSET_X = 6 / 160;
+const RING_RATIO_INSET_Y = 4 / 90;
+const RING_RATIO_RADIUS = 5 / 90;
+
+function buildRingPath(w: number, h: number) {
+  const ix = w * RING_RATIO_INSET_X;
+  const iy = h * RING_RATIO_INSET_Y;
+  const r = h * RING_RATIO_RADIUS;
+  const x0 = ix;
+  const x1 = w - ix;
+  const y0 = iy;
+  const y1 = h - iy;
+  return [
+    `M ${w / 2} ${y0}`,
+    `L ${x0 + r} ${y0}`,
+    `A ${r} ${r} 0 0 0 ${x0} ${y0 + r}`,
+    `L ${x0} ${y1 - r}`,
+    `A ${r} ${r} 0 0 0 ${x0 + r} ${y1}`,
+    `L ${x1 - r} ${y1}`,
+    `A ${r} ${r} 0 0 0 ${x1} ${y1 - r}`,
+    `L ${x1} ${y0 + r}`,
+    `A ${r} ${r} 0 0 0 ${x1 - r} ${y0}`,
+    "Z",
+  ].join(" ");
+}
 
 /**
  * Đặt ngôi sao lên đúng đường path theo tiến độ t (0..1).
- * Dùng getPointAtLength nên sao chạy khít theo viền chữ nhật bo góc,
- * không phải theo một đường cong khác.
+ * Dùng getPointAtLength nên sao chạy khít theo viền chữ nhật bo góc.
  */
 function placeStarOnPath(
   el: HTMLElement,
   path: SVGPathElement,
   t: number,
-  total: number
+  total: number,
+  w: number,
+  h: number
 ) {
   const pt = path.getPointAtLength(t * total);
-  el.style.left = `${((pt.x / RING_VB_W) * 100).toFixed(3)}%`;
-  el.style.top = `${((pt.y / RING_VB_H) * 100).toFixed(3)}%`;
+  el.style.left = `${((pt.x / w) * 100).toFixed(3)}%`;
+  el.style.top = `${((pt.y / h) * 100).toFixed(3)}%`;
 }
 
 const UNITS = [
@@ -115,8 +129,11 @@ export default function Countdown() {
   const timerRef = useRef<HTMLDivElement>(null);
   const stripsRef = useRef<(HTMLDivElement | null)[]>([]);
   const sectionElRef = useRef<HTMLElement>(null);
+  const ringWrapRef = useRef<HTMLDivElement>(null);
   const ringFillRef = useRef<SVGPathElement>(null);
   const ringStarRef = useRef<HTMLDivElement>(null);
+  /** Kích thước thật (px) của khung — dùng để dựng path đúng đơn vị. */
+  const [ringBox, setRingBox] = useState({ w: 0, h: 0 });
   /** true khi phiên này đã reveal trước đó (sessionStorage) → bỏ qua animation. */
   const skipRingAnimRef = useRef(false);
 
@@ -320,14 +337,34 @@ export default function Countdown() {
     if (phase === "reveal" && inView) setVideoMounted(true);
   }, [phase, inView]);
 
-  // Animation vòng tròn: sao chạy 1 vòng ngược kim đồng hồ, vệt sáng theo chân.
+  // Đo kích thước thật của khung để dựng path theo pixel (xem buildRingPath).
+  useEffect(() => {
+    if (phase !== "reveal") return;
+    const el = ringWrapRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(([entry]) => {
+      const r = entry.contentRect;
+      setRingBox((prev) =>
+        Math.abs(prev.w - r.width) < 1 && Math.abs(prev.h - r.height) < 1
+          ? prev
+          : { w: Math.round(r.width), h: Math.round(r.height) }
+      );
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [phase]);
+
+  // Animation khung: sao chạy 1 vòng ngược kim đồng hồ, vệt vàng lớn dần
+  // đúng tới vị trí ngôi sao (không có line vẽ sẵn từ trước).
   useEffect(() => {
     if (phase !== "reveal") return;
     const path = ringFillRef.current;
     const star = ringStarRef.current;
     if (!path || !star) return;
+    if (!ringBox.w || !ringBox.h) return;
 
     const total = path.getTotalLength();
+    if (!total) return;
     path.style.strokeDasharray = `${total}`;
 
     // Phiên trước đã reveal, hoặc user bật giảm chuyển động
@@ -337,12 +374,12 @@ export default function Countdown() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (skipRingAnimRef.current || reduceMotion) {
       path.style.strokeDashoffset = "0";
-      placeStarOnPath(star, path, 1, total);
+      placeStarOnPath(star, path, 1, total, ringBox.w, ringBox.h);
       return;
     }
 
     path.style.strokeDashoffset = `${total}`;
-    placeStarOnPath(star, path, 0, total);
+    placeStarOnPath(star, path, 0, total, ringBox.w, ringBox.h);
 
     const smooth = (t: number) =>
       t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -353,13 +390,13 @@ export default function Countdown() {
     const loop = (now: number) => {
       const t = Math.min(1, Math.max(0, (now - startAt) / RING_LAP_MS));
       const e = smooth(t);
-      placeStarOnPath(star, path, e, total);
+      placeStarOnPath(star, path, e, total, ringBox.w, ringBox.h);
       path.style.strokeDashoffset = `${total * (1 - e)}`;
       if (t < 1) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [phase]);
+  }, [phase, ringBox.w, ringBox.h]);
 
   return (
     <section
@@ -529,21 +566,27 @@ export default function Countdown() {
           {/* Reveal — video YouTube ở trên, khung tiến trình ngôi sao ôm quanh video */}
           {phase === "reveal" && (
             <div className="count-reveal mt-8">
-              <div className="count-ring">
-                <svg
-                  className="count-ring-svg"
-                  viewBox={`0 0 ${RING_VB_W} ${RING_VB_H}`}
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  {/* Chỉ vẽ vệt vàng — không vẽ track xám full khung,
-                      để đường chỉ "sinh ra" khi ngôi sao đi qua. */}
-                  <path ref={ringFillRef} className="count-ring-fill" d={RING_PATH} />
-                </svg>
+              <div className="count-ring" ref={ringWrapRef}>
+                {/* Chỉ render sau khi đo được kích thước — tránh viewBox rỗng */}
+                {ringBox.w > 0 && (
+                  <svg
+                    className="count-ring-svg"
+                    viewBox={`0 0 ${ringBox.w} ${ringBox.h}`}
+                    aria-hidden="true"
+                  >
+                    {/* Chỉ vẽ vệt vàng — không vẽ track nền, để đường chỉ
+                        "sinh ra" đúng tới đâu ngôi sao đi qua tới đó. */}
+                    <path
+                      ref={ringFillRef}
+                      className="count-ring-fill"
+                      d={buildRingPath(ringBox.w, ringBox.h)}
+                    />
+                  </svg>
+                )}
 
                 {/* Khung video — nằm gọn bên trong khung tiến trình.
-                    inset khớp với RING_INSET (x 6/160 ≈ 5.6%, y 4/90 ≈ 4.4% +
-                    chừa khe ~3 user-unit) để đường viền ôm sát quanh video. */}
+                    inset khớp với RING_RATIO_INSET (x 6/160 = 3.75%, y 4/90 =
+                    4.44% + chừa khe) để đường viền ôm sát quanh video. */}
                 <div className="absolute inset-x-[5.6%] inset-y-[7.8%] overflow-hidden rounded-[12px] bg-black md:rounded-[18px]">
                   {videoMounted && (
                     <iframe
