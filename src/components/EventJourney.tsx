@@ -2,6 +2,7 @@ import Reveal from "./Reveal";
 
 type Product = {
   name: string;
+  sku: string;
   tagline: string;
   image: string;
   url: string;
@@ -13,29 +14,35 @@ type Product = {
 const PRODUCTS: Product[] = [
   {
     name: "VANGUARD PRO 96",
+    sku: "CH-91E931G-NA",
     tagline: "PROVE IT WITH OUR MOST POPULAR KEYBOARD",
     image: "/products/product-vanguardpro96-guma.png",
     url: "#",
   },
   {
     name: "SABRE v2 PRO CF",
+    sku: "CH-931G20C-WW",
     tagline: "LIGHT, ACCURATE AND HOURS OF BATTERY LIFE",
     image: "/products/product-sabrev2cf-guma.png",
     url: "#",
   },
   {
     name: "MM 2XL STARRY NIGHT",
+    sku: "CH-941D17B-WW",
     tagline: "FEATURING GUMAYUSI",
     image: "/products/product-mmpro-starry-guma.png",
     url: "#",
   },
   {
     name: "MM 2XL BLACK/GOLD",
+    sku: "CH-941D17A-WW",
     tagline: "FEATURING GUMAYUSI",
     image: "/products/product-mmpro-blk-gld-guma.png",
     url: "#",
   },
 ];
+
+export { PRODUCTS };
 
 export default function EventJourney() {
   return (
