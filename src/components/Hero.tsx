@@ -32,7 +32,7 @@ export default function Hero() {
         <img
           src="/img-bg-portrait.png"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
-          className="h-full w-full object-cover object-center brightness-[0.6] md:hidden"
+          className="h-full w-full object-cover object-center brightness-[0.75] md:hidden"
           fetchPriority="high"
           decoding="async"
         />
@@ -40,12 +40,12 @@ export default function Hero() {
         <img
           src="/img-bg-landscape.png"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
-          className="hidden h-full w-full object-cover object-center brightness-100 md:block"
+          className="hidden h-full w-full object-cover object-center md:block"
           fetchPriority="high"
           decoding="async"
         />
-        {/* Overlay: mobile dốc dưới-lên (đậm đáy, nhạt đỉnh), desktop gradient ngang */}
-        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-transparent md:bg-gradient-to-r md:from-bg/90 md:via-bg/60 md:to-transparent" />
+        {/* Overlay: mobile dốc dưới-lên (nhẹ hơn), desktop gradient ngang (nhẹ hơn) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-bg/85 via-bg/55 to-transparent md:bg-gradient-to-r md:from-bg/75 md:via-bg/45 md:to-transparent" />
       </div>
 
       <div className="hero-aura">
