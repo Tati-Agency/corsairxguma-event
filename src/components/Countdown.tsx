@@ -12,7 +12,7 @@ import Reveal from "./Reveal";
    Perf: rAF chỉ chạy khi trong viewport (IntersectionObserver).
    ============================================================ */
 
-const TARGET = new Date(2026, 8, 22, 0, 0, 0); // 22/09/2026 00:00
+const TARGET = new Date(2020, 0, 1, 0, 0, 0); // TEST: ngày trong quá khứ → finished ngay
 const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 
 // Đường chạy của ngôi sao — thẳng (không vòng cung)
@@ -55,6 +55,8 @@ export default function Countdown() {
   /** Khi countdown finished + user scroll tới section → mở rộng panel thành video YouTube.
       Một chiều, không reset (F5 mới về false). */
   const [videoMode, setVideoMode] = useState(false);
+  /** Toggle mute — bắt buộc phải có user gesture để bật tiếng (chính sách YouTube). */
+  const [unmuted, setUnmuted] = useState(false);
 
   useEffect(() => {
     const core = coreRef.current;
@@ -384,15 +386,35 @@ export default function Countdown() {
                 </>
               )}
 
-              {/* Khi videoMode: hiện YouTube embed thay cho toàn bộ nội dung đồng hồ */}
+              {/* Khi videoMode: hiện YouTube embed thay cho toàn bộ nội dung đồng hồ.
+                  Mute=1 bắt buộc để autoplay hoạt động (chính sách của YouTube).
+                  Click nút "Bật tiếng" → reload iframe với mute=0 (cần user gesture). */}
               {videoMode && (
-                <iframe
-                  className="absolute inset-0 h-full w-full rounded-[20px]"
-                  src="https://www.youtube.com/embed/TrLuWaVNUSc?autoplay=1&rel=0"
-                  title="GUMAYUSI Collection"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+                <>
+                  <iframe
+                    key={unmuted ? "unmuted" : "muted"}
+                    className="absolute inset-0 h-full w-full rounded-[20px]"
+                    src={`https://www.youtube.com/embed/TrLuWaVNUSc?autoplay=1&mute=${unmuted ? 0 : 1}&rel=0&playsinline=1`}
+                    title="GUMAYUSI Collection"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                  {!unmuted && (
+                    <button
+                      type="button"
+                      onClick={() => setUnmuted(true)}
+                      aria-label="Bật tiếng video"
+                      className="absolute z-10 flex items-center gap-2 rounded-full border border-accent bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-accent backdrop-blur transition-all hover:bg-accent hover:text-black md:right-4 md:top-4 md:translate-x-0 md:translate-y-0 left-1/2 bottom-4 -translate-x-1/2 md:left-auto md:bottom-auto"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                        <line x1="23" y1="9" x2="17" y2="15" />
+                        <line x1="17" y1="9" x2="23" y2="15" />
+                      </svg>
+                      <span className="md:inline">Bật tiếng</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
