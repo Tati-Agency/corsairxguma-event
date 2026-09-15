@@ -74,22 +74,28 @@ const STAR_PATH =
   "M 0 -6.5 L 1.5 -1.5 L 6.5 0 L 1.5 1.5 L 0 6.5 L -1.5 1.5 L -6.5 0 L -1.5 -1.5 Z";
 
 /* ---- Khung tiến trình quanh video ----
-   Khung CHỮ NHẬT BO GÓC ôm sát viền khung video. Bắt đầu tại ĐỈNH GIỮA
-   rồi chạy NGƯỢC KIM ĐỒNG HỒ (sweep-flag 0): trên-trái → trái → dưới →
-   phải → trên-phải → về đỉnh (đoạn Z khép lại). Nhờ vậy vệt sáng cũng
-   lớn dần theo đúng chiều ngôi sao.
+   Khung CHỮ NHẬT BO GÓC ôm sát viền khung video, gồm 2 NHÁNH cùng xuất phát
+   từ ĐÁY GIỮA và chạy ngược chiều nhau lên ĐỈNH GIỮA:
+
+     nhánh LOGO — CHIỀU KIM ĐỒNG HỒ (sweep-flag 1): vòng qua bên TRÁI.
+     nhánh SAO  — NGƯỢC KIM ĐỒNG HỒ (sweep-flag 0): vòng qua bên PHẢI.
+
+   Hai nhánh dài BẰNG NHAU nên chạy cùng tiến độ t sẽ cùng tốc độ và cùng
+   lúc tới đích. Đỉnh giữa cố ý KHÔNG nối liền, chừa khoảng hở để đặt dấu X.
 
    Path dựng theo PIXEL thật của khung (viewBox khớp 1:1, không scale) và
    KHÔNG dùng `vector-effect: non-scaling-stroke`: khi có non-scaling-stroke,
    Chrome tính `stroke-dasharray` theo không gian màn hình còn
    `getTotalLength()` vẫn trả user-unit → hai đơn vị lệch nhau, dash bị sai
-   nên vệt vàng hiện sẵn thành nhiều đoạn thay vì lớn dần theo ngôi sao.
+   nên vệt vàng hiện sẵn thành nhiều đoạn thay vì lớn dần theo marker.
    Tỉ lệ inset / bo góc giữ nguyên theo thiết kế gốc 160×90. */
 const RING_RATIO_INSET_X = 6 / 160;
 const RING_RATIO_INSET_Y = 4 / 90;
 const RING_RATIO_RADIUS = 5 / 90;
+/** Nửa khoảng hở ở đỉnh giữa, theo bề rộng khung — chỗ đặt dấu X neon. */
+const RING_TOP_GAP_RATIO = 0.035;
 
-function buildRingPath(w: number, h: number) {
+function buildRingPaths(w: number, h: number) {
   const ix = w * RING_RATIO_INSET_X;
   const iy = h * RING_RATIO_INSET_Y;
   const r = h * RING_RATIO_RADIUS;
@@ -97,18 +103,29 @@ function buildRingPath(w: number, h: number) {
   const x1 = w - ix;
   const y0 = iy;
   const y1 = h - iy;
-  return [
-    `M ${w / 2} ${y0}`,
-    `L ${x0 + r} ${y0}`,
-    `A ${r} ${r} 0 0 0 ${x0} ${y0 + r}`,
-    `L ${x0} ${y1 - r}`,
-    `A ${r} ${r} 0 0 0 ${x0 + r} ${y1}`,
+  const cx = w / 2;
+  const gapHalf = w * RING_TOP_GAP_RATIO;
+
+  // sweep-flag 1 = chiều kim đồng hồ, 0 = ngược chiều kim đồng hồ
+  const logo = [
+    `M ${cx} ${y1}`,
+    `L ${x0 + r} ${y1}`,
+    `A ${r} ${r} 0 0 1 ${x0} ${y1 - r}`,
+    `L ${x0} ${y0 + r}`,
+    `A ${r} ${r} 0 0 1 ${x0 + r} ${y0}`,
+    `L ${cx - gapHalf} ${y0}`,
+  ].join(" ");
+
+  const star = [
+    `M ${cx} ${y1}`,
     `L ${x1 - r} ${y1}`,
     `A ${r} ${r} 0 0 0 ${x1} ${y1 - r}`,
     `L ${x1} ${y0 + r}`,
     `A ${r} ${r} 0 0 0 ${x1 - r} ${y0}`,
-    "Z",
+    `L ${cx + gapHalf} ${y0}`,
   ].join(" ");
+
+  return { logo, star, gapHalf };
 }
 
 /* ---- Easing cho ngôi sao (vận tốc cho theo QUÃNG ĐƯỜNG s) ----
@@ -175,10 +192,10 @@ function ringEase(t: number) {
 }
 
 /**
- * Đặt ngôi sao lên đúng đường path theo tiến độ t (0..1).
- * Dùng getPointAtLength nên sao chạy khít theo viền chữ nhật bo góc.
+ * Đặt 1 marker (logo hoặc sao) lên đúng đường path của nó theo tiến độ t
+ * (0..1). Dùng getPointAtLength nên marker chạy khít theo viền bo góc.
  */
-function placeStarOnPath(
+function placeOnPath(
   el: HTMLElement,
   path: SVGPathElement,
   t: number,
@@ -216,10 +233,14 @@ export default function Countdown() {
   const stripsRef = useRef<(HTMLDivElement | null)[]>([]);
   const sectionElRef = useRef<HTMLElement>(null);
   const ringWrapRef = useRef<HTMLDivElement>(null);
-  const ringFillRef = useRef<SVGPathElement>(null);
+  const ringFillLogoRef = useRef<SVGPathElement>(null);
+  const ringFillStarRef = useRef<SVGPathElement>(null);
+  const ringLogoRef = useRef<HTMLDivElement>(null);
   const ringStarRef = useRef<HTMLDivElement>(null);
   /** Kích thước thật (px) của khung — dùng để dựng path đúng đơn vị. */
   const [ringBox, setRingBox] = useState({ w: 0, h: 0 });
+  /** Cả 2 marker đã về đích → hiện dấu X neon ở khoảng hở trên đỉnh. */
+  const [ringDone, setRingDone] = useState(false);
   /** true khi phiên này đã reveal trước đó (sessionStorage) → bỏ qua animation. */
   const skipRingAnimRef = useRef(false);
 
@@ -441,18 +462,34 @@ export default function Countdown() {
     return () => ro.disconnect();
   }, []);
 
-  // Animation khung: sao chạy 1 vòng ngược kim đồng hồ, vệt vàng lớn dần
-  // đúng tới vị trí ngôi sao (không có line vẽ sẵn từ trước).
+  // Animation khung: logo chạy chiều kim đồng hồ (bên trái), sao chạy ngược
+  // chiều kim đồng hồ (bên phải) — cả hai xuất phát từ ĐÁY GIỮA, cùng tiến độ
+  // nên cùng tốc độ, gặp nhau ở ĐỈNH GIỮA và chừa khoảng hở cho dấu X.
+  // Vệt vàng mỗi bên lớn dần đúng tới vị trí marker của nó.
   useEffect(() => {
     if (phase !== "reveal") return;
-    const path = ringFillRef.current;
+    const logoPath = ringFillLogoRef.current;
+    const starPath = ringFillStarRef.current;
+    const logo = ringLogoRef.current;
     const star = ringStarRef.current;
-    if (!path || !star) return;
-    if (!ringBox.w || !ringBox.h) return;
+    if (!logoPath || !starPath || !logo || !star) return;
+    const { w, h } = ringBox;
+    if (!w || !h) return;
 
-    const total = path.getTotalLength();
-    if (!total) return;
-    path.style.strokeDasharray = `${total}`;
+    const logoTotal = logoPath.getTotalLength();
+    const starTotal = starPath.getTotalLength();
+    if (!logoTotal || !starTotal) return;
+
+    logoPath.style.strokeDasharray = `${logoTotal}`;
+    starPath.style.strokeDasharray = `${starTotal}`;
+
+    /** Đặt cả 2 marker + 2 vệt sáng theo cùng tiến độ e. */
+    const apply = (e: number) => {
+      placeOnPath(logo, logoPath, e, logoTotal, w, h);
+      placeOnPath(star, starPath, e, starTotal, w, h);
+      logoPath.style.strokeDashoffset = `${logoTotal * (1 - e)}`;
+      starPath.style.strokeDashoffset = `${starTotal * (1 - e)}`;
+    };
 
     // Phiên trước đã reveal, hoặc user bật giảm chuyển động
     // → hiện thẳng trạng thái hoàn tất, không chạy animation.
@@ -460,27 +497,36 @@ export default function Countdown() {
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (skipRingAnimRef.current || reduceMotion) {
-      path.style.strokeDashoffset = "0";
-      placeStarOnPath(star, path, 1, total, ringBox.w, ringBox.h);
+      apply(1);
+      setRingDone(true);
       return;
     }
 
-    path.style.strokeDashoffset = `${total}`;
-    placeStarOnPath(star, path, 0, total, ringBox.w, ringBox.h);
+    setRingDone(false);
+    apply(0);
 
     let raf = 0;
     const startAt = performance.now() + RING_START_DELAY;
 
     const loop = (now: number) => {
       const t = Math.min(1, Math.max(0, (now - startAt) / RING_LAP_MS));
-      const e = ringEase(t);
-      placeStarOnPath(star, path, e, total, ringBox.w, ringBox.h);
-      path.style.strokeDashoffset = `${total * (1 - e)}`;
-      if (t < 1) raf = requestAnimationFrame(loop);
+      apply(ringEase(t));
+      if (t < 1) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        setRingDone(true); // cả 2 đã dừng ở đỉnh → hiện dấu X
+      }
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [phase, ringBox.w, ringBox.h]);
+
+  // Path 2 nhánh — dựng theo pixel thật của khung; khi chưa đo được thì để
+  // rỗng (SVG cũng chưa render, xem điều kiện ringBox.w > 0 bên dưới).
+  const ringPaths =
+    ringBox.w > 0 && ringBox.h > 0
+      ? buildRingPaths(ringBox.w, ringBox.h)
+      : { logo: "", star: "", gapHalf: 0 };
 
   return (
     <section
@@ -541,12 +587,17 @@ export default function Countdown() {
                 viewBox={`0 0 ${ringBox.w} ${ringBox.h}`}
                 aria-hidden="true"
               >
-                {/* Chỉ vẽ vệt vàng — không vẽ track nền, để đường chỉ
-                    "sinh ra" đúng tới đâu ngôi sao đi qua tới đó. */}
+                {/* 2 nhánh, không vẽ track nền — đường chỉ "sinh ra"
+                    đúng tới đâu marker của nó đi qua tới đó. */}
                 <path
-                  ref={ringFillRef}
+                  ref={ringFillLogoRef}
                   className="count-ring-fill"
-                  d={buildRingPath(ringBox.w, ringBox.h)}
+                  d={ringPaths.logo}
+                />
+                <path
+                  ref={ringFillStarRef}
+                  className="count-ring-fill"
+                  d={ringPaths.star}
                 />
               </svg>
             )}
@@ -567,16 +618,42 @@ export default function Countdown() {
               )}
             </div>
 
-            {/* Ngôi sao chạy dọc viền khung — vị trí do rAF cập nhật */}
+            {/* 2 marker chạy dọc viền khung — vị trí do rAF cập nhật.
+                Cả hai xuất phát từ ĐÁY GIỮA (50%, 95.556% ~ sát mép dưới). */}
             {phase === "reveal" && (
-              <div
-                ref={ringStarRef}
-                className="count-ring-star"
-                style={{ left: "50%", top: "4.444%" }}
-              >
-                <span className="count-ring-star-halo" aria-hidden="true" />
-                <svg width="26" height="26" viewBox="-8 -8 16 16" aria-hidden="true">
-                  <path d={STAR_PATH} />
+              <>
+                {/* Logo CORSAIR — chạy CHIỀU KIM ĐỒNG HỒ (vòng bên trái).
+                    Tô vàng bằng CSS mask: nền accent + mask chính file SVG,
+                    vì logo là ảnh nhúng base64 nên không đổi fill được. */}
+                <div
+                  ref={ringLogoRef}
+                  className="count-ring-marker"
+                  style={{ left: "50%", top: "95.556%" }}
+                >
+                  <span className="count-ring-halo" aria-hidden="true" />
+                  <span className="count-ring-logo" aria-hidden="true" />
+                </div>
+
+                {/* Ngôi sao GUMA — chạy NGƯỢC KIM ĐỒNG HỒ (vòng bên phải) */}
+                <div
+                  ref={ringStarRef}
+                  className="count-ring-marker"
+                  style={{ left: "50%", top: "95.556%" }}
+                >
+                  <span className="count-ring-halo" aria-hidden="true" />
+                  <svg width="26" height="26" viewBox="-8 -8 16 16" aria-hidden="true">
+                    <path d={STAR_PATH} />
+                  </svg>
+                </div>
+              </>
+            )}
+
+            {/* Dấu X neon ở khoảng hở đỉnh giữa — hiện khi cả 2 marker về đích */}
+            {phase === "reveal" && ringDone && (
+              <div className="count-ring-x" style={{ left: "50%", top: "4.444%" }}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <line x1="5" y1="5" x2="19" y2="19" />
+                  <line x1="19" y1="5" x2="5" y2="19" />
                 </svg>
               </div>
             )}
