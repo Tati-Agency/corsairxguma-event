@@ -45,12 +45,14 @@ const RING_ACCEL_DISTANCE = 3 / 5;
  */
 const RING_SPEED_GAIN = 2.6;
 /**
- * Hình dạng cú hãm ở 2/5 cuối:
- *   1   = giảm tốc đều suốt đoạn cuối → cả đoạn cuối đều chậm (đang dùng)
- *   2-3 = giữ tốc độ cao lâu rồi mới tụt ở sát đích (đoạn cuối vẫn nhanh)
- *   4+  = gần như phanh gấp đúng lúc về đích
+ * Hình dạng cú hãm ở 2/5 cuối — quyết định cú hãm dồn vào ĐẦU hay CUỐI đoạn:
+ *   0.4-0.6 = hãm sốc ngay khi vào đoạn cuối rồi thoải dần (đang dùng 0.5)
+ *   1       = giảm đều suốt đoạn cuối
+ *   2-3     = giữ tốc độ cao lâu rồi mới tụt sát đích
+ *   4+      = gần như phanh gấp đúng lúc về đích
+ * Mọi giá trị đều về ĐÚNG tốc độ ban đầu tại s = 1.
  */
-const RING_BRAKE_P = 1;
+const RING_BRAKE_P = 0.5;
 /** Số mẫu khi tích phân số dựng bảng easing. */
 const RING_TABLE_N = 400;
 /** Cờ sessionStorage đánh dấu đã reveal. */
