@@ -345,9 +345,6 @@ export default function Countdown() {
               </div>
             </div>
           </div>
-
-          <Reveal delay={420}>
-          </Reveal>
         </div>
       </div>
     </section>
