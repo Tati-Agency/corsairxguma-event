@@ -29,7 +29,7 @@ const WINDOW_MS = 14 * 24 * 60 * 60 * 1000; // cửa sổ 14 ngày
 /** Thời gian khung đồng hồ đóng lại (khớp keyframes count-close trong CSS). */
 const CLOSE_MS = 650;
 /** Thời gian ngôi sao chạy 1 vòng quanh video. */
-const RING_LAP_MS = 4800;
+const RING_LAP_MS = 4200;
 /** Chờ khung bung ra xong mới cho sao chạy. */
 const RING_START_DELAY = 600;
 /** Quãng đường tăng tốc (2/3) — 1/3 còn lại giảm tốc về tốc độ ban đầu. */
@@ -40,6 +40,12 @@ const RING_ACCEL_DISTANCE = 2 / 3;
  * lúc xuất phát; >3.5 bắt đầu giật vì đoạn đầu/cuối quá chậm.
  */
 const RING_SPEED_GAIN = 2.6;
+/**
+ * Độ "dốc" của cú hãm cuối: càng lớn thì tốc độ giữ càng lâu ở 1/3 cuối
+ * rồi tụt càng sốc về tốc độ ban đầu. 2 = hãm trải đều, 3 = hãm rõ ở cuối,
+ * 4+ = gần như giữ nguyên tốc độ rồi phanh gấp sát đích.
+ */
+const RING_BRAKE_P = 3;
 /** Số mẫu khi tích phân số dựng bảng easing. */
 const RING_TABLE_N = 400;
 /** Cờ sessionStorage đánh dấu đã reveal. */
@@ -98,22 +104,35 @@ function buildRingPath(w: number, h: number) {
   ].join(" ");
 }
 
-/* ---- Easing cho ngôi sao ----
-   Vận tốc được cho theo QUÃNG ĐƯỜNG s:
-     v(s) = v0 + A·sin(π·s^P)
-   với P chọn sao cho đỉnh vận tốc rơi đúng tại s = 2/3. Nhờ vậy:
-   bắt đầu ở tốc độ gốc → tăng tốc trong 2/3 quãng đường → giảm tốc trong
-   1/3 còn lại và về ĐÚNG tốc độ ban đầu (không dừng hẳn) → cảm giác nhanh
-   mà vẫn mượt, không bị "hãm" ở cuối.
+/* ---- Easing cho ngôi sao (vận tốc cho theo QUÃNG ĐƯỜNG s) ----
+   Chia 2 pha, đỉnh vận tốc đúng tại s = 2/3:
+
+     pha tăng tốc  (s ≤ 2/3):  v = v0 + d·smoothstep(s / (2/3))
+       → vào êm (đạo hàm 0 tại s=0) rồi tăng dần tới đỉnh.
+
+     pha hãm       (s > 2/3):  v = v0 + d·(1 - u^BRAKE_P),  u = (s-2/3)/(1/3)
+       → giữ tốc độ cao gần như suốt 1/3 cuối rồi mới TỤT MẠNH ở những %
+         cuối cùng, và về đúng tốc độ ban đầu tại s = 1.
+         BRAKE_P càng lớn thì cú hãm càng dồn về sát đích.
+
+   (Trước đây dùng v = v0 + d·sin(π·s^P) — giảm tốc trải đều cả 1/3 cuối nên
+   nhìn không rõ cú hãm.)
 
    Vì v cho theo quãng đường nên phải tích phân số để đổi sang thời gian
    (t = ∫ ds/v), rồi tra ngược bảng để biết tại thời điểm t đã đi được bao
    xa. Bảng dựng 1 lần ở module scope nên không tốn gì lúc chạy. */
 const RING_EASE_TABLE = (() => {
-  const P = Math.log(0.5) / Math.log(RING_ACCEL_DISTANCE);
   const v0 = 1;
-  const A = v0 * (RING_SPEED_GAIN - 1);
-  const speed = (s: number) => v0 + A * Math.sin(Math.PI * Math.pow(s, P));
+  const d = RING_SPEED_GAIN - 1;
+  const accel = RING_ACCEL_DISTANCE;
+  const speed = (s: number) => {
+    if (s <= accel) {
+      const u = s / accel;
+      return v0 + d * (u * u * (3 - 2 * u)); // smoothstep
+    }
+    const u = (s - accel) / (1 - accel);
+    return v0 + d * (1 - Math.pow(u, RING_BRAKE_P));
+  };
 
   const ts: number[] = [0];
   const ss: number[] = [0];
