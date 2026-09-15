@@ -68,15 +68,7 @@ export default function ProductSelector({ selectedSkus, onToggle }: Props) {
               }`}
             />
 
-            {/* Check icon góc trên-phải khi đã chọn */}
-            {checked && (
-              <span
-                aria-hidden="true"
-                className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-black shadow-md"
-              >
-                ✓
-              </span>
-            )}
+            {/* Border brackets + zoom là đủ để biểu thị "đã chọn" — không cần check icon */}
           </label>
         );
       })}
