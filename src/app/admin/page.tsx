@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EVENT } from "@/lib/config";
 import { GROUPS, SKU_LABEL, type GroupKey } from "@/lib/groups";
+import type { AdminRole } from "@/lib/admin-auth";
 import AnimatedNumber from "@/components/admin/AnimatedNumber";
 import Donut from "@/components/admin/Donut";
 import StatChart from "@/components/admin/StatChart";
@@ -24,6 +25,15 @@ interface Stats {
 /** Sắp xếp entry của map theo giá trị giảm dần (dùng cho bar/chip). */
 function byValueDesc(obj: Record<string, number>): [string, number][] {
   return Object.entries(obj).sort((a, b) => b[1] - a[1]);
+}
+
+/**
+ * Staff nhận mốc thời gian đã bị cắt còn "YYYY-MM-DD" (không giờ) →
+ * hiển thị dd/mm/yyyy thay vì toLocaleString (sẽ ra "00:00:00").
+ */
+function formatDateOnly(value: string): string {
+  const [y, m, d] = value.slice(0, 10).split("-");
+  return d && m && y ? `${d}/${m}/${y}` : value;
 }
 
 interface CheckinDoc {
@@ -81,6 +91,12 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   /** Lỗi khi tải dữ liệu — phân loại để báo đúng nguyên nhân. */
   const [loadError, setLoadError] = useState<LoadFailure | null>(null);
+  /**
+   * Vai trò lấy từ server (theo key đã đăng nhập). Mặc định "staff" — mức
+   * quyền thấp nhất, để lúc chưa biết role thì UI không lỡ hiện phần admin.
+   */
+  const [role, setRole] = useState<AdminRole>("staff");
+  const isAdmin = role === "admin";
   /** Danh sách đang xem: all | keyboard | mouse | mousepad | mouse_keyboard */
   const [group, setGroup] = useState<GroupKey>("all");
   /** Dropdown chọn danh sách để xuất CSV đang mở. */
@@ -153,6 +169,7 @@ export default function AdminPage() {
             ? await checkinsRes.value.json().catch(() => null)
             : null;
 
+        if (statsData?.role) setRole(statsData.role);
         if (statsData?.stats) setStats(statsData.stats);
         if (checkinsData?.documents) {
           setCheckins(checkinsData.documents);
@@ -284,7 +301,18 @@ export default function AdminPage() {
     <main className="container-c py-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="display text-3xl font-bold">DASHBOARD</h1>
+          <h1 className="display flex items-center gap-3 text-3xl font-bold">
+            DASHBOARD
+            <span
+              className={`border px-2 py-0.5 text-xs font-semibold tracking-widest ${
+                isAdmin
+                  ? "border-accent text-accent"
+                  : "border-line text-muted"
+              }`}
+            >
+              {isAdmin ? "ADMIN" : "STAFF"}
+            </span>
+          </h1>
           <p className="text-sm text-muted">{EVENT.title} — {EVENT.slug}</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -370,14 +398,24 @@ export default function AdminPage() {
             <StatCard label="Tổng truy cập" value={stats.totalVisits} />
             <StatCard label="Truy cập thật (unique)" value={stats.uniqueVisits} accent />
             <StatCard label="Tổng đăng ký" value={stats.totalCheckins} />
-            <StatCard
-              label="Conversion rate"
-              value={stats.conversionRate}
-              decimals={1}
-              suffix="%"
-              accent
-            />
+            {/* Conversion rate chỉ dành cho admin */}
+            {isAdmin && (
+              <StatCard
+                label="Conversion rate"
+                value={stats.conversionRate ?? 0}
+                decimals={1}
+                suffix="%"
+                accent
+              />
+            )}
           </div>
+
+          {!isAdmin && (
+            <p className="mt-4 text-xs text-muted">
+              Bạn đang đăng nhập bằng key staff — thông tin cá nhân trong danh
+              sách đã được che bớt.
+            </p>
+          )}
 
           {/* Biểu đồ theo ngày */}
           <div className="mt-6 border border-line bg-surface p-6">
@@ -399,6 +437,10 @@ export default function AdminPage() {
             />
           </div>
 
+          {/* Các breakdown bên dưới CHỈ dành cho admin — server cũng không
+              gửi các số liệu này xuống khi đăng nhập bằng key staff. */}
+          {isAdmin && (
+            <>
           {/* Thiết bị (donut) + Hệ điều hành + Đăng ký theo giờ */}
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <div className="border border-line bg-surface p-6">
@@ -481,6 +523,8 @@ export default function AdminPage() {
               )}
             </div>
           </div>
+            </>
+          )}
         </section>
       )}
 
@@ -518,7 +562,11 @@ export default function AdminPage() {
           <div className="flex gap-2">
             <input
               className="field !w-56"
-              placeholder="Tìm tên / SĐT / email / code…"
+              placeholder={
+                isAdmin
+                  ? "Tìm tên / SĐT / email / code…"
+                  : "Tìm theo mã tham gia…"
+              }
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -618,7 +666,10 @@ export default function AdminPage() {
                         </div>
                       </td>
                       <td className="px-4 py-2 whitespace-nowrap text-muted">
-                        {new Date(c.$createdAt).toLocaleString("vi-VN")}
+                        {/* Staff chỉ nhận về ngày (không giờ) từ server */}
+                        {isAdmin
+                          ? new Date(c.$createdAt).toLocaleString("vi-VN")
+                          : formatDateOnly(c.$createdAt)}
                       </td>
                     </tr>
                   );

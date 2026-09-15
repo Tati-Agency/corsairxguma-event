@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin-auth";
+import { getRole, unauthorized } from "@/lib/admin-auth";
 import { listAllDocs } from "@/lib/admin-data";
 import { APPWRITE } from "@/lib/config";
 
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const denied = requireAdmin(req);
-  if (denied) return denied;
+  const role = getRole(req);
+  if (!role) return unauthorized();
+  const isStaff = role === "staff";
 
   const event = req.nextUrl.searchParams.get("event") ?? "";
   try {
@@ -80,24 +81,34 @@ export async function GET(req: NextRequest) {
     const totalVisits = evVisits.length;
     const totalCheckins = evCheckins.length;
 
-    return NextResponse.json({
-      ok: true,
-      stats: {
-        totalVisits,
-        uniqueVisits: uniqueSessions.size,
-        totalCheckins,
-        conversionRate:
-          totalVisits > 0
-            ? Math.round((totalCheckins / totalVisits) * 1000) / 10
-            : 0,
-        byDevice,
-        byBrowser,
-        byOs,
-        byReferrer,
-        byHour,
-        byDay,
-      },
-    });
+    // Staff chỉ được nhận 3 KPI cơ bản + chuỗi theo ngày. Các breakdown
+    // (thiết bị / OS / giờ / browser / referrer) và conversion rate KHÔNG
+    // được gửi xuống, để dù có mở DevTools cũng không thấy.
+    const stats = isStaff
+      ? {
+          totalVisits,
+          uniqueVisits: uniqueSessions.size,
+          totalCheckins,
+          byDay,
+        }
+      : {
+          totalVisits,
+          uniqueVisits: uniqueSessions.size,
+          totalCheckins,
+          conversionRate:
+            totalVisits > 0
+              ? Math.round((totalCheckins / totalVisits) * 1000) / 10
+              : 0,
+          byDevice,
+          byBrowser,
+          byOs,
+          byReferrer,
+          byHour,
+          byDay,
+        };
+
+    // `role` để UI biết ẩn/hiện phần nào (không phải để client tự che dữ liệu)
+    return NextResponse.json({ ok: true, role, stats });
   } catch (err) {
     console.error("[admin/summary]", err);
     return NextResponse.json({ ok: false, error: "server_error" }, { status: 500 });

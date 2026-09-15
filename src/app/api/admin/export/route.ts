@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin-auth";
+import { getRole, unauthorized } from "@/lib/admin-auth";
+import { maskCheckinRow } from "@/lib/mask";
 import { groupQueries, listAllDocs, toCsv } from "@/lib/admin-data";
 import { APPWRITE } from "@/lib/config";
 import { Query } from "node-appwrite";
@@ -7,8 +8,8 @@ import { Query } from "node-appwrite";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const denied = requireAdmin(req);
-  if (denied) return denied;
+  const role = getRole(req);
+  if (!role) return unauthorized();
 
   const sp = req.nextUrl.searchParams;
   const type = sp.get("type") ?? "register";
@@ -23,7 +24,12 @@ export async function GET(req: NextRequest) {
         ...(event ? [Query.equal("event_id", event)] : []),
         ...groupQueries(group),
       ];
-      const rows = await listAllDocs(APPWRITE.colCheckins, queries);
+      const allRows = await listAllDocs(APPWRITE.colCheckins, queries);
+
+      // Staff: che thông tin cá nhân NGAY Ở SERVER trước khi dựng CSV —
+      // file tải về cũng chỉ có dữ liệu đã che, giống trên màn hình.
+      const rows =
+        role === "staff" ? allRows.map((r) => maskCheckinRow(r)) : allRows;
 
       // CSV không có kiểu mảng → gộp mảng thành chuỗi, mỗi giá trị cách " | ".
       // photo_file_ids có thể trống với dữ liệu cũ → fallback về photo_file_id.

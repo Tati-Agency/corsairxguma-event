@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/admin-auth";
+import { getRole, unauthorized } from "@/lib/admin-auth";
 import { getAppwrite } from "@/lib/appwrite";
+import { maskCheckinRow } from "@/lib/mask";
 import { groupQueries } from "@/lib/admin-data";
 import { APPWRITE } from "@/lib/config";
 import { Query } from "node-appwrite";
@@ -8,8 +9,8 @@ import { Query } from "node-appwrite";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  const denied = requireAdmin(req);
-  if (denied) return denied;
+  const role = getRole(req);
+  if (!role) return unauthorized();
 
   const sp = req.nextUrl.searchParams;
   const event = sp.get("event") ?? "";
@@ -25,14 +26,19 @@ export async function GET(req: NextRequest) {
     // Lọc theo danh sách (theo SKU đã mua)
     queries.push(...groupQueries(group));
     if (q) {
-      // Tìm đa trường: tên, SĐT, email, player code
+      // Staff chỉ được tìm theo mã tham gia: nếu cho tìm theo tên/SĐT/email thì
+      // họ có thể dò dần để xác nhận một người có trong danh sách hay không
+      // (dù kết quả đã bị che) — đó vẫn là rò rỉ thông tin.
+      const fields =
+        role === "staff"
+          ? ["player_code"]
+          : ["full_name", "phone", "email", "player_code"];
+      // Appwrite yêu cầu Query.or() có ÍT NHẤT 2 điều kiện → với 1 field
+      // (trường hợp staff) thì thêm thẳng Query.contains, không bọc or.
       queries.push(
-        Query.or([
-          Query.contains("full_name", q),
-          Query.contains("phone", q),
-          Query.contains("email", q),
-          Query.contains("player_code", q),
-        ])
+        fields.length === 1
+          ? Query.contains(fields[0], q)
+          : Query.or(fields.map((f) => Query.contains(f, q)))
       );
     }
 
@@ -43,10 +49,17 @@ export async function GET(req: NextRequest) {
       [...queries, Query.orderDesc("$createdAt"), Query.limit(limit), Query.offset(offset)]
     );
 
+    // Staff: che thông tin cá nhân NGAY Ở SERVER (không để client tự che)
+    const documents =
+      role === "staff"
+        ? res.rows.map((r) => maskCheckinRow(r as unknown as Record<string, unknown>))
+        : res.rows;
+
     return NextResponse.json({
       ok: true,
+      role,
       total: res.total,
-      documents: res.rows,
+      documents,
     });
   } catch (err) {
     console.error("[admin/checkins]", err);
