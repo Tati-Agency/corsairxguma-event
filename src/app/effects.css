@@ -434,6 +434,13 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 @media (min-width: 768px) {
   .hero-subhead { font-size: 1.35rem; }
 }
+/* Hero desktop: khi subhead xếp 2 cột dọc (mỗi chữ 1 dòng),
+   cần size to hơn để 19 dòng đọc được từ xa. */
+@media (min-width: 768px) {
+  .hero-subhead > span.flex > span.flex-col > span {
+    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  }
+}
 .hero-main {
   display: block;
   color: var(--color-text);
