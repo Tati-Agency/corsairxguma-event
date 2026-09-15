@@ -49,7 +49,7 @@ export default function EventJourney() {
     <section id="collection" className="section-divider cv-auto py-16 scroll-mt-20 md:py-32">
       <div className="container-c">
         <Reveal>
-          <h2 className="section-title section-title-light section-title-plain">
+          <h2 className="section-title section-title-light">
             THE GUMAYUSI COLLECTION
           </h2>
         </Reveal>
