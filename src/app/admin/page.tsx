@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EVENT } from "@/lib/config";
+import { GROUPS, SKU_LABEL, type GroupKey } from "@/lib/groups";
 
 interface Stats {
   totalVisits: number;
@@ -21,7 +22,10 @@ interface CheckinDoc {
   full_name: string;
   phone: string;
   email: string;
+  address?: string;
+  purchased_skus?: string[];
   photo_file_id: string;
+  photo_file_ids?: string[];
   $createdAt: string;
 }
 
@@ -62,6 +66,11 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   /** Lỗi khi tải dữ liệu — phân loại để báo đúng nguyên nhân. */
   const [loadError, setLoadError] = useState<LoadFailure | null>(null);
+  /** Danh sách đang xem: all | keyboard | mouse | mousepad | mouse_keyboard */
+  const [group, setGroup] = useState<GroupKey>("all");
+  /** Dropdown chọn danh sách để xuất CSV đang mở. */
+  const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +106,7 @@ export default function AdminPage() {
       setLoadError(null);
 
       const headers = { "x-admin-key": key };
-      const checkinsUrl = `/api/admin/checkins?event=${EVENT.slug}&limit=${PAGE_SIZE}&offset=${newOffset}${
+      const checkinsUrl = `/api/admin/checkins?event=${EVENT.slug}&group=${group}&limit=${PAGE_SIZE}&offset=${newOffset}${
         search ? `&q=${encodeURIComponent(search)}` : ""
       }`;
 
@@ -152,7 +161,7 @@ export default function AdminPage() {
         setLoading(false);
       }
     },
-    [key]
+    [key, group]
   );
 
   /** Xoá key đã lưu và quay về form đăng nhập. */
@@ -173,22 +182,37 @@ export default function AdminPage() {
   /**
    * Tải CSV qua fetch (gửi kèm x-admin-key header) rồi lưu về máy.
    * Link <a href> trực tiếp không gửi được header → sẽ bị 401.
+   *
+   * type "register": xuất danh sách đăng ký, chọn 1 trong 5 danh sách qua `groupKey`.
    */
-  const downloadCsv = async (type: "checkins" | "analytics") => {
+  const downloadCsv = async (
+    type: "register" | "analytics",
+    groupKey: GroupKey = "all"
+  ) => {
+    setExportOpen(false);
     try {
-      const res = await fetch(`/api/admin/export?type=${type}&event=${EVENT.slug}`, {
+      const params = new URLSearchParams({ type, event: EVENT.slug });
+      if (type === "register") params.set("group", groupKey);
+
+      const res = await fetch(`/api/admin/export?${params.toString()}`, {
         headers: { "x-admin-key": key },
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setLoadError({ kind: "server", msg: "Xuất CSV thất bại. Thử lại giúp mình." });
+        return;
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${type}-${EVENT.slug}.csv`;
+      a.download =
+        type === "register"
+          ? `register-${groupKey}-${EVENT.slug}.csv`
+          : `analytics-${EVENT.slug}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      // ignore — user can retry
+      setLoadError({ kind: "network", msg: "Không kết nối được server để xuất CSV." });
     }
   };
 
@@ -203,6 +227,18 @@ export default function AdminPage() {
   useEffect(() => {
     if (authed && key) load();
   }, [authed, key, load]);
+
+  // Đóng dropdown xuất CSV khi click ra ngoài
+  useEffect(() => {
+    if (!exportOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setExportOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [exportOpen]);
 
   if (!authed) {
     return (
@@ -237,13 +273,44 @@ export default function AdminPage() {
           <p className="text-sm text-muted">{EVENT.title} — {EVENT.slug}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            className="btn-ghost !py-2 !px-4 text-xs"
-            onClick={() => downloadCsv("checkins")}
-          >
-            ⬇ CSV Check-in
-          </button>
+          {/* Xuất Register — dropdown custom chọn 1 trong 5 danh sách */}
+          <div className="relative" ref={exportRef}>
+            <button
+              type="button"
+              className="btn-ghost !py-2 !px-4 text-xs"
+              aria-haspopup="listbox"
+              aria-expanded={exportOpen}
+              onClick={() => setExportOpen((v) => !v)}
+            >
+              ⬇ CSV Register
+              <span className={`ml-1 inline-block transition-transform ${exportOpen ? "rotate-180" : ""}`}>
+                ▾
+              </span>
+            </button>
+
+            {exportOpen && (
+              <ul
+                role="listbox"
+                className="absolute right-0 z-20 mt-2 w-64 border border-line bg-surface py-1 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)]"
+              >
+                {GROUPS.map((g) => (
+                  <li key={g.key}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={group === g.key}
+                      className="flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-xs text-muted transition-colors hover:bg-white/5 hover:text-text"
+                      onClick={() => downloadCsv("register", g.key)}
+                    >
+                      <span className={group === g.key ? "text-accent" : ""}>{g.short}</span>
+                      {group === g.key && <span className="text-accent">●</span>}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <button
             type="button"
             className="btn-ghost !py-2 !px-4 text-xs"
@@ -352,11 +419,35 @@ export default function AdminPage() {
         </section>
       )}
 
-      {/* Check-ins table */}
+      {/* 5 danh sách: 4 để quay số + 1 tổng để quản lý số liệu */}
       <section className="mt-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <h2 className="display text-2xl font-bold">DANH SÁCH ĐĂNG KÝ</h2>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {GROUPS.map((g) => {
+            const active = group === g.key;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => setGroup(g.key)}
+                aria-pressed={active}
+                className={`border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                  active
+                    ? "border-accent bg-accent text-black"
+                    : "border-line text-muted hover:border-accent hover:text-accent"
+                }`}
+              >
+                {g.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="display text-2xl font-bold">DANH SÁCH ĐĂNG KÝ</h2>
+            <h3 className="display text-lg font-bold">
+              {GROUPS.find((g) => g.key === group)?.label ?? "Tổng đăng ký"}
+            </h3>
             <p className="text-sm text-muted">Tổng: {total} đăng ký</p>
           </div>
           <div className="flex gap-2">
@@ -380,46 +471,93 @@ export default function AdminPage() {
         </div>
 
         <div className="mt-4 overflow-x-auto border border-line">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[1080px] text-sm">
             <thead>
               <tr className="border-b border-line bg-surface text-left text-xs uppercase tracking-wider text-muted">
-                <th className="px-4 py-3">Ảnh</th>
+                <th className="px-4 py-3">Hóa đơn</th>
                 <th className="px-4 py-3">Player Code</th>
                 <th className="px-4 py-3">Họ tên</th>
                 <th className="px-4 py-3">SĐT</th>
                 <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Địa chỉ</th>
+                <th className="px-4 py-3">SP đã mua</th>
                 <th className="px-4 py-3">Thời gian</th>
               </tr>
             </thead>
             <tbody>
               {checkins.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted">
-                    Chưa có đăng ký nào.
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted">
+                    Chưa có đăng ký nào trong danh sách này.
                   </td>
                 </tr>
               ) : (
-                checkins.map((c) => (
-                  <tr key={c.$id} className="border-b border-line/50 last:border-0">
-                    <td className="px-4 py-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`/api/admin/photo/${c.photo_file_id}?k=${encodeURIComponent(key)}`}
-                        alt=""
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    </td>
-                    <td className="px-4 py-2 font-bold tracking-wide text-accent">
-                      {c.player_code}
-                    </td>
-                    <td className="px-4 py-2">{c.full_name}</td>
-                    <td className="px-4 py-2">{c.phone}</td>
-                    <td className="px-4 py-2 text-muted">{c.email}</td>
-                    <td className="px-4 py-2 text-muted">
-                      {new Date(c.$createdAt).toLocaleString("vi-VN")}
-                    </td>
-                  </tr>
-                ))
+                checkins.map((c) => {
+                  // Dữ liệu cũ chỉ có photo_file_id (1 ảnh) → fallback
+                  const photoIds =
+                    c.photo_file_ids && c.photo_file_ids.length > 0
+                      ? c.photo_file_ids
+                      : c.photo_file_id
+                        ? [c.photo_file_id]
+                        : [];
+                  const skus = c.purchased_skus ?? [];
+
+                  return (
+                    <tr key={c.$id} className="border-b border-line/50 last:border-0">
+                      <td className="px-4 py-2">
+                        <div className="flex gap-1">
+                          {photoIds.map((id, i) => {
+                            const src = `/api/admin/photo/${id}?k=${encodeURIComponent(key)}`;
+                            return (
+                              <a key={id} href={src} target="_blank" rel="noreferrer" title={`Ảnh ${i + 1}`}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={src}
+                                  alt={`Hóa đơn ${i + 1}`}
+                                  className="h-10 w-10 rounded object-cover"
+                                  loading="lazy"
+                                />
+                              </a>
+                            );
+                          })}
+                          {photoIds.length === 0 && (
+                            <span className="text-xs text-muted">—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 font-bold tracking-wide text-accent">
+                        {c.player_code}
+                      </td>
+                      <td className="px-4 py-2">{c.full_name}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{c.phone}</td>
+                      <td className="px-4 py-2 text-muted">{c.email}</td>
+                      <td className="px-4 py-2 text-muted">
+                        <span className="block max-w-[240px] whitespace-normal" title={c.address ?? ""}>
+                          {c.address || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex flex-wrap gap-1">
+                          {skus.length === 0 ? (
+                            <span className="text-xs text-muted">—</span>
+                          ) : (
+                            skus.map((sku) => (
+                              <span
+                                key={sku}
+                                className="whitespace-nowrap border border-line px-1.5 py-0.5 text-[11px] text-muted"
+                              >
+                                {SKU_LABEL[sku] ?? sku}
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-muted">
+                        {new Date(c.$createdAt).toLocaleString("vi-VN")}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -437,7 +575,7 @@ export default function AdminPage() {
             </button>
             <span className="text-muted">
               Trang {Math.floor(offset / PAGE_SIZE) + 1} /{" "}
-              {Math.ceil(total / PAGE_SIZE)} — {total} check-in
+              {Math.ceil(total / PAGE_SIZE)} — {total} đăng ký
             </span>
             <button
               type="button"
