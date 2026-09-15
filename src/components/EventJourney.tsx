@@ -84,9 +84,19 @@ export default function EventJourney() {
                 <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center justify-end px-4 pb-6 text-center md:pb-8">
                   <h3 className="product-name">{product.name}</h3>
                   <p className="product-tagline">{product.tagline}</p>
-                  <span className="mt-4 inline-block whitespace-nowrap bg-[#ece81a] px-8 py-1.5 text-sm font-semibold text-black transition-colors duration-200 group-hover:bg-white md:py-3">
-                    Tìm hiểu thêm
-                  </span>
+                  {/* CTA wrapper — bracket vàng staggered + URL placeholder khi hover */}
+                  <div className="cta-tech mt-4">
+                    <span className="cta-tech__bracket tl" />
+                    <span className="cta-tech__bracket tr" />
+                    <span className="cta-tech__bracket bl" />
+                    <span className="cta-tech__bracket br" />
+                    <span className="cta-tech__btn whitespace-nowrap bg-[#ece81a] px-8 py-1.5 text-sm font-semibold text-black transition-colors duration-200 group-hover:bg-white md:py-3">
+                      Tìm hiểu thêm
+                    </span>
+                    <span className="cta-tech__url">
+                      {product.url === "#" ? "#countdown" : product.url.replace(/^https?:\/\//, "")}
+                    </span>
+                  </div>
                 </div>
               </a>
             </Reveal>
