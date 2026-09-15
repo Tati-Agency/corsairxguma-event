@@ -28,6 +28,28 @@ interface CheckinDoc {
 const KEY_STORAGE = "cxg_admin_key";
 const PAGE_SIZE = 50;
 
+/** Lỗi mạng tạm thời thường tự khỏi → thử lại vài lần trước khi báo. */
+const MAX_TRIES = 3;
+
+type LoadFailure = {
+  kind: "network" | "auth" | "server";
+  msg: string;
+};
+
+const FAILURE_MSG: Record<LoadFailure["kind"], string> = {
+  network: "Không kết nối được server (có thể đang khởi động lại). Thử lại sau vài giây.",
+  auth: "Key không đúng hoặc đã hết hạn. Bấm “Đăng nhập lại” để nhập key mới.",
+  server: "Server lỗi khi đọc dữ liệu. Thử lại, hoặc xem log server để biết chi tiết.",
+};
+
+/** Phân loại 1 request: null nếu thành công, ngược lại là loại lỗi. */
+function classify(r: PromiseSettledResult<Response>): LoadFailure["kind"] | null {
+  if (r.status === "rejected") return "network";
+  if (r.value.ok) return null;
+  if (r.value.status === 401 || r.value.status === 403) return "auth";
+  return "server";
+}
+
 export default function AdminPage() {
   const [key, setKey] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -38,7 +60,8 @@ export default function AdminPage() {
   const [offset, setOffset] = useState(0);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState("");
+  /** Lỗi khi tải dữ liệu — phân loại để báo đúng nguyên nhân. */
+  const [loadError, setLoadError] = useState<LoadFailure | null>(null);
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,39 +84,50 @@ export default function AdminPage() {
   /**
    * Tải stats + danh sách check-in.
    *
-   * Dùng Promise.allSettled (KHÔNG phải Promise.all) + bọc try/catch: lỗi mạng
-   * kiểu "Failed to fetch" (server đang restart/compile, mất kết nối) sẽ chỉ
-   * hiện thông báo trong trang, không ném ra unhandled rejection làm bung
-   * error overlay của Next. Một endpoint lỗi cũng không kéo đổ endpoint kia.
+   * - Promise.allSettled (KHÔNG phải Promise.all): 1 endpoint lỗi không kéo đổ
+   *   endpoint kia, và lỗi mạng không thoát ra thành unhandled rejection
+   *   (nguyên nhân bung error overlay "Failed to fetch" của Next).
+   * - Lỗi mạng tạm thời (server đang restart/compile) được thử lại tối đa
+   *   MAX_TRIES lần trước khi báo → tránh báo động giả.
+   * - Chỉ báo "key hết hạn" khi server THỰC SỰ trả 401/403, không đoán.
    */
   const load = useCallback(
     async (search = "", newOffset = 0) => {
       setLoading(true);
-      setLoadError("");
+      setLoadError(null);
 
       const headers = { "x-admin-key": key };
       const checkinsUrl = `/api/admin/checkins?event=${EVENT.slug}&limit=${PAGE_SIZE}&offset=${newOffset}${
         search ? `&q=${encodeURIComponent(search)}` : ""
       }`;
 
-      const [statsRes, checkinsRes] = await Promise.allSettled([
-        fetch(`/api/admin/stats?event=${EVENT.slug}`, { headers }),
-        fetch(checkinsUrl, { headers }),
-      ]);
+      let statsRes!: PromiseSettledResult<Response>;
+      let checkinsRes!: PromiseSettledResult<Response>;
 
-      /** Đọc JSON nếu request thành công; trả null cho mọi trường hợp lỗi. */
-      const readJson = async (r: PromiseSettledResult<Response>) => {
-        if (r.status !== "fulfilled" || !r.value.ok) return null;
-        try {
-          return await r.value.json();
-        } catch {
-          return null;
-        }
-      };
+      for (let attempt = 1; ; attempt++) {
+        [statsRes, checkinsRes] = await Promise.allSettled([
+          fetch(`/api/admin/stats?event=${EVENT.slug}`, { headers }),
+          fetch(checkinsUrl, { headers }),
+        ]);
+
+        const kinds = [classify(statsRes), classify(checkinsRes)].filter(
+          (k): k is LoadFailure["kind"] => k !== null
+        );
+        // Chỉ thử lại khi mọi lỗi đều là mạng; 401/500 thì thử lại vô nghĩa.
+        const onlyNetwork = kinds.length > 0 && kinds.every((k) => k === "network");
+        if (!onlyNetwork || attempt >= MAX_TRIES) break;
+        await new Promise((r) => setTimeout(r, 700 * attempt));
+      }
 
       try {
-        const statsData = await readJson(statsRes);
-        const checkinsData = await readJson(checkinsRes);
+        const statsData =
+          statsRes.status === "fulfilled" && statsRes.value.ok
+            ? await statsRes.value.json().catch(() => null)
+            : null;
+        const checkinsData =
+          checkinsRes.status === "fulfilled" && checkinsRes.value.ok
+            ? await checkinsRes.value.json().catch(() => null)
+            : null;
 
         if (statsData?.stats) setStats(statsData.stats);
         if (checkinsData?.documents) {
@@ -101,19 +135,40 @@ export default function AdminPage() {
           setTotal(checkinsData.total);
           setOffset(newOffset);
         }
-        if (!statsData || !checkinsData) {
-          setLoadError(
-            "Không tải được dữ liệu — có thể mất kết nối hoặc key đã hết hạn."
-          );
+
+        const kinds = [classify(statsRes), classify(checkinsRes)].filter(
+          (k): k is LoadFailure["kind"] => k !== null
+        );
+        if (kinds.length) {
+          // Ưu tiên báo nguyên nhân nặng nhất nếu 2 endpoint lỗi khác loại
+          const kind: LoadFailure["kind"] = kinds.includes("auth")
+            ? "auth"
+            : kinds.includes("server")
+              ? "server"
+              : "network";
+          setLoadError({ kind, msg: FAILURE_MSG[kind] });
         }
-      } catch {
-        setLoadError("Không tải được dữ liệu — có thể mất kết nối.");
       } finally {
         setLoading(false);
       }
     },
     [key]
   );
+
+  /** Xoá key đã lưu và quay về form đăng nhập. */
+  const logout = () => {
+    try {
+      sessionStorage.removeItem(KEY_STORAGE);
+    } catch {
+      /* private mode */
+    }
+    setAuthed(false);
+    setKey("");
+    setStats(null);
+    setCheckins([]);
+    setTotal(0);
+    setLoadError(null);
+  };
 
   /**
    * Tải CSV qua fetch (gửi kèm x-admin-key header) rồi lưu về máy.
@@ -210,7 +265,7 @@ export default function AdminPage() {
 
       {loadError && (
         <div className="mt-6 flex flex-wrap items-center gap-4 border border-red-500/40 bg-red-500/5 px-4 py-3">
-          <p className="text-sm text-red-400">{loadError}</p>
+          <p className="text-sm text-red-400">{loadError.msg}</p>
           <button
             type="button"
             className="btn-ghost !py-2 !px-4 text-xs"
@@ -218,6 +273,11 @@ export default function AdminPage() {
           >
             ⟳ Thử lại
           </button>
+          {loadError.kind === "auth" && (
+            <button type="button" className="btn-accent !py-2 !px-4 text-xs" onClick={logout}>
+              Đăng nhập lại
+            </button>
+          )}
         </div>
       )}
 
