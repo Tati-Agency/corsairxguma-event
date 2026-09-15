@@ -20,16 +20,27 @@ export default function Hero() {
 
   return (
     <section ref={sectionRef} id="top" className="hero">
-      {/* Preload the hero image (LCP) */}
-      <link rel="preload" as="image" href="/guma-hero.png" />
+      {/* Preload cả 2 ảnh — desktop ưu tiên để LCP mượt */}
+      <link rel="preload" as="image" href="/img-bg-landscape.png" media="(min-width: 768px)" />
+      <link rel="preload" as="image" href="/img-bg-portrait.png" media="(max-width: 767px)" />
 
-      {/* Background image — hero mới từ web gốc (1 ảnh cho cả breakpoint).
-          object-position 55% 0% và mobile brightness giảm như bản gốc. */}
+      {/* Background image — 2 ảnh riêng theo breakpoint
+          (mobile dùng portrait, desktop dùng landscape).
+          object-position đặt center để bạn tinh chỉnh vị trí crop sau. */}
       <div className="absolute inset-0 z-0">
+        {/* Mobile: portrait */}
         <img
-          src="/guma-hero.png"
+          src="/img-bg-portrait.png"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
-          className="h-full w-full object-cover object-[50%_0%] brightness-[0.6] md:translate-x-0 md:object-[55%_0%] md:brightness-100"
+          className="h-full w-full object-cover object-center brightness-[0.6] md:hidden"
+          fetchPriority="high"
+          decoding="async"
+        />
+        {/* Desktop: landscape */}
+        <img
+          src="/img-bg-landscape.png"
+          alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
+          className="hidden h-full w-full object-cover object-center brightness-100 md:block"
           fetchPriority="high"
           decoding="async"
         />
