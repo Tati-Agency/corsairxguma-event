@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const type = sp.get("type") ?? "register";
   const event = sp.get("event") ?? "";
-  /** 1 trong 5 danh sách: all | keyboard | mouse | mousepad | mouse_keyboard */
+  /** 1 trong 5 danh sách: all | keyboard | mouse | mousepad | mouse_or_keyboard */
   const group = sp.get("group") ?? "all";
 
   try {

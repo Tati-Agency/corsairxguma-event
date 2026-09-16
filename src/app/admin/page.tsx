@@ -97,7 +97,7 @@ export default function AdminPage() {
    */
   const [role, setRole] = useState<AdminRole>("staff");
   const isAdmin = role === "admin";
-  /** Danh sách đang xem: all | keyboard | mouse | mousepad | mouse_keyboard */
+  /** Danh sách đang xem: all | keyboard | mouse | mousepad | mouse_or_keyboard */
   const [group, setGroup] = useState<GroupKey>("all");
   /** Dropdown chọn danh sách để xuất CSV đang mở. */
   const [exportOpen, setExportOpen] = useState(false);

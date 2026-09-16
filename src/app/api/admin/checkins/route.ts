@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const event = sp.get("event") ?? "";
   const q = (sp.get("q") ?? "").trim();
-  /** 1 trong 5 danh sách: all | keyboard | mouse | mousepad | mouse_keyboard */
+  /** 1 trong 5 danh sách: all | keyboard | mouse | mousepad | mouse_or_keyboard */
   const group = sp.get("group") ?? "all";
   const limit = Math.min(Number(sp.get("limit") ?? 50), 100);
   const offset = Math.max(Number(sp.get("offset") ?? 0), 0);

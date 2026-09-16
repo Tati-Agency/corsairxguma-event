@@ -3,7 +3,8 @@
  *
  * 4 danh sách đầu dùng để quay số (luckydraw), danh sách "all" để quản lý số liệu.
  * Lọc theo kiểu "CÓ chứa": ai mua nhiều món sẽ xuất hiện ở NHIỀU danh sách
- * (vd mua chuột + bàn phím thì có mặt ở cả "mouse", "keyboard" và "mouse_keyboard").
+ * (vd mua chuột + bàn phím thì có mặt ở cả "mouse", "keyboard" và
+ * "mouse_or_keyboard").
  *
  * File này là dữ liệu thuần (không import server-only) nên dùng được cho cả
  * client (dropdown, tab) lẫn server (dựng query Appwrite).
@@ -25,7 +26,12 @@ export const SKU_LABEL: Record<string, string> = {
   [SKU.mousepadBlkGld]: "MM 2XL BLACK/GOLD",
 };
 
-export type GroupKey = "all" | "keyboard" | "mouse" | "mousepad" | "mouse_keyboard";
+export type GroupKey =
+  | "all"
+  | "keyboard"
+  | "mouse"
+  | "mousepad"
+  | "mouse_or_keyboard";
 
 export type GroupSpec = {
   key: GroupKey;
@@ -69,10 +75,13 @@ export const GROUPS: GroupSpec[] = [
     orGroups: [[SKU.mousepadStarry, SKU.mousepadBlkGld]],
   },
   {
-    key: "mouse_keyboard",
-    label: "Chuột + Bàn phím",
-    short: "Chuột + Bàn phím",
-    orGroups: [[SKU.mouse], [SKU.keyboard]],
+    // HỢP (hoặc), KHÔNG phải giao: thể lệ lucky draw đặc biệt ghi
+    // "bàn phím HOẶC chuột" → 1 nhóm OR chứa cả 2 SKU.
+    // (Tên key cũ là "mouse_keyboard" gây hiểu nhầm là giao.)
+    key: "mouse_or_keyboard",
+    label: "Chuột hoặc Bàn phím",
+    short: "Chuột hoặc Bàn phím",
+    orGroups: [[SKU.mouse, SKU.keyboard]],
   },
 ];
 
