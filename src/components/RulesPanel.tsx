@@ -59,7 +59,7 @@ export default function RulesPanel() {
                       🖱️ SABRE v2 PRO Wireless CF GUMAYUSI Edition
                     </td>
                     <td className="py-2 align-top text-text">
-                      🎁 Dây đeo (ribbon) Gumayusi
+                      🎁 Móc khóa Gumayusi
                     </td>
                   </tr>
                   <tr>
