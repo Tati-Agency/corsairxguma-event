@@ -11,14 +11,12 @@ import { useState } from "react";
 /** Một mục accordion: tiêu đề + nội dung, mở/đóng độc lập nhau. */
 function Section({
   title,
-  defaultOpen = false,
   children,
 }: {
   title: string;
-  defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="border-t border-line first:border-t-0">
@@ -63,14 +61,18 @@ export default function RulesPanel() {
         </h3>
 
         <div className="mt-4">
-          {/* 1 */}
-          <Section title="🎁 CHƯƠNG TRÌNH LUCKY DRAW" defaultOpen>
-            <p>
+          {/* 1 — nội dung chỉ 1 câu nên để CỨNG (không accordion), tránh
+              phải bấm mở chỉ để đọc một dòng */}
+          <div className="pb-5">
+            <p className="display text-sm font-bold tracking-wide">
+              🎁 CHƯƠNG TRÌNH LUCKY DRAW
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
               Mua sản phẩm trong bộ sưu tập{" "}
               <strong className="text-text">CORSAIR × Gumayusi</strong> để có cơ hội
               tham gia bốc thăm trúng thưởng!
             </p>
-          </Section>
+          </div>
 
           {/* 2 */}
           <Section title="🎯 CƠ CẤU GIẢI THƯỞNG">
