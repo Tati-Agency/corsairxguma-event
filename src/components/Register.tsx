@@ -221,7 +221,7 @@ export default function Register() {
                 Mobile: nhờ thứ tự DOM nên ra thể lệ → ảnh → form. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/card-pic.png"
+              src="/card-pic.webp"
               alt="3 thẻ Polaroid Gumayusi — giải thưởng Lucky Draw"
               className="mb-8 w-full rounded-xl border border-line"
               loading="lazy"

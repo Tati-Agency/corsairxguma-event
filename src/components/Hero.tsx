@@ -21,8 +21,8 @@ export default function Hero() {
   return (
     <section ref={sectionRef} id="top" className="hero">
       {/* Preload cả 2 ảnh — desktop ưu tiên để LCP mượt */}
-      <link rel="preload" as="image" href="/img-bg-landscape.png" media="(min-width: 768px)" />
-      <link rel="preload" as="image" href="/img-bg-portrait.png" media="(max-width: 767px)" />
+      <link rel="preload" as="image" href="/img-bg-landscape.webp" media="(min-width: 768px)" />
+      <link rel="preload" as="image" href="/img-bg-portrait.webp" media="(max-width: 767px)" />
 
       {/* Background image — 2 ảnh riêng theo breakpoint
           (mobile dùng portrait, desktop dùng landscape).
@@ -30,7 +30,7 @@ export default function Hero() {
       <div className="absolute inset-0 z-0">
         {/* Mobile: portrait */}
         <img
-          src="/img-bg-portrait.png"
+          src="/img-bg-portrait.webp"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
           className="h-full w-full object-cover object-center brightness-[0.75] md:hidden"
           fetchPriority="high"
@@ -38,7 +38,7 @@ export default function Hero() {
         />
         {/* Desktop: landscape */}
         <img
-          src="/img-bg-landscape.png"
+          src="/img-bg-landscape.webp"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
           className="hidden h-full w-full object-cover object-center md:block"
           fetchPriority="high"

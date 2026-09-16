@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 
 /**
@@ -170,9 +173,28 @@ function gradientFor(spec: LayerSpec, gold: boolean) {
 export default function Starfield({ density = "low", color = "white" }: Props) {
   const specs = buildLayers(density);
   const gold = color === "gold";
+  const ref = useRef<HTMLDivElement>(null);
+
+  /**
+   * Tạm dừng twinkle khi section ngoài màn hình.
+   * Mỗi section có 5 layer animation vô hạn, cả trang 5 section → 25 animation
+   * chạy mãi không nghỉ. Chỉ section đang nhìn thấy mới cần chạy.
+   */
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => el.toggleAttribute("data-idle", !entry.isIntersecting),
+      // Nới 1 chút để bắt đầu chạy sớm trước khi lọt vào khung nhìn
+      { rootMargin: "120px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div
+      ref={ref}
       aria-hidden="true"
       className="starfield pointer-events-none absolute inset-0 overflow-hidden"
     >

@@ -702,7 +702,8 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 .count-arc-notch { stroke: rgba(255, 255, 255, 0.16); stroke-width: 1.2; stroke-linecap: round; }
 .count-arc-fill {
   fill: none; stroke: var(--color-accent); stroke-width: 1.6; stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(236, 232, 26, 0.65));
+  /* Bỏ filter drop-shadow: dashoffset được cập nhật mỗi frame lúc đếm ngược,
+     filter sẽ phải blur lại liên tục. */
   transition: stroke-dashoffset 1s linear;
 }
 .count-ghost { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.2; stroke-dasharray: 2 3; }
@@ -874,7 +875,16 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   stroke: var(--color-accent);
   stroke-width: 2.5;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(236, 232, 26, 0.8));
+  /* KHÔNG dùng filter drop-shadow ở đây: dashoffset đổi mỗi frame nên filter
+     phải blur lại toàn bộ khung mỗi frame → tụt fps. Quầng làm bằng path
+     .count-ring-glow (nét to, mờ) chạy cùng dash offset. */
+}
+/* Quầng sáng của vệt tiến trình (xem .count-ring-fill) */
+.count-ring-glow {
+  fill: none;
+  stroke: rgba(236, 232, 26, 0.3);
+  stroke-width: 7;
+  stroke-linecap: round;
 }
 /* Marker (logo + sao) chạy dọc viền khung — rAF set left/top theo % */
 .count-ring-marker {
@@ -1025,8 +1035,12 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   animation-name: star-twinkle;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
-  will-change: opacity;
+  /* KHÔNG đặt will-change ở đây: mỗi section có 5 layer, cả trang 25 layer —
+     promote hết thành layer riêng tốn RAM GPU mà không thêm được gì (browser
+     vẫn tự promote trong lúc animation chạy). */
 }
+/* Ngoài màn hình thì dừng hẳn animation (Starfield tự gắn data-idle) */
+.starfield[data-idle] .starfield-layer { animation-play-state: paused; }
 @keyframes star-twinkle {
   0%, 100% { opacity: 0.35; }
   50%      { opacity: 1; }

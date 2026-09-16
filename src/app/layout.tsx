@@ -21,7 +21,6 @@ const OG_DESCRIPTION =
  * Ảnh thumbnail khi share link — 1200×628 (tỉ lệ 1.91:1, chuẩn Open Graph).
  * Dùng JPEG (~100KB) thay vì PNG gốc (~864KB): crawler của Facebook/Zalo
  * ưu tiên JPEG và có giới hạn dung lượng, PNG nặng dễ bị bỏ qua → thumbnail trắng.
- * File gốc img-bg-landscape.png vẫn giữ nguyên cho hero desktop.
  */
 const OG_IMAGE = {
   url: "/og-image.jpg",

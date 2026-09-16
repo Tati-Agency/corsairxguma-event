@@ -235,6 +235,8 @@ export default function Countdown() {
   const ringWrapRef = useRef<HTMLDivElement>(null);
   const ringFillLogoRef = useRef<SVGPathElement>(null);
   const ringFillStarRef = useRef<SVGPathElement>(null);
+  const ringGlowLogoRef = useRef<SVGPathElement>(null);
+  const ringGlowStarRef = useRef<SVGPathElement>(null);
   const ringLogoRef = useRef<HTMLDivElement>(null);
   const ringStarRef = useRef<HTMLDivElement>(null);
   /** Kích thước thật (px) của khung — dùng để dựng path đúng đơn vị. */
@@ -468,27 +470,37 @@ export default function Countdown() {
   // Vệt vàng mỗi bên lớn dần đúng tới vị trí marker của nó.
   useEffect(() => {
     if (phase !== "reveal") return;
-    const logoPath = ringFillLogoRef.current;
-    const starPath = ringFillStarRef.current;
+    const logoFill = ringFillLogoRef.current;
+    const starFill = ringFillStarRef.current;
+    const logoGlow = ringGlowLogoRef.current;
+    const starGlow = ringGlowStarRef.current;
     const logo = ringLogoRef.current;
     const star = ringStarRef.current;
-    if (!logoPath || !starPath || !logo || !star) return;
+    if (!logoFill || !starFill || !logoGlow || !starGlow || !logo || !star) return;
     const { w, h } = ringBox;
     if (!w || !h) return;
 
-    const logoTotal = logoPath.getTotalLength();
-    const starTotal = starPath.getTotalLength();
-    if (!logoTotal || !starTotal) return;
+    // Thứ tự [logo, sao] dùng chung cho cả 3 mảng bên dưới
+    const fills = [logoFill, starFill] as const;
+    const glows = [logoGlow, starGlow] as const;
+    const markers = [logo, star] as const;
+    const totals = [logoFill.getTotalLength(), starFill.getTotalLength()] as const;
+    if (!totals[0] || !totals[1]) return;
 
-    logoPath.style.strokeDasharray = `${logoTotal}`;
-    starPath.style.strokeDasharray = `${starTotal}`;
+    // Quầng dùng CHUNG dasharray với vệt chính nên luôn trùng khít nhau
+    for (let i = 0; i < 2; i++) {
+      fills[i].style.strokeDasharray = `${totals[i]}`;
+      glows[i].style.strokeDasharray = `${totals[i]}`;
+    }
 
-    /** Đặt cả 2 marker + 2 vệt sáng theo cùng tiến độ e. */
+    /** Đặt 2 marker + 2 vệt sáng (kèm quầng) theo cùng tiến độ e. */
     const apply = (e: number) => {
-      placeOnPath(logo, logoPath, e, logoTotal, w, h);
-      placeOnPath(star, starPath, e, starTotal, w, h);
-      logoPath.style.strokeDashoffset = `${logoTotal * (1 - e)}`;
-      starPath.style.strokeDashoffset = `${starTotal * (1 - e)}`;
+      for (let i = 0; i < 2; i++) {
+        const offset = `${totals[i] * (1 - e)}`;
+        fills[i].style.strokeDashoffset = offset;
+        glows[i].style.strokeDashoffset = offset;
+        placeOnPath(markers[i], fills[i], e, totals[i], w, h);
+      }
     };
 
     // Phiên trước đã reveal, hoặc user bật giảm chuyển động
@@ -587,18 +599,16 @@ export default function Countdown() {
                 viewBox={`0 0 ${ringBox.w} ${ringBox.h}`}
                 aria-hidden="true"
               >
-                {/* 2 nhánh, không vẽ track nền — đường chỉ "sinh ra"
-                    đúng tới đâu marker của nó đi qua tới đó. */}
-                <path
-                  ref={ringFillLogoRef}
-                  className="count-ring-fill"
-                  d={ringPaths.logo}
-                />
-                <path
-                  ref={ringFillStarRef}
-                  className="count-ring-fill"
-                  d={ringPaths.star}
-                />
+                {/* 2 nhánh, không vẽ track nền — đường chỉ "sinh ra" đúng tới
+                    đâu marker của nó đi qua tới đó.
+                    Mỗi nhánh gồm 2 path: QUẦNG (nét to, mờ) + VỆT CHÍNH (nét
+                    mảnh, sáng), dùng chung dash offset nên trùng khít. Làm
+                    quầng bằng path thay vì filter drop-shadow để khỏi phải
+                    blur lại toàn khung mỗi frame. */}
+                <path ref={ringGlowLogoRef} className="count-ring-glow" d={ringPaths.logo} />
+                <path ref={ringFillLogoRef} className="count-ring-fill" d={ringPaths.logo} />
+                <path ref={ringGlowStarRef} className="count-ring-glow" d={ringPaths.star} />
+                <path ref={ringFillStarRef} className="count-ring-fill" d={ringPaths.star} />
               </svg>
             )}
 
