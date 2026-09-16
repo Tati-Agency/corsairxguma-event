@@ -115,7 +115,7 @@ export default function RulesPanel() {
               <p className="text-text">
                 🎴{" "}
                 <strong className="text-accent">
-                  Ảnh gốc (photo master) thẻ Polaroid Gumayusi
+                  Ảnh gốc thẻ Polaroid Gumayusi
                 </strong>
               </p>
               <p className="mt-2">Áp dụng cho khách đặt mua bàn phím hoặc chuột.</p>
@@ -131,8 +131,8 @@ export default function RulesPanel() {
             </p>
             <ul className="mt-3 space-y-1.5">
               <li>
-                🎁 <strong className="text-text">Giải thưởng:</strong> Ảnh gốc (photo
-                master) thẻ Polaroid Gumayusi – tổng cộng 3 tấm.
+                🎁 <strong className="text-text">Giải thưởng:</strong> Ảnh gốc thẻ
+                Polaroid Gumayusi – tổng cộng 3 tấm.
               </li>
               <li>
                 👤 <strong className="text-text">Số người trúng:</strong> 3 người – mỗi
