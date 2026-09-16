@@ -1,53 +1,15 @@
-"use client";
-
-import { useState } from "react";
-
 /**
- * Thể lệ chương trình Lucky Draw — nội dung lấy nguyên văn từ Google Docs
- * của ban tổ chức. Hiển thị dạng accordion để không chiếm quá nhiều chỗ khi
- * panel nằm cạnh form (desktop) và đỡ phải cuộn dài (mobile).
+ * Thể lệ chương trình Lucky Draw — nội dung lấy nguyên văn từ Google Docs của
+ * ban tổ chức. Hiển thị đầy đủ (không thu gọn) theo yêu cầu.
+ *
+ * Panel này nằm cột trái trên desktop (cạnh card-pic + form) và nằm trên cùng
+ * trên mobile.
  */
 
-/** Một mục accordion: tiêu đề + nội dung, mở/đóng độc lập nhau. */
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-
+/** Tiêu đề 1 mục trong thể lệ. */
+function Heading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border-t border-line first:border-t-0">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full items-start justify-between gap-4 py-4 text-left transition-colors hover:text-accent"
-      >
-        <span className="display text-sm font-bold tracking-wide">{title}</span>
-        <span
-          aria-hidden="true"
-          className={`mt-0.5 shrink-0 text-accent transition-transform duration-300 ${
-            open ? "rotate-180" : ""
-          }`}
-        >
-          ▾
-        </span>
-      </button>
-
-      {/* Kỹ thuật grid-template-rows 0fr→1fr để animate chiều cao mà không
-          cần biết trước nội dung dài bao nhiêu */}
-      <div
-        className="grid transition-[grid-template-rows] duration-300 ease-out"
-        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
-      >
-        <div className="overflow-hidden">
-          <div className="pb-5 text-sm leading-relaxed text-muted">{children}</div>
-        </div>
-      </div>
-    </div>
+    <h4 className="display text-sm font-bold tracking-wide">{children}</h4>
   );
 }
 
@@ -60,14 +22,11 @@ export default function RulesPanel() {
           THỂ LỆ THAM GIA
         </h3>
 
-        <div className="mt-4">
-          {/* 1 — nội dung chỉ 1 câu nên để CỨNG (không accordion), tránh
-              phải bấm mở chỉ để đọc một dòng */}
-          <div className="pb-5">
-            <p className="display text-sm font-bold tracking-wide">
-              🎁 CHƯƠNG TRÌNH LUCKY DRAW
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted">
+        <div className="mt-6 space-y-6 text-sm leading-relaxed text-muted">
+          {/* 1 */}
+          <div>
+            <Heading>🎁 CHƯƠNG TRÌNH LUCKY DRAW</Heading>
+            <p className="mt-2">
               Mua sản phẩm trong bộ sưu tập{" "}
               <strong className="text-text">CORSAIR × Gumayusi</strong> để có cơ hội
               tham gia bốc thăm trúng thưởng!
@@ -75,13 +34,15 @@ export default function RulesPanel() {
           </div>
 
           {/* 2 */}
-          <Section title="🎯 CƠ CẤU GIẢI THƯỞNG">
-            <div className="overflow-x-auto">
+          <div className="border-t border-line pt-6">
+            <Heading>🎯 CƠ CẤU GIẢI THƯỞNG</Heading>
+
+            <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-xs md:text-sm">
                 <thead>
                   <tr className="border-b border-line text-[11px] uppercase tracking-wider text-muted">
                     <th className="py-2 pr-3 font-semibold">Sản phẩm</th>
-                    <th className="py-2 font-semibold">Giải thưởng</th>
+                    <th className="py-2 font-semibold">Giải thưởng luckydraw</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -114,18 +75,18 @@ export default function RulesPanel() {
             <div className="mt-4 border border-accent/30 bg-accent/5 p-3">
               <p className="text-text">
                 🎴{" "}
-                <strong className="text-accent">
-                  Ảnh gốc thẻ Polaroid Gumayusi
-                </strong>
+                <strong className="text-accent">Ảnh gốc thẻ Polaroid Gumayusi</strong>
               </p>
               <p className="mt-2">Áp dụng cho khách đặt mua bàn phím hoặc chuột.</p>
               <p className="mt-1">❌ Không áp dụng cho khách chỉ mua lót chuột.</p>
             </div>
-          </Section>
+          </div>
 
           {/* 3 */}
-          <Section title="📸 LUCKY DRAW ĐẶC BIỆT — ẢNH GỐC POLAROID">
-            <p>
+          <div className="border-t border-line pt-6">
+            <Heading>📸 LUCKY DRAW ĐẶC BIỆT — ẢNH GỐC POLAROID</Heading>
+
+            <p className="mt-2">
               Mua bàn phím hoặc chuột trong bộ sưu tập để có cơ hội tham gia bốc
               thăm:
             </p>
@@ -160,11 +121,12 @@ export default function RulesPanel() {
               Livestream công bố sau ngày 22/09 trên fanpage Facebook của CORSAIR
               (VN).
             </p>
-          </Section>
+          </div>
 
           {/* 4 */}
-          <Section title="📝 LƯU Ý KHI THAM GIA">
-            <ul className="space-y-1.5">
+          <div className="border-t border-line pt-6">
+            <Heading>📝 LƯU Ý KHI THAM GIA</Heading>
+            <ul className="mt-2 space-y-1.5">
               <li>
                 • Vui lòng điền đúng họ tên, số điện thoại, Email và địa chỉ nhận
                 hàng đầy đủ.
@@ -179,7 +141,7 @@ export default function RulesPanel() {
                 chương trình này.
               </li>
             </ul>
-          </Section>
+          </div>
         </div>
       </div>
     </div>

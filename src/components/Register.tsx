@@ -216,6 +216,18 @@ export default function Register() {
           </Reveal>
 
           <Reveal delay={100}>
+            {/* Ảnh thẻ Polaroid — đặt TRÊN form.
+                Desktop: cùng cột phải với form (thể lệ ở cột trái).
+                Mobile: nhờ thứ tự DOM nên ra thể lệ → ảnh → form. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/card-pic.png"
+              alt="3 thẻ Polaroid Gumayusi — giải thưởng Lucky Draw"
+              className="mb-8 w-full rounded-xl border border-line"
+              loading="lazy"
+              decoding="async"
+            />
+
             {state === "verifying" && (
               <div className="card">
                 <div className="card-core !p-6 text-center md:!p-10">
