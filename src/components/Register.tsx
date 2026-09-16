@@ -205,7 +205,7 @@ export default function Register() {
       <div className="container-c relative z-10">
         <Reveal>
           <span className="eyebrow">Đăng ký tham gia</span>
-          <h2 className="section-title section-title-light mt-4">REGISTER NOW.</h2>
+          <h2 className="section-title section-title-light mt-4">LUCKYDRAW.</h2>
         </Reveal>
 
         {/* Desktop (md+): grid 2 cột — thể lệ trái, form phải.
