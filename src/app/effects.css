@@ -439,38 +439,65 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 @media (min-width: 768px) {
   .hero-subhead { font-size: 1.35rem; }
 }
-/* Hero desktop: 2 hàng ngang, mỗi hàng là 1 dòng subhead (md:block) —
-   giữ font-size như subhead thường, không cần override. */
-.hero-main {
-  display: block;
-  color: var(--color-text);
-  font-family: "Saira Expanded Light", var(--font-display), sans-serif;
-  font-weight: 300; /* bản Expanded Light đứng riêng — đúng font gốc CORSAIR */
-  line-height: 1.1;
-  letter-spacing: -0.005em;
-  font-size: clamp(2.5rem, 6.5vw, 5rem); /* reference: 2.5/4/5rem */
-  white-space: nowrap;
-}
-@media (max-width: 767px) {
-  /* Mobile: cho phép headline wrap — 1 dòng sẽ tràn viewport */
-  .hero-main { white-space: normal; }
-}
-/* Chữ "x" trong CORSAIR x GUMAYUSI — thu nhỏ, nâng nhẹ cho cân optical */
-.hero-x {
-  font-size: 0.55em;
-  vertical-align: 0.12em;
-  letter-spacing: 0;
-}
-/* Logo lockup CORSAIR x GUMAYUSI trong hero — to, căn giữa, như ảnh logo bản gốc (1030px) */
-.hero-logo {
-  display: block;
-  width: min(86vw, 880px);
+/* ---------- Hero logo ----------
+   Ảnh nền hero đã bỏ logo sẵn (bản *-nologo) nên logo đưa vào bằng element
+   riêng, khác nhau giữa 2 breakpoint. */
+/* Desktop: lockup CORSAIR × GUMAYUSI (2 dòng) ở khu vực 1/4 trên-phải.
+   Ảnh gốc 357×192 (tỉ lệ 1.86) — để rộng ~26vw thì vừa gọn trong 1/4 đó. */
+.hero-lockup {
+  position: absolute;
+  top: 7%;
+  right: 4%;
+  width: clamp(200px, 26vw, 420px);
   height: auto;
-  margin-top: 1.5rem;
-  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.6));
 }
+/* Mobile: 3 logo CORSAIR - x - GUMAYUSI xếp ngang, cùng DẢI với 2 bracket trên
+   (bracket cao 28px, đặt ở top 1.5rem → cho hàng logo đúng 28px + căn giữa
+   để 2 bên thẳng hàng nhau).
+   Kích thước dùng clamp theo vw vì điện thoại muôn vàn resolution/ratio —
+   vw giúp logo co giãn theo bề rộng màn hình thay vì cố định px. */
+.hero-logos {
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2.6vw, 16px);
+  /* Chừa chỗ cho 2 bracket 2 bên (1.5rem offset + bracket rộng 28px) */
+  padding-inline: clamp(3.5rem, 12vw, 5rem);
+  pointer-events: none;
+}
+.hero-logos img {
+  display: block;
+  width: auto;
+}
+/* Tỉ lệ gốc: corsair 4.70 · x 1.00 · guma 5.89 */
+.hero-logos .logo-corsair { height: clamp(13px, 4.2vw, 21px); }
+.hero-logos .logo-x { height: clamp(8px, 2.4vw, 12px); }
+.hero-logos .logo-guma { height: clamp(13px, 4.2vw, 21px); }
+
+/* ===== Ẩn theo breakpoint — PHẢI viết tay ở đây =====
+   Không dùng được `md:hidden` / `hidden` của Tailwind trong 2 trường hợp dưới:
+   globals.css @import effects.css ra NGOÀI mọi @layer, mà CSS không layer luôn
+   thắng CSS có layer (Tailwind bỏ utility vào @layer utilities). Nên chỉ cần
+   class ở file này khai báo `display` là nó đè utility bất kể thứ tự/độ ưu tiên. */
+/* Hàng logo mobile (CORSAIR - x - GUMAYUSI): desktop ẩn
+   (.hero-logos khai báo display: flex nên đè md:hidden) */
 @media (min-width: 768px) {
-  .hero-logo { margin-top: 2rem; }
+  .hero-logos { display: none; }
+}
+/* Nút PRE-ORDER trong hero: chỉ có ở desktop
+   (.btn-ghost khai báo display: inline-flex nên đè `hidden`;
+   scope .hero vì .btn-ghost dùng chung ở admin / EventPass / Register) */
+@media (max-width: 767px) {
+  .hero .btn-ghost { display: none; }
 }
 /* ============================================================
    Product card — đúng kiểu TwoColumnBanner của web gốc

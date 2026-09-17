@@ -2,7 +2,7 @@
  * Thể lệ chương trình Lucky Draw — nội dung lấy nguyên văn từ Google Docs của
  * ban tổ chức. Hiển thị đầy đủ (không thu gọn) theo yêu cầu.
  *
- * Panel này nằm cột trái trên desktop (cạnh card-pic + form) và nằm trên cùng
+ * Panel này nằm cột trái trên desktop (cạnh fan-card + form) và nằm trên cùng
  * trên mobile.
  */
 

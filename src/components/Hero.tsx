@@ -21,16 +21,15 @@ export default function Hero() {
   return (
     <section ref={sectionRef} id="top" className="hero">
       {/* Preload cả 2 ảnh — desktop ưu tiên để LCP mượt */}
-      <link rel="preload" as="image" href="/img-bg-landscape.webp" media="(min-width: 768px)" />
-      <link rel="preload" as="image" href="/img-bg-portrait.webp" media="(max-width: 767px)" />
+      <link rel="preload" as="image" href="/img-bg-landscape-nologo.webp" media="(min-width: 768px)" />
+      <link rel="preload" as="image" href="/img-bg-portrait-nologo.webp" media="(max-width: 767px)" />
 
-      {/* Background image — 2 ảnh riêng theo breakpoint
-          (mobile dùng portrait, desktop dùng landscape).
-          object-position đặt center để bạn tinh chỉnh vị trí crop sau. */}
+      {/* Background image — 2 ảnh riêng theo breakpoint, đều là bản *-nologo
+          (logo đã bỏ khỏi ảnh, đưa vào bằng element riêng bên dưới). */}
       <div className="absolute inset-0 z-0">
         {/* Mobile: portrait */}
         <img
-          src="/img-bg-portrait.webp"
+          src="/img-bg-portrait-nologo.webp"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
           className="h-full w-full object-cover object-center brightness-[0.75] md:hidden"
           fetchPriority="high"
@@ -38,7 +37,7 @@ export default function Hero() {
         />
         {/* Desktop: landscape */}
         <img
-          src="/img-bg-landscape.webp"
+          src="/img-bg-landscape-nologo.webp"
           alt="Gumayusi, League of Legends pro player, focused at his gaming setup in a CORSAIR jersey in a neon-lit room"
           className="hidden h-full w-full object-cover object-center md:block"
           fetchPriority="high"
@@ -56,6 +55,23 @@ export default function Hero() {
       <span className="corner-bracket tr" />
       <span className="corner-bracket bl" />
       <span className="corner-bracket br" />
+
+      {/* Desktop: lockup CORSAIR × GUMAYUSI ở khu vực 1/4 trên-phải */}
+      <img
+        src="/logos/corsairguma-portrait.png"
+        alt="CORSAIR x GUMAYUSI"
+        className="hero-lockup hidden md:block"
+        decoding="async"
+      />
+
+      {/* Mobile: 3 logo CORSAIR - x - GUMAYUSI xếp ngang, cùng dải với 2
+          bracket trên (ảnh nền mobile cũng đã bỏ logo).
+          Desktop ẩn — media query ở effects.css, KHÔNG dùng `md:hidden` được. */}
+      <div className="hero-logos">
+        <img src="/logos/corsairlogo.png" alt="CORSAIR" className="logo-corsair" decoding="async" />
+        <img src="/logos/x.png" alt="x" className="logo-x" decoding="async" />
+        <img src="/logos/gumalogo.png" alt="GUMAYUSI" className="logo-guma" decoding="async" />
+      </div>
 
       {/* Desktop (md+): nội dung canh trái, subhead 2 hàng ngang, nút canh trái ngay dưới.
           Mobile: giữ layout cũ — nội dung căn giữa, đặt ở đáy hero */}
@@ -77,7 +93,9 @@ export default function Hero() {
             [ Đăng ký LUCKYDRAW ]
             <span className="arrow">→</span>
           </a>
-          <a href="#collection" className="btn-ghost hidden md:inline-flex">
+          {/* Chỉ hiện ở desktop — media query nằm ở effects.css, không dùng
+              `hidden` của Tailwind được (xem giải thích ở .hero-logos). */}
+          <a href="#collection" className="btn-ghost">
             PRE-ORDER
           </a>
         </Reveal>
