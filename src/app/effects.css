@@ -245,6 +245,8 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   .hero-aura::before, .hero-aura::after { animation: none; }
   .hero-line, .hotspot-pulse, .arena-glow,
   .arena-tip-inner, .arena-tip-line { animation: none; }
+  /* Ngôi sao "x" ở hero: bỏ nhấp nháy, giữ trạng thái sáng rõ */
+  .hero-logos .logo-x { animation: none; opacity: 1; transform: none; }
   .hero-line { opacity: 1; transform: none; }
   .section-title::after { transform: none; }
   .count-shell { animation: none; opacity: 1; transform: none; }
@@ -480,8 +482,21 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 }
 /* Tỉ lệ gốc: corsair 4.70 · x 1.00 · guma 5.89 */
 .hero-logos .logo-corsair { height: clamp(13px, 4.2vw, 21px); }
-.hero-logos .logo-x { height: clamp(8px, 2.4vw, 12px); }
 .hero-logos .logo-guma { height: clamp(13px, 4.2vw, 21px); }
+/* Chữ "x" giữa 2 logo thực chất là hình NGÔI SAO 4 CÁNH (x.png) → cho nhấp
+   nháy như sao: mờ/sáng + phóng nhẹ, kèm quầng sáng.
+   Chỉ animate opacity + transform (chạy ở compositor); quầng dùng filter TĨNH
+   nên trình duyệt rasterize 1 lần, không phải blur lại mỗi frame. */
+.hero-logos .logo-x {
+  height: clamp(8px, 2.4vw, 12px);
+  filter: drop-shadow(0 0 5px rgba(255, 254, 244, 0.7));
+  transform-origin: center;
+  animation: hero-x-twinkle 2.6s ease-in-out infinite;
+}
+@keyframes hero-x-twinkle {
+  0%, 100% { opacity: 0.45; transform: scale(0.86); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
 
 /* ===== Ẩn theo breakpoint — PHẢI viết tay ở đây =====
    Không dùng được `md:hidden` / `hidden` của Tailwind trong 2 trường hợp dưới:
