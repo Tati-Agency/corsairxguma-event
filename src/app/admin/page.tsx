@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { EVENT } from "@/lib/config";
 import { GROUPS, SKU_LABEL, type GroupKey } from "@/lib/groups";
 import type { AdminRole } from "@/lib/admin-auth";
+import { countryFlag, countryName } from "@/lib/geo";
 import AnimatedNumber from "@/components/admin/AnimatedNumber";
 import Donut from "@/components/admin/Donut";
 import StatChart from "@/components/admin/StatChart";
@@ -20,6 +21,11 @@ interface Stats {
   byHour: Record<string, number>;
   /** Chuỗi theo ngày cho biểu đồ (đã điền đủ ngày trống) */
   byDay: { date: string; visits: number; checkins: number }[];
+  /** Quốc gia / thành phố suy ra từ IP (chỉ có từ khi bật header Vercel) */
+  byCountry: Record<string, number>;
+  byCity: Record<string, number>;
+  /** Số lượt không xác định được quốc gia (row cũ hoặc chạy local) */
+  unknownGeo: number;
 }
 
 /** Sắp xếp entry của map theo giá trị giảm dần (dùng cho bar/chip). */
@@ -523,6 +529,61 @@ export default function AdminPage() {
               )}
             </div>
           </div>
+
+          {/* Quốc gia + Thành phố — suy ra từ IP qua header Vercel.
+              Chỉ có dữ liệu từ khi deploy lên Vercel (local không có header). */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="border border-line bg-surface p-6">
+              <h2 className="display text-lg font-bold">QUỐC GIA</h2>
+              {Object.keys(stats.byCountry).length === 0 ? (
+                <p className="mt-4 text-sm text-muted">
+                  Chưa có dữ liệu. Thông tin quốc gia lấy từ header của Vercel nên
+                  chỉ xuất hiện trên bản deploy, không có khi chạy local.
+                </p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {byValueDesc(stats.byCountry).map(([code, v]) => (
+                    <BarRow
+                      key={code}
+                      label={`${countryFlag(code)} ${countryName(code)}`.trim()}
+                      value={v}
+                      max={stats.totalVisits || 1}
+                    />
+                  ))}
+                </div>
+              )}
+              {stats.unknownGeo > 0 && (
+                <p className="mt-4 text-xs text-muted">
+                  {stats.unknownGeo} lượt không xác định được quốc gia (dữ liệu cũ
+                  hoặc chạy local).
+                </p>
+              )}
+            </div>
+
+            <div className="border border-line bg-surface p-6">
+              <h2 className="display text-lg font-bold">THÀNH PHỐ</h2>
+              {Object.keys(stats.byCity).length === 0 ? (
+                <p className="mt-4 text-sm text-muted">Chưa có dữ liệu.</p>
+              ) : (
+                /* Hiện dạng chip thay vì bar: số thành phố nhiều, mỗi nơi chỉ
+                   chiếm tỉ lệ nhỏ nên bar sẽ rất ngắn, khó đọc. */
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {byValueDesc(stats.byCity)
+                    .slice(0, 15)
+                    .map(([city, v]) => (
+                      <span key={city} className="border border-line px-2 py-1 text-xs">
+                        {city}: <strong className="text-text">{v}</strong>
+                      </span>
+                    ))}
+                </div>
+              )}
+              {Object.keys(stats.byCity).length > 15 && (
+                <p className="mt-4 text-xs text-muted">
+                  … và {Object.keys(stats.byCity).length - 15} thành phố khác.
+                </p>
+              )}
+            </div>
+          </div>
             </>
           )}
         </section>
@@ -747,7 +808,10 @@ function BarRow({
 }) {
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="w-24 shrink-0 truncate text-muted">{label}</span>
+      {/* title để hover xem tên đầy đủ — nhãn dài (vd tên quốc gia) bị truncate */}
+      <span className="w-24 shrink-0 truncate text-muted" title={label}>
+        {label}
+      </span>
       <div className="h-2 flex-1 bg-line/40">
         <div
           className="h-full bg-accent"

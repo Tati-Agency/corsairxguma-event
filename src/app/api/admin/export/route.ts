@@ -82,6 +82,8 @@ export async function GET(req: NextRequest) {
         "browser",
         "os",
         "referrer",
+        "country",
+        "city",
       ]);
       return new NextResponse(csv, {
         headers: {

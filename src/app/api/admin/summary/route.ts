@@ -25,7 +25,11 @@ export async function GET(req: NextRequest) {
     const byBrowser: Record<string, number> = {};
     const byOs: Record<string, number> = {};
     const byReferrer: Record<string, number> = {};
+    const byCountry: Record<string, number> = {};
+    const byCity: Record<string, number> = {};
     const uniqueSessions = new Set<string>();
+    /** Số lượt KHÔNG có thông tin quốc gia (dữ liệu cũ hoặc chạy local). */
+    let unknownGeo = 0;
 
     for (const v of evVisits) {
       const device = String(v.device ?? "desktop");
@@ -36,6 +40,14 @@ export async function GET(req: NextRequest) {
       byOs[os] = (byOs[os] ?? 0) + 1;
       const ref = String(v.referrer ?? "direct") || "direct";
       byReferrer[ref] = (byReferrer[ref] ?? 0) + 1;
+
+      // country/city suy ra từ IP (header Vercel) — row cũ sẽ rỗng
+      const country = String(v.country ?? "").trim();
+      const city = String(v.city ?? "").trim();
+      if (country) byCountry[country] = (byCountry[country] ?? 0) + 1;
+      else unknownGeo += 1;
+      if (city) byCity[city] = (byCity[city] ?? 0) + 1;
+
       if (v.session_hash) uniqueSessions.add(String(v.session_hash));
     }
 
@@ -105,6 +117,9 @@ export async function GET(req: NextRequest) {
           byReferrer,
           byHour,
           byDay,
+          byCountry,
+          byCity,
+          unknownGeo,
         };
 
     // `role` để UI biết ẩn/hiện phần nào (không phải để client tự che dữ liệu)

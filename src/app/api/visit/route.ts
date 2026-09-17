@@ -12,6 +12,32 @@ interface TrackBody {
   referrer?: string;
 }
 
+/**
+ * Quốc gia / thành phố suy ra từ IP — Vercel tự gắn header vào mọi request.
+ * Chạy ở localhost thì KHÔNG có header nên 2 field này để rỗng.
+ *
+ * Lưu ý: `x-vercel-ip-city` trả chuỗi percent-encoded theo RFC3986
+ * (vd "H%E1%BB%93%20Ch%C3%AD%20Minh") nên phải decode trước khi lưu.
+ */
+function geoFromHeaders(headers: Headers) {
+  const country = (headers.get("x-vercel-ip-country") ?? "")
+    .trim()
+    .toUpperCase()
+    .slice(0, 2);
+
+  const rawCity = headers.get("x-vercel-ip-city") ?? "";
+  let city = rawCity;
+  if (rawCity) {
+    try {
+      city = decodeURIComponent(rawCity);
+    } catch {
+      // Chuỗi % không hợp lệ → giữ nguyên bản gốc
+    }
+  }
+
+  return { country, city: city.trim().slice(0, 64) };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const ua = req.headers.get("user-agent") ?? "";
@@ -48,6 +74,8 @@ export async function POST(req: NextRequest) {
     }
 
     const info = parseUa(ua);
+    const { country, city } = geoFromHeaders(req.headers);
+
     await tablesDB.createRow(
       APPWRITE.databaseId,
       APPWRITE.colVisits,
@@ -60,6 +88,8 @@ export async function POST(req: NextRequest) {
         browser: info.browser,
         os: info.os,
         referrer: (body.referrer ?? "direct").slice(0, 200),
+        country,
+        city,
       }
     );
 
