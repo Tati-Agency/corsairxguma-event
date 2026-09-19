@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
-import { EVENT_END_MS, SHOPEE_LINKS } from "@/lib/config";
-import { trackClick } from "@/lib/track";
+import { EVENT_END_MS } from "@/lib/config";
 
 /* ============================================================
    GUMA Countdown — "ROAD TO THE STAR"
@@ -694,38 +693,6 @@ export default function Countdown() {
               <span className="md:inline">{unmuted ? "Tắt tiếng" : "Bật tiếng"}</span>
             </button>
           </div>
-
-          {/* Link Shopee — CHỈ render ở phase reveal, tức là SAU khi đồng hồ về
-              0. Đúng thể lệ "link mở ở đồng hồ đếm ngược vào 0h 22/09": trước
-              mốc đó không có gì trong DOM nên link không bị lộ khi sản phẩm
-              chưa mở bán. */}
-          {phase === "reveal" && (
-            <div className="mt-8 md:mt-10">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted md:text-sm">
-                Đặt trước tại Shopee · Gian hàng chính hãng CORSAIR
-              </p>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-                {SHOPEE_LINKS.map((link) => (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackClick(link.id)}
-                    className="group flex items-center gap-2 border border-accent bg-black/70 px-6 py-3 text-xs font-semibold uppercase tracking-widest text-accent backdrop-blur transition-all hover:bg-accent hover:text-black md:text-sm"
-                  >
-                    <span>{link.label}</span>
-                    <span
-                      aria-hidden="true"
-                      className="transition-transform group-hover:translate-x-1"
-                    >
-                      →
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Panel đồng hồ — đóng lại (thu nhỏ) rồi biến mất khi reveal */}
           {phase !== "reveal" && (

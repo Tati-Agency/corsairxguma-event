@@ -105,7 +105,7 @@ export default function RulesPanel() {
             <ul className="mt-2 space-y-1.5">
               <li>
                 • Hoàn tất đặt trước tại Shopee “Gian hàng chính hãng CORSAIR”.
-                (link mở ở đồng hồ đếm ngược vào 0h 22/09)
+                (link sẽ mở vào ngày 22/09)
               </li>
               <li>
                 • Sản phẩm đủ điều kiện: Bàn phím VANGUARD PRO 96 GUMAYUSI Edition
