@@ -15,6 +15,17 @@ export const EVENT = {
  * Mốc thời gian kết thúc countdown = lúc mở cổng pre-order: 22/09/2026 00:00.
  * Dùng chung giữa Countdown.tsx và Register.tsx để đồng bộ
  * "khi nào nút đăng ký được mở" + khi nào video YouTube tự hiện.
+ *
+ * ⚠️ PHỤ THUỘC MÚI GIỜ CỦA NƠI GỌI — chỉ được đọc ở CLIENT.
+ * `new Date(y, m, d, ...)` tính theo TZ của máy chạy code:
+ *   - Trình duyệt người dùng (VN, UTC+7) → đúng 0h 22/09 giờ VN
+ *   - Server Vercel (UTC)               → 22/09 00:00 UTC = 7h sáng giờ VN
+ * Lệch 7 tiếng. Hiện tại an toàn vì mọi chỗ đọc đều nằm trong client
+ * component, và phần hiển thị không có số nào phụ thuộc thời gian được
+ * server-render. Nếu sau này đọc hằng số này Ở SERVER (vd chặn submit sớm
+ * trong /api/checkin) thì PHẢI đổi sang mốc UTC tường minh trước
+ * (Date.UTC(2026, 8, 21, 17, 0, 0)) — nếu không sẽ chặn nhầm người dùng
+ * thật suốt 7 tiếng đầu.
  */
 export const EVENT_END_MS = new Date(2026, 8, 22, 0, 0, 0).getTime();
 
