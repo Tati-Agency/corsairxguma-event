@@ -33,6 +33,13 @@ export const SHOPEE_LINKS = [
   { id: "shopee_mousepad", label: "Lót chuột", url: "https://vn.shp.ee/E61wLrCT" },
 ] as const;
 
+export type ShopeeLinkId = (typeof SHOPEE_LINKS)[number]["id"];
+
+/** Tra cứu link Shopee theo id — dùng cho card sản phẩm ở EventJourney. */
+export const SHOPEE_BY_ID = Object.fromEntries(
+  SHOPEE_LINKS.map((l) => [l.id, l])
+) as Record<ShopeeLinkId, (typeof SHOPEE_LINKS)[number]>;
+
 /**
  * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
  * sản phẩm GUMA Collection (xác minh bằng hóa đơn mua hàng).
