@@ -59,6 +59,26 @@ export async function GET(req: NextRequest) {
       byHour[hour] = (byHour[hour] ?? 0) + 1;
     }
 
+    // ---- Lượt bấm link Shopee (CHỈ admin xem) ----
+    // Bảng click_logs có thể chưa được tạo trong Appwrite → nếu để lỗi lan ra
+    // ngoài thì cả dashboard (kể cả phần staff xem được) sẽ 500. Tách riêng
+    // try/catch để thiếu bảng chỉ làm phần này rỗng.
+    const byButton: Record<string, number> = {};
+    let totalClicks = 0;
+    try {
+      const clicks = await listAllDocs(APPWRITE.colClicks);
+      const evClicks = event
+        ? clicks.filter((d) => d.event_id === event)
+        : clicks;
+      totalClicks = evClicks.length;
+      for (const c of evClicks) {
+        const id = String(c.button_id ?? "");
+        if (id) byButton[id] = (byButton[id] ?? 0) + 1;
+      }
+    } catch (err) {
+      console.error("[admin/summary] khong doc duoc bang click_logs:", err);
+    }
+
     // ---- Chuỗi theo NGÀY cho biểu đồ (truy cập + đăng ký) ----
     // Điền đủ các ngày trống giữa ngày đầu và ngày cuối để biểu đồ không bị
     // "nhảy" khoảng thời gian. Tối đa 400 ngày để tránh vòng lặp bất thường.
@@ -120,6 +140,8 @@ export async function GET(req: NextRequest) {
           byCountry,
           byCity,
           unknownGeo,
+          byButton,
+          totalClicks,
         };
 
     // `role` để UI biết ẩn/hiện phần nào (không phải để client tự che dữ liệu)

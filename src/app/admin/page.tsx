@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EVENT } from "@/lib/config";
+import { EVENT, SHOPEE_LINKS } from "@/lib/config";
 import { GROUPS, SKU_LABEL, type GroupKey } from "@/lib/groups";
 import type { AdminRole } from "@/lib/admin-auth";
 import { countryFlag, countryName } from "@/lib/geo";
@@ -26,7 +26,15 @@ interface Stats {
   byCity: Record<string, number>;
   /** Số lượt không xác định được quốc gia (row cũ hoặc chạy local) */
   unknownGeo: number;
+  /** Lượt bấm link Shopee theo `button_id` — chỉ admin nhận được field này */
+  byButton: Record<string, number>;
+  totalClicks: number;
 }
+
+/** id nút bấm → nhãn hiển thị (dùng chung nguồn với link ở trang chủ). */
+const CLICK_LABEL: Record<string, string> = Object.fromEntries(
+  SHOPEE_LINKS.map((l) => [l.id, l.label])
+);
 
 /** Sắp xếp entry của map theo giá trị giảm dần (dùng cho bar/chip). */
 function byValueDesc(obj: Record<string, number>): [string, number][] {
@@ -447,6 +455,34 @@ export default function AdminPage() {
               gửi các số liệu này xuống khi đăng nhập bằng key staff. */}
           {isAdmin && (
             <>
+          {/* Lượt bấm link Shopee. Server cũng không gửi field này xuống khi
+              đăng nhập bằng key staff, nên dù mở DevTools cũng không thấy. */}
+          <div className="mt-6 border border-line bg-surface p-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="display text-lg font-bold">LƯỢT BẤM LINK SHOPEE</h2>
+              <p className="text-xs text-muted">
+                Tổng <AnimatedNumber value={stats.totalClicks} /> lượt
+              </p>
+            </div>
+            {byValueDesc(stats.byButton).length === 0 ? (
+              <p className="mt-4 text-sm text-muted">Chưa có lượt bấm nào.</p>
+            ) : (
+              /* Lấy thẳng từ map (không lặp theo SHOPEE_LINKS) để id lạ —
+                 ví dụ dữ liệu cũ sau khi đổi id — vẫn hiện, không bị cộng
+                 thiếu so với tổng. */
+              <div className="mt-4 space-y-3">
+                {byValueDesc(stats.byButton).map(([id, v]) => (
+                  <BarRow
+                    key={id}
+                    label={CLICK_LABEL[id] ?? id}
+                    value={v}
+                    max={stats.totalClicks || 1}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Thiết bị (donut) + Hệ điều hành + Đăng ký theo giờ */}
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <div className="border border-line bg-surface p-6">

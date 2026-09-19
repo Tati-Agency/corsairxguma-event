@@ -19,6 +19,21 @@ export const EVENT = {
 export const EVENT_END_MS = new Date(2026, 8, 22, 0, 0, 0).getTime();
 
 /**
+ * 3 link Shopee — gian hàng chính hãng CORSAIR (VN).
+ * CHỈ hiện ở đồng hồ đếm ngược SAU khi đồng hồ về 0, đúng thể lệ ghi
+ * "link mở ở đồng hồ đếm ngược vào 0h 22/09". Trước mốc đó không render nên
+ * link không bị lộ khi sản phẩm chưa mở bán.
+ *
+ * `id` là khoá ghi vào bảng click_logs mỗi lượt bấm → cũng là khoá hiển thị
+ * trong bảng thống kê ở /admin. ĐỔI `id` sẽ làm số liệu cũ tách thành dòng mới.
+ */
+export const SHOPEE_LINKS = [
+  { id: "shopee_keyboard", label: "Bàn phím", url: "https://vn.shp.ee/cinkfF1J" },
+  { id: "shopee_mouse", label: "Chuột", url: "https://vn.shp.ee/qrDmZXC2" },
+  { id: "shopee_mousepad", label: "Lót chuột", url: "https://vn.shp.ee/E61wLrCT" },
+] as const;
+
+/**
  * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
  * sản phẩm GUMA Collection (xác minh bằng hóa đơn mua hàng).
  */
@@ -39,5 +54,6 @@ export const APPWRITE = {
   colEvents: process.env.APPWRITE_COLLECTION_EVENTS ?? "events",
   colCheckins: process.env.APPWRITE_COLLECTION_CHECKINS ?? "checkins",
   colVisits: process.env.APPWRITE_COLLECTION_VISITS ?? "visit_logs",
+  colClicks: process.env.APPWRITE_COLLECTION_CLICKS ?? "click_logs",
   bucketPhotos: process.env.APPWRITE_BUCKET_PHOTOS ?? "event-photos",
 } as const;
