@@ -118,8 +118,8 @@ export default function RulesPanel() {
             </ul>
 
             <p className="mt-4">
-              Livestream công bố sau ngày 22/09 trên fanpage Facebook của CORSAIR
-              (VN).
+              Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách đăng
+              ký tham gia sau ngày 07/10.
             </p>
           </div>
 
