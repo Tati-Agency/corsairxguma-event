@@ -132,7 +132,7 @@ export default function EventJourney() {
                     <span className="cta-tech__bracket bl" />
                     <span className="cta-tech__bracket br" />
                     <span className="cta-tech__btn whitespace-nowrap bg-[#ece81a] px-8 py-1.5 text-sm font-semibold text-black transition-colors duration-200 group-hover:bg-white md:py-3">
-                      Tìm hiểu thêm
+                      {open ? "Pre-order ngay" : "Tìm hiểu thêm"}
                     </span>
                     <span className="cta-tech__url">
                       {href.replace(/^https?:\/\//, "")}
