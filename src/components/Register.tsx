@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Reveal from "./Reveal";
 import {
   submitCheckin,
@@ -38,6 +39,9 @@ export default function Register() {
   const [countdownFinished, setCountdownFinished] = useState(
     typeof window !== "undefined" && Date.now() >= EVENT_END_MS
   );
+  /** Popup phóng to ảnh mẫu (mở tại chỗ, KHÔNG mở tab mới — trên điện thoại
+      nhảy sang tab khác rất khó chịu). */
+  const [showExample, setShowExample] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // VERIFY: kiểm tra phiếu đăng ký đã lưu trên máy
@@ -61,6 +65,21 @@ export default function Register() {
     }, 1000);
     return () => window.clearInterval(id);
   }, [countdownFinished]);
+
+  // Popup ảnh mẫu: đóng bằng Esc, và khoá cuộn nền trong lúc mở
+  useEffect(() => {
+    if (!showExample) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowExample(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [showExample]);
 
   // Cleanup object URLs khi unmount hoặc khi previews thay đổi
   useEffect(() => {
@@ -353,12 +372,12 @@ export default function Register() {
                         + sản phẩm + thành tiền), không có hoá đơn riêng, nên
                         cần ảnh mẫu để người dùng biết chụp đúng màn hình nào. */}
                     <div className="mt-3 flex items-start gap-3 border border-line bg-white/5 p-3">
-                      <a
-                        href="/examp-img.jpg"
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => setShowExample(true)}
                         title="Bấm để xem ảnh mẫu lớn hơn"
-                        className="shrink-0"
+                        aria-label="Xem ảnh mẫu lớn hơn"
+                        className="shrink-0 cursor-zoom-in"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -368,7 +387,7 @@ export default function Register() {
                           loading="lazy"
                           decoding="async"
                         />
-                      </a>
+                      </button>
                       <p className="text-xs leading-relaxed text-muted">
                         <strong className="text-text">Ảnh mẫu:</strong> chụp phần{" "}
                         <strong className="text-text">Thông tin đơn hàng</strong> trên
@@ -531,6 +550,42 @@ export default function Register() {
             )}
           </Reveal>
         </div>
+
+        {/* Popup ảnh mẫu — render qua PORTAL ra document.body.
+            KHÔNG đặt thẳng trong <section>: section có class `cv-auto`
+            (content-visibility: auto) → sinh layout containment, mà
+            `contain: layout` biến phần tử thành containing block của
+            `position: fixed`. Khi đó popup bị neo và cắt theo section thay vì
+            phủ cả màn hình. Portal thoát khỏi mọi ancestor nên không phụ thuộc
+            vào chi tiết containment của cây DOM phía trên. */}
+        {showExample &&
+          createPortal(
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Ảnh mẫu thông tin đơn hàng"
+              onClick={() => setShowExample(false)}
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/examp-img.jpg"
+                alt="Ví dụ ảnh thông tin đơn hàng trên Shopee"
+                onClick={(e) => e.stopPropagation()}
+                className="max-h-[88svh] max-w-[92vw] rounded-lg border border-white/25 object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setShowExample(false)}
+                aria-label="Đóng ảnh mẫu"
+                className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-black/70 text-lg text-white transition-colors hover:bg-white hover:text-black"
+              >
+                ✕
+              </button>
+            </div>,
+            document.body
+          )}
+
       </div>
     </section>
   );
