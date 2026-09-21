@@ -684,7 +684,7 @@ export default function AdminPage() {
           <table className="w-full min-w-[1080px] text-sm">
             <thead>
               <tr className="border-b border-line bg-surface text-left text-xs uppercase tracking-wider text-muted">
-                <th className="px-4 py-3">Hóa đơn</th>
+                <th className="px-4 py-3">Ảnh đơn hàng</th>
                 <th className="px-4 py-3">Player Code</th>
                 <th className="px-4 py-3">Họ tên</th>
                 <th className="px-4 py-3">SĐT</th>
@@ -723,7 +723,7 @@ export default function AdminPage() {
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={src}
-                                  alt={`Hóa đơn ${i + 1}`}
+                                  alt={`Ảnh đơn hàng ${i + 1}`}
                                   className="h-10 w-10 rounded object-cover"
                                   loading="lazy"
                                 />

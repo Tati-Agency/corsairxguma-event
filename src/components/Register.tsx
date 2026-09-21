@@ -335,7 +335,7 @@ export default function Register() {
                   </div>
 
                   <div>
-                    <span className="label">Ảnh hóa đơn mua hàng *</span>
+                    <span className="label">Ảnh thông tin đơn hàng *</span>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -348,6 +348,37 @@ export default function Register() {
                       }}
                     />
 
+                    {/* Ảnh mẫu — thu nhỏ, bấm vào mở ảnh gốc ở tab mới.
+                        Pre-order trên Shopee chỉ có "Thông tin đơn hàng" (mã đơn
+                        + sản phẩm + thành tiền), không có hoá đơn riêng, nên
+                        cần ảnh mẫu để người dùng biết chụp đúng màn hình nào. */}
+                    <div className="mt-3 flex items-start gap-3 border border-line bg-white/5 p-3">
+                      <a
+                        href="/examp-img.jpg"
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Bấm để xem ảnh mẫu lớn hơn"
+                        className="shrink-0"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/examp-img.jpg"
+                          alt="Ví dụ ảnh thông tin đơn hàng trên Shopee"
+                          className="h-24 w-auto rounded border border-line object-cover object-top transition-transform hover:scale-[1.04]"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </a>
+                      <p className="text-xs leading-relaxed text-muted">
+                        <strong className="text-text">Ảnh mẫu:</strong> chụp phần{" "}
+                        <strong className="text-text">Thông tin đơn hàng</strong> trên
+                        Shopee, thấy rõ{" "}
+                        <strong className="text-text">mã đơn hàng</strong> và{" "}
+                        <strong className="text-text">sản phẩm đã mua</strong>. Bấm vào
+                        ảnh để xem lớn hơn.
+                      </p>
+                    </div>
+
                     {invoicePreviews.length > 0 && (
                       <div className="mt-3 grid grid-cols-3 gap-3">
                         {invoicePreviews.map((url, i) => (
@@ -355,7 +386,7 @@ export default function Register() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={url}
-                              alt={`Ảnh hóa đơn ${i + 1}`}
+                              alt={`Ảnh đơn hàng ${i + 1}`}
                               className="h-24 w-full rounded-lg object-cover border border-line"
                             />
                             <button
@@ -378,7 +409,7 @@ export default function Register() {
                         className="btn-ghost mt-3 w-full !py-3 text-sm"
                       >
                         {invoices.length === 0
-                          ? "🧾 Tải ảnh hóa đơn"
+                          ? "🧾 Tải ảnh đơn hàng"
                           : `➕ Thêm ảnh (${invoices.length}/${MAX_PHOTOS})`}
                       </button>
                     )}
@@ -404,8 +435,9 @@ export default function Register() {
                       className="mt-0.5 h-4 w-4 shrink-0 accent-[#ece81a]"
                     />
                     <span>
-                      Tôi xác nhận hóa đơn trên là của tôi và đồng ý cho ban tổ
-                      chức lưu lại để xác minh việc mua sản phẩm GUMAYUSI Collection. *
+                      Tôi xác nhận thông tin đơn hàng trên là của tôi và đồng ý cho
+                      ban tổ chức lưu lại để xác minh việc mua sản phẩm GUMAYUSI
+                      Collection. *
                       {fieldErrors.consent && (
                         <FieldError msg={errorMessage("consent_required")} />
                       )}

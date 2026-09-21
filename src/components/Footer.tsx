@@ -13,7 +13,7 @@ export default function Footer() {
             Development by <span className="font-semibold text-text">pr0w4.dev</span>
           </p>
           <p className="mt-1">
-            Hóa đơn và thông tin chỉ phục vụ việc xác minh đăng ký tham gia
+            Thông tin đơn hàng chỉ phục vụ việc xác minh đăng ký tham gia
             chương trình.
           </p>
         </div>

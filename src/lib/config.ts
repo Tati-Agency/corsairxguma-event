@@ -60,12 +60,12 @@ export const SHOPEE_BY_ID = Object.fromEntries(
 
 /**
  * Tên chương trình đăng ký tham gia — dành riêng cho chủ nhân
- * sản phẩm GUMA Collection (xác minh bằng hóa đơn mua hàng).
+ * sản phẩm GUMA Collection (xác minh bằng thông tin đơn hàng).
  */
 export const CAMPAIGN = {
   title: "GUMA REGISTER",
   codeLabel: "Mã tham gia",
-  materialLabel: "Hóa đơn mua hàng",
+  materialLabel: "Thông tin đơn hàng",
 } as const;
 
 /** Prefix used for player codes, e.g. GUMA-8F3K */

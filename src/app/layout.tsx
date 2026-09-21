@@ -16,7 +16,7 @@ const saira = localFont({
 const SITE_URL = "https://corsairgumayusilimitededition.com";
 const OG_TITLE = "CORSAIR × GUMAYUSI";
 const OG_DESCRIPTION =
-  "Đăng ký tham gia chương trình CORSAIR × GUMAYUSI dành riêng cho chủ nhân GUMAYUSI Collection. Xác minh hóa đơn mua hàng và nhận mã tham gia của bạn.";
+  "Đăng ký tham gia chương trình CORSAIR × GUMAYUSI dành riêng cho chủ nhân GUMAYUSI Collection. Xác minh thông tin đơn hàng và nhận mã tham gia của bạn.";
 /**
  * Ảnh thumbnail khi share link — 1200×628 (tỉ lệ 1.91:1, chuẩn Open Graph).
  * Dùng JPEG (~100KB) thay vì PNG gốc (~864KB): crawler của Facebook/Zalo

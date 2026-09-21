@@ -132,8 +132,8 @@ export default function RulesPanel() {
                 hàng đầy đủ.
               </li>
               <li>
-                • Bằng chứng mua hàng phải hiển thị rõ mã đơn hàng, sản phẩm đã mua
-                và số hóa đơn.
+                • Bằng chứng mua hàng phải hiển thị rõ mã đơn hàng và sản phẩm đã
+                mua.
               </li>
               <li>• Việc liên hệ trúng thưởng và gửi quà sẽ ưu tiên qua Email.</li>
               <li>

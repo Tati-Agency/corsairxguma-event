@@ -62,7 +62,7 @@ export function dateOnly(value?: string | null): string {
  *
  * Dùng danh sách TRẮNG (chỉ copy ra các field được phép) thay vì spread rồi
  * xoá — như vậy field mới thêm sau này sẽ mặc định bị ẩn, không lỡ lộ ra.
- * Staff vẫn thấy: mã tham gia, sản phẩm đã mua, ảnh hóa đơn (theo yêu cầu
+ * Staff vẫn thấy: mã tham gia, sản phẩm đã mua, ảnh đơn hàng (theo yêu cầu
  * để đối chiếu tại sự kiện).
  */
 export function maskCheckinRow(row: Record<string, unknown>) {
