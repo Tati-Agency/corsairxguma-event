@@ -114,6 +114,7 @@ const ERR_MESSAGE: Record<string, string> = {
   too_many_requests: "Bạn thao tác quá nhanh — thử lại sau ít phút.",
   server_error: "Hệ thống bận. Vui lòng thử lại.",
   server_busy: "Hệ thống bận. Vui lòng thử lại.",
+  invalid_request: "Yêu cầu không hợp lệ. Vui lòng tải lại trang và thử lại.",
   network: "Kết nối mạng không ổn định. Đang thử lại…",
 };
 

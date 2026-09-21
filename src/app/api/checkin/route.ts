@@ -33,7 +33,15 @@ export async function POST(req: NextRequest) {
       return errorJson("too_many_requests", 429);
     }
 
-    const form = await req.formData();
+    // Content-Type không phải multipart (bot/scanner POST JSON chẳng hạn) làm
+    // formData() ném lỗi. Đây là lỗi phía client nên trả 400, không để rơi vào
+    // catch chung rồi thành 500 (làm rác log + tăng error rate vô ích).
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      return errorJson("invalid_request", 400);
+    }
     const fullName = String(form.get("fullName") ?? "").trim();
     const phoneRaw = String(form.get("phone") ?? "").trim();
     const email = String(form.get("email") ?? "").trim().toLowerCase();
