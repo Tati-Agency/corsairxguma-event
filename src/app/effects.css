@@ -919,6 +919,11 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
 .count-ring--done .count-ring-x {
   opacity: 0;
   pointer-events: none;
+  /* `animation: none` là BẮT BUỘC, không phải cho chắc.
+     Dấu X có `animation: ring-x-neon ... infinite` động vào opacity, mà CSS
+     animation LUÔN thắng khai báo opacity thường (chỉ !important mới đè được).
+     Thiếu dòng này thì `opacity: 0` ở trên vô hiệu và dấu X vẫn nhấp nháy. */
+  animation: none;
   transition: opacity 0.7s ease;
 }
 /* Vệt sáng chạy theo chân ngôi sao — chỉ có path này, không có track nền.
