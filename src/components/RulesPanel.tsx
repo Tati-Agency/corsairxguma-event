@@ -86,41 +86,34 @@ export default function RulesPanel() {
           <div className="border-t border-line pt-6">
             <Heading>📸 LUCKY DRAW ĐẶC BIỆT — ẢNH GỐC POLAROID</Heading>
 
-            <p className="mt-2">
-              Mua bàn phím hoặc chuột trong bộ sưu tập để có cơ hội tham gia bốc
-              thăm:
-            </p>
-            <ul className="mt-3 space-y-1.5">
-              <li>
-                🎁 <strong className="text-text">Giải thưởng:</strong> Ảnh gốc thẻ
-                Polaroid Gumayusi – tổng cộng 3 tấm.
-              </li>
-              <li>
-                👤 <strong className="text-text">Số người trúng:</strong> 3 người – mỗi
-                người nhận 1 tấm.
-              </li>
-            </ul>
-
-            <p className="mt-4 font-semibold text-text">✅ Điều kiện tham gia:</p>
+            <p className="mt-2 font-semibold text-text">✅ Điều kiện tham gia:</p>
             <ul className="mt-2 space-y-1.5">
               <li>
-                • Hoàn tất đặt trước tại Shopee “Gian hàng chính hãng CORSAIR”.
-                (link sẽ mở vào ngày 22/09)
+                • Pre-order trong thời gian diễn ra chương trình (từ 22/09 đến
+                4/10). Điền thông tin vào trang đăng ký LUCKY DRAW (trang được mở
+                và post lúc 00:01 22/09)
               </li>
               <li>
-                • Sản phẩm đủ điều kiện: Bàn phím VANGUARD PRO 96 GUMAYUSI Edition
-                hoặc Chuột SABRE v2 PRO Wireless CF GUMAYUSI Edition.
+                • Mua bàn phím hoặc chuột có quyền tham gia bốc thăm ảnh gốc thẻ
+                Polaroid Gumayusi, tổng cộng 3 giải.
               </li>
               <li>
-                ❌ Chỉ mua lót chuột MM 2XL GUMAYUSI Edition sẽ không đủ điều kiện
-                tham gia.
+                • Chỉ mua lót chuột sẽ không có quyền tham gia LUCKY DRAW ĐẶC BIỆT.
+              </li>
+              <li>
+                • Cung cấp ảnh chụp màn hình thông tin mua hàng tại Corsair
+                Official Store. Hình chụp cung cấp rõ tình trạng đơn hàng, mã đơn
+                hàng.
+              </li>
+              <li>
+                • Thời gian đăng ký tham gia LUCKY DRAW từ 22/09 đến 4/10 (Form sẽ
+                đóng vào 05/10)
+              </li>
+              <li>
+                📺 Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách
+                đăng ký tham gia sau ngày 07/10
               </li>
             </ul>
-
-            <p className="mt-4">
-              📺 Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách
-              đăng ký tham gia sau ngày 07/10.
-            </p>
           </div>
 
           {/* 4 */}
@@ -132,8 +125,13 @@ export default function RulesPanel() {
                 hàng đầy đủ.
               </li>
               <li>
-                • Bằng chứng mua hàng phải hiển thị rõ mã đơn hàng và sản phẩm đã
-                mua.
+                • Cung cấp ảnh chụp màn hình thông tin mua hàng tại Corsair
+                Official Store. Hình chụp cung cấp rõ tình trạng đơn hàng, mã đơn
+                hàng.
+              </li>
+              <li>
+                • Bằng chứng mua hàng phải hiển thị rõ shop, mã đơn hàng và sản
+                phẩm đã đặt.
               </li>
               <li>• Việc liên hệ trúng thưởng và gửi quà sẽ ưu tiên qua Email.</li>
               <li>

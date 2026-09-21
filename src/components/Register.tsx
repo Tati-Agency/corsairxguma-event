@@ -392,8 +392,9 @@ export default function Register() {
                         <strong className="text-text">Ảnh mẫu:</strong> chụp phần{" "}
                         <strong className="text-text">Thông tin đơn hàng</strong> trên
                         Shopee, thấy rõ{" "}
+                        <strong className="text-text">Corsair Official Store</strong>,{" "}
                         <strong className="text-text">mã đơn hàng</strong> và{" "}
-                        <strong className="text-text">sản phẩm đã mua</strong>. Bấm vào
+                        <strong className="text-text">sản phẩm đã đặt</strong>. Bấm vào
                         ảnh để xem lớn hơn.
                       </p>
                     </div>
