@@ -110,7 +110,7 @@ export default function RulesPanel() {
                 đóng vào 05/10)
               </li>
               <li>
-                • 📺 Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách
+                • Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách
                 đăng ký tham gia sau ngày 07/10
               </li>
             </ul>
