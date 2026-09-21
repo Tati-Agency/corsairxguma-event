@@ -530,7 +530,9 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   font-family: "Saira Expanded Light", var(--font-display), sans-serif;
   font-weight: 300;
   font-variation-settings: normal;
-  text-transform: uppercase;
+  /* KHÔNG dùng text-transform: uppercase ở đây nữa — nó ép "SABRE v2 PRO CF"
+     thành "SABRE V2 PRO CF" trên màn hình. 3 tên còn lại trong PRODUCTS đã
+     viết hoa sẵn trong nguồn nên bỏ đi không đổi gì về hình thức. */
   letter-spacing: 0.02em;
   line-height: 1.08;
   font-size: clamp(1.5rem, 4.5vw, 2.75rem);
