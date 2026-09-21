@@ -110,7 +110,7 @@ export default function RulesPanel() {
                 đóng vào 05/10)
               </li>
               <li>
-                📺 Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách
+                • 📺 Livestream LUCKY DRAW ảnh gốc thẻ Polaroid dựa trên danh sách
                 đăng ký tham gia sau ngày 07/10
               </li>
             </ul>
@@ -133,7 +133,6 @@ export default function RulesPanel() {
                 • Bằng chứng mua hàng phải hiển thị rõ shop, mã đơn hàng và sản
                 phẩm đã đặt.
               </li>
-              <li>• Việc liên hệ trúng thưởng và gửi quà sẽ ưu tiên qua Email.</li>
               <li>
                 • CORSAIR bảo lưu quyền sửa đổi, tạm dừng, chấm dứt và giải thích
                 chương trình này.
