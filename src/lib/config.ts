@@ -12,22 +12,29 @@ export const EVENT = {
 } as const;
 
 /**
- * Mốc thời gian kết thúc countdown = lúc mở cổng pre-order: 22/09/2026 00:00.
- * Dùng chung giữa Countdown.tsx và Register.tsx để đồng bộ
- * "khi nào nút đăng ký được mở" + khi nào video YouTube tự hiện.
+ * Mốc thời gian kết thúc countdown = lúc mở cổng pre-order.
+ *
+ * ĐÃ MỞ SỚM 1 NGÀY: 21/09/2026 00:00 (kế hoạch ban đầu là 22/09/2026 00:00).
+ * Chủ dự án chốt mở ngay khi nhận tin sản phẩm đã lên sàn Shopee — đã kiểm tra
+ * cả 3 link vn.shp.ee đều trả 200. Vì mốc này nằm ở QUÁ KHỨ nên đồng hồ đóng
+ * ngay lập tức, form đăng ký mở, và nút "Tìm hiểu thêm" trỏ thẳng ra Shopee.
+ *
+ * Dùng chung giữa Countdown.tsx, Register.tsx và EventJourney.tsx để đồng bộ
+ * "khi nào nút đăng ký được mở" + khi nào video YouTube tự hiện + khi nào đổi
+ * từ #countdown sang link Shopee.
  *
  * ⚠️ PHỤ THUỘC MÚI GIỜ CỦA NƠI GỌI — chỉ được đọc ở CLIENT.
  * `new Date(y, m, d, ...)` tính theo TZ của máy chạy code:
- *   - Trình duyệt người dùng (VN, UTC+7) → đúng 0h 22/09 giờ VN
- *   - Server Vercel (UTC)               → 22/09 00:00 UTC = 7h sáng giờ VN
+ *   - Trình duyệt người dùng (VN, UTC+7) → đúng 0h 21/09 giờ VN
+ *   - Server Vercel (UTC)               → 21/09 00:00 UTC = 7h sáng giờ VN
  * Lệch 7 tiếng. Hiện tại an toàn vì mọi chỗ đọc đều nằm trong client
  * component, và phần hiển thị không có số nào phụ thuộc thời gian được
  * server-render. Nếu sau này đọc hằng số này Ở SERVER (vd chặn submit sớm
  * trong /api/checkin) thì PHẢI đổi sang mốc UTC tường minh trước
- * (Date.UTC(2026, 8, 21, 17, 0, 0)) — nếu không sẽ chặn nhầm người dùng
+ * (Date.UTC(2026, 8, 20, 17, 0, 0)) — nếu không sẽ chặn nhầm người dùng
  * thật suốt 7 tiếng đầu.
  */
-export const EVENT_END_MS = new Date(2026, 8, 22, 0, 0, 0).getTime();
+export const EVENT_END_MS = new Date(2026, 8, 21, 0, 0, 0).getTime();
 
 /**
  * 3 link Shopee — gian hàng chính hãng CORSAIR (VN).
