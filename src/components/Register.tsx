@@ -371,7 +371,7 @@ export default function Register() {
                         Pre-order trên Shopee chỉ có "Thông tin đơn hàng" (mã đơn
                         + sản phẩm + thành tiền), không có hoá đơn riêng, nên
                         cần ảnh mẫu để người dùng biết chụp đúng màn hình nào. */}
-                    <div className="mt-3 flex items-start gap-3 border border-line bg-white/5 p-3">
+                    <div className="mt-3 flex items-center gap-3 border border-line bg-white/5 p-3">
                       <button
                         type="button"
                         onClick={() => setShowExample(true)}
