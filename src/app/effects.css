@@ -909,6 +909,18 @@ html:not(.js) .section-title::after { transform: scaleX(1); }
   height: 100%;
   overflow: visible;
 }
+/* Sau khi CẢ 2 marker về đích: ẩn toàn bộ vòng tiến trình + 2 marker + dấu X,
+   chỉ giữ lại khung .count-ring để video nằm nguyên trong đó.
+   Lý do: marker phía logo vẽ lại logo CORSAIR bằng mask rồi đổi màu (trắng +
+   quầng vàng), mà guideline thương hiệu không cho phép chế/chỉnh logo → cho
+   hiệu ứng chạy đúng 1 lần rồi ẩn hẳn. */
+.count-ring--done .count-ring-svg,
+.count-ring--done .count-ring-marker,
+.count-ring--done .count-ring-x {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
 /* Vệt sáng chạy theo chân ngôi sao — chỉ có path này, không có track nền.
    KHÔNG dùng vector-effect: non-scaling-stroke ở đây — nó khiến Chrome tính
    stroke-dasharray theo không gian màn hình trong khi getTotalLength() trả

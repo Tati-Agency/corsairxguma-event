@@ -589,7 +589,9 @@ export default function Countdown() {
               Vì video luôn ở cùng một vị trí trong cây DOM nên khi chuyển
               phase nó KHÔNG bị unmount → không bị phát lại từ đầu. */}
           <div
-            className={`count-ring mt-10 ${phase === "reveal" ? "count-ring--in" : ""}`}
+            className={`count-ring mt-10 ${phase === "reveal" ? "count-ring--in" : ""} ${
+              ringDone ? "count-ring--done" : ""
+            }`}
             ref={ringWrapRef}
           >
             {/* Chỉ render sau khi đo được kích thước — tránh viewBox rỗng */}
