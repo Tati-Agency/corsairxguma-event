@@ -12,7 +12,7 @@ import {
 import ProductSelector from "./ProductSelector";
 import RulesPanel from "./RulesPanel";
 import Starfield from "./Starfield";
-import { EVENT_END_MS } from "@/lib/config";
+import { EVENT_END_MS, REGISTER_CLOSED } from "@/lib/config";
 
 type RegisterState =
   | "idle"
@@ -39,6 +39,9 @@ export default function Register() {
   const [countdownFinished, setCountdownFinished] = useState(
     typeof window !== "undefined" && Date.now() >= EVENT_END_MS
   );
+  /** Được phép gửi form: đồng hồ đã hết VÀ chương trình chưa đóng đăng ký.
+      Tách khỏi `countdownFinished` vì đóng đăng ký không liên quan tới đồng hồ. */
+  const canSubmit = countdownFinished && !REGISTER_CLOSED;
   /** Popup phóng to ảnh mẫu (mở tại chỗ, KHÔNG mở tab mới — trên điện thoại
       nhảy sang tab khác rất khó chịu). */
   const [showExample, setShowExample] = useState(false);
@@ -468,11 +471,13 @@ export default function Register() {
                 <button
                   type="submit"
                   className="btn-accent mt-8 w-full"
-                  disabled={!countdownFinished}
+                  disabled={!canSubmit}
                 >
-                  {countdownFinished
-                    ? "[ Đăng ký LUCKYDRAW ]"
-                    : "[ Đăng ký sẽ được mở vào 22/9 ]"}
+                  {REGISTER_CLOSED
+                    ? "[ Đăng ký đã đóng ]"
+                    : countdownFinished
+                      ? "[ Đăng ký LUCKYDRAW ]"
+                      : "[ Đăng ký sẽ được mở vào 22/9 ]"}
                 </button>
                 </div>
               </form>

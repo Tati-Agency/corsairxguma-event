@@ -37,6 +37,20 @@ export const EVENT = {
 export const EVENT_END_MS = new Date(2026, 8, 21, 0, 0, 0).getTime();
 
 /**
+ * Đăng ký đã ĐÓNG (hết hạn 05/10/2026).
+ *
+ * Dùng cờ boolean riêng thay vì đẩy EVENT_END_MS về tương lai — vì
+ * EVENT_END_MS còn điều khiển đồng hồ đếm ngược, video reveal VÀ link Shopee
+ * trên 4 card sản phẩm. Đẩy nó về tương lai sẽ làm đồng hồ chạy lại từ đầu và
+ * card quay về cuộn xuống #countdown. Cờ này CHỈ khoá form đăng ký.
+ *
+ * Đặt về false nếu cần mở lại để test. Không có vấn đề múi giờ như
+ * EVENT_END_MS vì đây là boolean chứ không phải mốc thời gian — nên dùng được
+ * ở CẢ server (xem /api/checkin) lẫn client (xem Register.tsx).
+ */
+export const REGISTER_CLOSED = true;
+
+/**
  * 3 link Shopee — gian hàng chính hãng CORSAIR (VN).
  * CHỈ hiện ở đồng hồ đếm ngược SAU khi đồng hồ về 0, đúng thể lệ ghi
  * "link mở ở đồng hồ đếm ngược vào 0h 22/09". Trước mốc đó không render nên

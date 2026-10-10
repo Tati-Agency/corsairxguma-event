@@ -115,6 +115,7 @@ const ERR_MESSAGE: Record<string, string> = {
   server_error: "Hệ thống bận. Vui lòng thử lại.",
   server_busy: "Hệ thống bận. Vui lòng thử lại.",
   invalid_request: "Yêu cầu không hợp lệ. Vui lòng tải lại trang và thử lại.",
+  register_closed: "Đăng ký đã đóng (hết hạn 05/10). Rất tiếc, bạn không thể gửi thêm.",
   network: "Kết nối mạng không ổn định. Đang thử lại…",
 };
 

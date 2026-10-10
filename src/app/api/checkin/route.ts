@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAppwrite } from "@/lib/appwrite";
-import { APPWRITE, EVENT, PLAYER_CODE_PREFIX } from "@/lib/config";
+import { APPWRITE, EVENT, PLAYER_CODE_PREFIX, REGISTER_CLOSED } from "@/lib/config";
 import { getClientIp, hashIdentity, isBot } from "@/lib/ua";
 import { rateLimit } from "@/lib/rate-limit";
 import { Query } from "node-appwrite";
@@ -25,6 +25,12 @@ function errorJson(error: string, status = 400, field?: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Chương trình đã đóng đăng ký → chặn NGAY, trước cả khi đọc form.
+    // Chặn ở server chứ không chỉ disable nút: nút disabled chỉ là hành vi
+    // trình duyệt, gọi thẳng API vẫn lọt được. Bài gửi sau hạn 05/10 sẽ phá
+    // tính công bằng của lucky-draw.
+    if (REGISTER_CLOSED) return errorJson("register_closed", 403);
+
     const ua = req.headers.get("user-agent") ?? "";
     if (isBot(ua)) return errorJson("forbidden", 403);
 
